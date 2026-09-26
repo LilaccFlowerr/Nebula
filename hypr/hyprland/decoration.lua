@@ -11,8 +11,8 @@ hl.config({
 
         blur = {
             enabled        = true,
-            size           = 8,
-            passes         = 2,
+            size           = 4,
+            passes         = 1,
             ignore_opacity = true, -- needed to blur through transparent windows
             popups         = true,
         },
