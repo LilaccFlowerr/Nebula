@@ -1,0 +1,16 @@
+{{colors.surface_container.default.hex}}
+{{colors.red.default.hex}}
+{{colors.green.default.hex}}
+{{colors.yellow.default.hex}}
+{{colors.blue.default.hex}}
+{{colors.magenta.default.hex}}
+{{colors.cyan.default.hex}}
+{{colors.on_surface_variant.default.hex}}
+{{colors.outline.default.hex}}
+{{colors.red.default.hex}}
+{{colors.green.default.hex}}
+{{colors.yellow.default.hex}}
+{{colors.blue.default.hex}}
+{{colors.magenta.default.hex}}
+{{colors.cyan.default.hex}}
+{{colors.on_surface.default.hex}}
