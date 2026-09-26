@@ -13,17 +13,32 @@ hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(vars.launcher))
 -- Windows
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle only
+
+-- Lock (goes through hypridle's lock_cmd, so it keeps working when hyprlock is replaced)
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
+
+-- Screenshot of a region: saved to ~/Pictures/Screenshots and copied to the clipboard
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd([[
+    region=$(slurp) || exit  # Esc cancels, no empty file
+    dir=~/Pictures/Screenshots; mkdir -p "$dir"
+    file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+    grim -g "$region" "$file" && wl-copy < "$file" && notify-send -i "$file" "Screenshot" "Saved to $file"
+]]))
+
+-- Clipboard history: pick an entry with fuzzel
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"))
 
 -- Exit Hyprland
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 
--- Move focus with mainMod + arrow keys
-hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+-- Move focus with mainMod + CTRL + arrow keys
+hl.bind(mainMod .. " + CTRL + left",  hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + CTRL + right", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + CTRL + up",    hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + CTRL + down",  hl.dsp.focus({ direction = "down" }))
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
@@ -33,9 +48,13 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
+-- Previous / next workspace
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ workspace = "e+1" }))
+
 -- Special workspace (scratchpad)
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(mainMod .. " + ALT + S",   hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
