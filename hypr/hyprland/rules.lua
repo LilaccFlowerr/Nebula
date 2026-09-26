@@ -48,6 +48,13 @@ hl.window_rule({
 --     rounding    = 0,
 -- })
 
+-- No animation on the slurp selection (screenshots), so it doesn't slide away and end up in the shot
+hl.layer_rule({
+    name    = "no-anim-slurp",
+    match   = { namespace = "^selection$" },
+    no_anim = true,
+})
+
 -- Layer rules (later: blur for Quickshell widgets)
 -- hl.layer_rule({
 --     name  = "no-anim-overlay",
