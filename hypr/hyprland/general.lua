@@ -1,5 +1,11 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/
 
+-- Colors from matugen (hypr/colors.lua), with a fallback when it hasn't run yet
+local ok, colors = pcall(require, "colors")
+if not ok then
+    colors = { primary = "33ccff", tertiary = "00ff99", outline_variant = "595959" }
+end
+
 hl.config({
     general = {
         layout      = "dwindle",
@@ -9,8 +15,8 @@ hl.config({
         border_size = 1,
 
         col = {
-            active_border   = { colors = {"rgba(33ccffee)", "rgba(00ff99ee)"}, angle = 45 },
-            inactive_border = "rgba(595959aa)",
+            active_border   = { colors = {"rgba(" .. colors.primary .. "ee)", "rgba(" .. colors.tertiary .. "ee)"}, angle = 45 },
+            inactive_border = "rgba(" .. colors.outline_variant .. "aa)",
         },
 
         -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
