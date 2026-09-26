@@ -3,7 +3,7 @@
 My personal Linux desktop, built from scratch: **Hyprland** + a custom shell written
 in **Quickshell (QML)**, styled after **Material 3 / Material You**.
 
-> 🚧 Work in progress: currently in the design phase.
+> 🚧 Work in progress: base Hyprland config is running, custom shell not started yet.
 
 ## Stack
 
@@ -13,12 +13,14 @@ in **Quickshell (QML)**, styled after **Material 3 / Material You**.
 | Compositor | [Hyprland](https://hyprland.org) |
 | Shell (bar, widgets, popups) | [Quickshell](https://quickshell.org), custom QML |
 | Colors | [matugen](https://github.com/InioX/matugen) (Material You from wallpaper) |
-| Terminal | kitty |
+| Terminal | [Ghostty](https://ghostty.org) |
+| Launcher (temporary) | [fuzzel](https://codeberg.org/dnkl/fuzzel) |
 | Dotfile management | Plain symlinks (`ln -s`) |
 
 ## Planned features
 
-- [ ] Hyprland base config: keybinds, blur, rounded corners, animations
+- [x] Hyprland base config (Lua, split into modules)
+- [ ] Hyprland looks: wallpaper, blur, rounded corners, animations
 - [ ] Material 3 theme with wallpaper-based colors
 - [ ] Custom Quickshell bar
 - [ ] **Now playing** desktop widget: album art, track info and controls (MPRIS)
@@ -26,29 +28,31 @@ in **Quickshell (QML)**, styled after **Material 3 / Material You**.
 
 ## Structure
 
-Every top-level folder is symlinked to `~/.config`:
+Every top-level folder is symlinked to `~/.config`. The Hyprland config starts at
+`hypr/hyprland.lua`, which loads the modules in `hypr/hyprland/`.
+
 
 ```
 hypr/         → ~/.config/hypr
 quickshell/   → ~/.config/quickshell
 matugen/      → ~/.config/matugen
-kitty/        → ~/.config/kitty
+ghostty/      → ~/.config/ghostty
 design/       # moodboard and Figma references (not installed)
 ```
 
 ## Installation
 
-> ⚠️ Not usable yet. These steps are for when the configs exist.
+> ⚠️ Work in progress: only `hypr` and `ghostty` contain configs so far.
 
 ```bash
 # dependencies (Fedora)
-sudo dnf install hyprland kitty
-# Quickshell and matugen: see their docs for Fedora/COPR packages
+sudo dnf install hyprland fuzzel playerctl brightnessctl
+# Ghostty, Quickshell and matugen: see their docs for Fedora/COPR packages
 
 # clone and link
-git clone git@github.com:LilaccFlowerr/dotfiles.git ~/dotfiles
-for dir in hypr quickshell matugen kitty; do
-  ln -s ~/dotfiles/$dir ~/.config/$dir
+git clone git@github.com:LilaccFlowerr/dotfiles.git ~/setup/dotfiles
+for dir in hypr quickshell matugen ghostty; do
+  ln -s ~/setup/dotfiles/$dir ~/.config/$dir
 done
 ```
 
