@@ -115,6 +115,31 @@ Island {
                     source: Media.artUrl
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
+                    opacity: Media.playing ? 1 : 0.5
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: Theme.anim.medium }
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "pause"
+                    font.family: Theme.font.icons
+                    font.pixelSize: 18
+                    color: Colors.textOnSurface
+                    opacity: Media.playing ? 0 : 1
+                    scale: Media.playing ? 0.6 : 1
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: Theme.anim.medium }
+                    }
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Theme.anim.medium
+                            easing.type: Easing.OutBack
+                        }
+                    }
                 }
             }
 
