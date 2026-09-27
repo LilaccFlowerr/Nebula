@@ -14,11 +14,14 @@ Island {
     
     readonly property int maxTitleWidth: 360
 
+    // No window on this workspace → collapse into a dot with the OS logo
+    readonly property bool empty: !ActiveWindow.hasWindow
+
     Rectangle {
         id: pill
         anchors.centerIn: parent
 
-        implicitWidth: content.implicitWidth + Theme.spacing.lg * 2
+        implicitWidth: root.empty ? Theme.button.size : content.implicitWidth + Theme.spacing.lg * 2
         implicitHeight: Theme.button.size
         radius: Theme.radius.full
         color: Colors.surfaceContainer
@@ -33,8 +36,19 @@ Island {
             }
         }
 
+        // OS logo, only on an empty workspace
+        Text {
+            anchors.centerIn: parent
+            visible: root.empty
+            text: SystemInfo.osLogo
+            font.family: Theme.font.logos
+            font.pixelSize: Theme.button.iconSize
+            color: Colors.textOnSurface      // same light color as the rest of the bar text
+        }
+
         RowLayout {
             id: content
+            visible: !root.empty
             anchors.centerIn: parent
             spacing: Theme.spacing.xs
 
