@@ -38,6 +38,22 @@ Island {
 
         IconButton { icon: "keyboard_arrow_up";   onClicked: console.info("tray") }
         IconButton { icon: "settings";            onClicked: console.info("quick settings") }
-        IconButton { icon: "power_settings_new";  onClicked: console.info("power") }
+        Item {
+            implicitWidth: Theme.batteryRing.size
+            implicitHeight: Theme.batteryRing.size
+
+            BatteryRing {
+                anchors.fill: parent
+                visible: Battery.available
+                level: Battery.level               
+                low: Battery.low                 
+            }
+
+            IconButton {
+                anchors.centerIn: parent
+                icon: "power_settings_new"
+                onClicked: console.info("power")
+            }
+        }
     }
 }
