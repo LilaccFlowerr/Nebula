@@ -21,4 +21,12 @@ Singleton {
 
     readonly property string title: hasWindow ? toplevel.title : ""
     readonly property string appId: hasWindow ? toplevel.appId : ""   // e.g. "com.mitchellh.ghostty"
+
+    // App icon, found via the app's .desktop file. Empty when unknown.
+    // Usage: IconImage { source: ActiveWindow.icon }  (import Quickshell.Widgets)
+    readonly property string icon: {
+        DesktopEntries.applications.values;   // re-run when the list of apps has loaded
+        const entry = hasWindow ? DesktopEntries.heuristicLookup(appId) : null;
+        return entry ? Quickshell.iconPath(entry.icon, true) : "";
+    }
 }
