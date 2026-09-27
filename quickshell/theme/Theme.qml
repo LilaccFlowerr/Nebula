@@ -72,7 +72,7 @@ Singleton {
         readonly property int small: 12
         readonly property int normal: 14
         readonly property int large: 16
-        readonly property int clock: 24
+        readonly property int clock: 20
     }
     readonly property Font font: Font {}
 
