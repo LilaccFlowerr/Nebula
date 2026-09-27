@@ -1,10 +1,6 @@
 # Nebula
 
-My Hyprland setup on Fedora, with a bar and widgets I'm writing myself in Quickshell.
-Colors come from the wallpaper through matugen, so everything changes along with it.
-
-Still very much a work in progress. The bar works (workspaces, window title, clock,
-battery ring), the rest is coming.
+This is my hyprland setup, currently working on it on fedora :3
 
 ## What's in here
 
