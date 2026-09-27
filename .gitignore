@@ -6,3 +6,6 @@ ghostty/themes/
 quickshell/theme/Colors.qml
 quickshell/.qmlls.ini
 .vscode/
+
+# Private notes for AI agents, kept local only
+AGENTS.md
