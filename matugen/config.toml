@@ -33,3 +33,9 @@ output_path = "~/.cache/wal/colors"
 [templates.pywal]
 input_path  = "~/.config/matugen/templates/pywal-colors.json"
 output_path = "~/.cache/wal/colors.json"
+
+# Quickshell colors (singleton): import qs.theme → Colors.primary
+# Quickshell hot-reloads when this file changes, so no post_hook needed
+[templates.quickshell]
+input_path  = "~/.config/matugen/templates/quickshell-colors.qml"
+output_path = "~/.config/quickshell/theme/Colors.qml"

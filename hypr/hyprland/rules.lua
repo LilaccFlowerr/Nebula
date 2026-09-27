@@ -55,7 +55,16 @@ hl.layer_rule({
     no_anim = true,
 })
 
--- Layer rules (later: blur for Quickshell widgets)
+-- Quickshell bar: blur behind the islands. ignore_alpha skips fully transparent pixels,
+-- so only the islands get blurred and not the empty space between them.
+hl.layer_rule({
+    name         = "blur-quickshell-bar",
+    match        = { namespace = "^quickshell:bar$" },
+    blur         = true,
+    ignore_alpha = 0.1,
+})
+
+-- Layer rules (later: more Quickshell widgets)
 -- hl.layer_rule({
 --     name  = "no-anim-overlay",
 --     match = { namespace = "^my-overlay$" },
