@@ -13,16 +13,45 @@ Island {
 
     readonly property int maxTitleWidth: 360
 
-    readonly property bool showMedia: Media.active
-    readonly property bool showWindow: ActiveWindow.hasWindow && !showMedia
-    readonly property bool empty: !showWindow && !showMedia
+    property bool showOsd: false
+    property bool armed: false
+
+    readonly property bool showMedia: Media.active && !showOsd
+    readonly property bool showWindow: ActiveWindow.hasWindow && !showMedia && !showOsd
+    readonly property bool empty: !showWindow && !showMedia && !showOsd
+
+    Timer {
+        interval: 1000
+        running: true
+        onTriggered: root.armed = true
+    }
+
+    Timer {
+        id: osdTimer
+        interval: 1500
+        onTriggered: root.showOsd = false
+    }
+
+    function popOsd() {
+        if (!armed) return;
+        showOsd = true;
+        osdTimer.restart();
+    }
+
+    Connections {
+        target: Audio
+        function onVolumeChanged() { root.popOsd(); }
+        function onMutedChanged() { root.popOsd(); }
+    }
 
     Rectangle {
         id: pill
         anchors.centerIn: parent
 
         implicitWidth: root.empty ? Theme.button.size
-                     : (root.showMedia ? media.implicitWidth : content.implicitWidth) + Theme.spacing.lg * 2
+                     : (root.showOsd ? osd.implicitWidth
+                        : root.showMedia ? media.implicitWidth
+                        : content.implicitWidth) + Theme.spacing.lg * 2
         implicitHeight: Theme.button.size
         radius: Theme.radius.full
         color: Colors.surfaceContainer
@@ -30,9 +59,9 @@ Island {
 
         Behavior on implicitWidth {
             NumberAnimation {
-                duration: Theme.anim.fast
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Theme.anim.standard
+                duration: Theme.anim.island
+                easing.type: Easing.OutBack
+                easing.overshoot: Theme.anim.overshoot
             }
         }
 
@@ -114,6 +143,35 @@ Island {
                 implicitWidth: 80
                 progress: Media.progress
                 animated: Media.playing
+            }
+        }
+
+        RowLayout {
+            id: osd
+            visible: root.showOsd
+            anchors.centerIn: parent
+            spacing: Theme.spacing.sm
+
+            Text {
+                text: Audio.icon
+                font.family: Theme.font.icons
+                font.pixelSize: Theme.button.iconSize
+                color: Colors.textOnSurface
+            }
+
+            Slider {
+                implicitWidth: 140
+                value: Audio.volume
+                onMoved: Audio.setVolume(value)
+            }
+
+            Text {
+                Layout.preferredWidth: 32
+                horizontalAlignment: Text.AlignRight
+                text: Audio.percent + "%"
+                font.family: Theme.font.family
+                font.pixelSize: Theme.font.normal
+                color: Colors.textOnSurface
             }
         }
     }
