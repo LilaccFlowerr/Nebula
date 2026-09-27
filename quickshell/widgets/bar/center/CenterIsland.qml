@@ -9,24 +9,24 @@ Island {
     id: root
     roundLeft: true
     roundRight: true
-    implicitWidth: pill.implicitWidth + Theme.bar.padding * 2
+    implicitWidth: Math.max(Theme.bar.centerMinWidth, pill.implicitWidth + Theme.bar.padding * 2)
 
-    
     readonly property int maxTitleWidth: 360
 
-    // No window on this workspace → collapse into a dot with the OS logo
-    readonly property bool empty: !ActiveWindow.hasWindow
+    readonly property bool showMedia: Media.active
+    readonly property bool showWindow: ActiveWindow.hasWindow && !showMedia
+    readonly property bool empty: !showWindow && !showMedia
 
     Rectangle {
         id: pill
         anchors.centerIn: parent
 
-        implicitWidth: root.empty ? Theme.button.size : content.implicitWidth + Theme.spacing.lg * 2
+        implicitWidth: root.empty ? Theme.button.size
+                     : (root.showMedia ? media.implicitWidth : content.implicitWidth) + Theme.spacing.lg * 2
         implicitHeight: Theme.button.size
         radius: Theme.radius.full
         color: Colors.surfaceContainer
         clip: true
-
 
         Behavior on implicitWidth {
             NumberAnimation {
@@ -36,19 +36,18 @@ Island {
             }
         }
 
-        // OS logo, only on an empty workspace
         Text {
             anchors.centerIn: parent
             visible: root.empty
             text: SystemInfo.osLogo
             font.family: Theme.font.logos
             font.pixelSize: Theme.button.iconSize
-            color: Colors.textOnSurface      // same light color as the rest of the bar text
+            color: Colors.textOnSurface
         }
 
         RowLayout {
             id: content
-            visible: !root.empty
+            visible: root.showWindow
             anchors.centerIn: parent
             spacing: Theme.spacing.xs
 
@@ -67,6 +66,54 @@ Island {
                 color: Colors.textOnSurface
                 font.family: Theme.font.family
                 font.pixelSize: Theme.font.normal
+            }
+        }
+
+        RowLayout {
+            id: media
+            visible: root.showMedia
+            anchors.centerIn: parent
+            spacing: Theme.spacing.sm
+
+            ClippingRectangle {
+                implicitWidth: 28
+                implicitHeight: 28
+                radius: Theme.radius.small
+                color: Colors.surfaceContainerHigh
+
+                Image {
+                    anchors.fill: parent
+                    source: Media.artUrl
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                }
+            }
+
+            ColumnLayout {
+                spacing: 0
+
+                Text {
+                    Layout.maximumWidth: root.maxTitleWidth
+                    elide: Text.ElideRight
+                    text: Media.title
+                    color: Colors.textOnSurface
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.normal
+                }
+
+                Text {
+                    Layout.maximumWidth: root.maxTitleWidth
+                    elide: Text.ElideRight
+                    text: Media.artist
+                    color: Colors.textOnSurfaceVariant
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.small
+                }
+            }
+            WavyProgress {
+                implicitWidth: 80
+                progress: Media.progress
+                animated: Media.playing
             }
         }
     }
