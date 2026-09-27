@@ -11,6 +11,16 @@ Item {
 
     property real thickness: 3
     property real amplitude: 2.5
+
+    property real shownAmplitude: animated ? amplitude : 0
+
+    Behavior on shownAmplitude {
+        NumberAnimation {
+            duration: Theme.anim.medium
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Theme.anim.standard
+        }
+    }
     property real wavelength: 16
     property real gap: 6
 
@@ -24,7 +34,7 @@ Item {
     readonly property var wavePoints: {
         const points = [];
         for (let x = thickness / 2; x <= splitX; x += 1.5) {
-            const y = mid + amplitude * Math.sin(x / wavelength * 2 * Math.PI + phase);
+            const y = mid + shownAmplitude * Math.sin(x / wavelength * 2 * Math.PI + phase);
             points.push(Qt.point(x, y));
         }
         return points;
