@@ -84,6 +84,8 @@ Singleton {
         readonly property int fast: 150
         readonly property int medium: 300
         readonly property int slow: 500
+        readonly property int island: 550       // dynamic island grow/shrink
+        readonly property real overshoot: 1.2   // how far it springs past its size (Apple-like)
 
         readonly property list<real> standard:        [0.2, 0, 0, 1, 1, 1]
         readonly property list<real> emphasizedDecel: [0.05, 0.7, 0.1, 1, 1, 1] // things appearing
