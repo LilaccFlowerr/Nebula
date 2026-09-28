@@ -49,11 +49,21 @@ Island {
             onRequestClose: root.powerOpen = false
         }
     }
+    Neck {
+        id: neck
+        anchors.top: parent.bottom
+        x: row.x + gearButton.x + gearButton.width / 2 - width / 2
+        neckWidth: Theme.quickSettings.neckWidth
+        curve: Theme.quickSettings.neckCurve
+        opacity: quickSettings.opacity
+        visible: opacity > 0
+    }
+
     Item {
         id: settingsArea
-        anchors.top: parent.bottom
-        anchors.topMargin: Theme.spacing.sm
+        anchors.top: neck.bottom
         anchors.right: parent.right
+        anchors.rightMargin: Theme.bar.padding
         width: quickSettings.width
         height: root.settingsOpen ? quickSettings.height : 0
 
@@ -102,7 +112,7 @@ Island {
         }
 
         IconButton { icon: "keyboard_arrow_up";   onClicked: console.info("tray") }
-        IconButton { icon: "settings"; onClicked: { root.powerOpen = false; root.settingsOpen = !root.settingsOpen; } }
+        IconButton { id: gearButton; icon: "settings"; onClicked: { root.powerOpen = false; root.settingsOpen = !root.settingsOpen; } }
         Item {
             implicitWidth: Theme.batteryRing.size
             implicitHeight: Theme.batteryRing.size
