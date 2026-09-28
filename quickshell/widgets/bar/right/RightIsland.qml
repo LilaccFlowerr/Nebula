@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import qs.components
+import qs.widgets.popups.quicksettings
 import qs.services
 import qs.theme
 
@@ -11,6 +12,7 @@ Island {
     roundLeft: true
 
     property bool powerOpen: false
+    property bool settingsOpen: false
     property bool armed: false
 
     Timer {
@@ -19,11 +21,15 @@ Island {
         onTriggered: root.armed = true
     }
     property alias powerArea: powerArea
+    property alias settingsArea: settingsArea
 
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
-        active: root.powerOpen
-        onCleared: root.powerOpen = false
+        active: root.powerOpen || root.settingsOpen
+        onCleared: {
+            root.powerOpen = false;
+            root.settingsOpen = false;
+        }
     }
 
     Item {
@@ -43,6 +49,23 @@ Island {
             onRequestClose: root.powerOpen = false
         }
     }
+    Item {
+        id: settingsArea
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
+        anchors.right: parent.right
+        width: quickSettings.width
+        height: root.settingsOpen ? quickSettings.height : 0
+
+        QuickSettings {
+            id: quickSettings
+            anchors.top: parent.top
+            anchors.right: parent.right
+            open: root.settingsOpen
+            onRequestClose: root.settingsOpen = false
+        }
+    }
+
     implicitWidth: row.implicitWidth + Theme.bar.padding * 2
 
     Connections {
@@ -79,7 +102,7 @@ Island {
         }
 
         IconButton { icon: "keyboard_arrow_up";   onClicked: console.info("tray") }
-        IconButton { icon: "settings";            onClicked: console.info("quick settings") }
+        IconButton { icon: "settings"; onClicked: { root.powerOpen = false; root.settingsOpen = !root.settingsOpen; } }
         Item {
             implicitWidth: Theme.batteryRing.size
             implicitHeight: Theme.batteryRing.size
@@ -95,7 +118,7 @@ Island {
             IconButton {
                 anchors.centerIn: parent
                 icon: "power_settings_new"
-                onClicked: root.powerOpen = !root.powerOpen
+                onClicked: { root.settingsOpen = false; root.powerOpen = !root.powerOpen; }
             }
         }
     }

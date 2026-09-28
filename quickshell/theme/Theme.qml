@@ -10,7 +10,7 @@ Singleton {
         readonly property int gap: 14
         readonly property int radius: 16
         readonly property int centerMinWidth: 336
-        readonly property int windowHeight: 320
+        readonly property int windowHeight: 480
         readonly property real opacity: 0.85
     }
     readonly property Bar bar: Bar {}
