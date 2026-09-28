@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Hyprland
 import qs.components
 import qs.services
 import qs.theme
@@ -8,6 +10,7 @@ Island {
     id: root
     roundLeft: true
 
+    property bool powerOpen: false
     property bool armed: false
 
     Timer {
@@ -15,7 +18,31 @@ Island {
         running: true
         onTriggered: root.armed = true
     }
+    property alias powerArea: powerArea
 
+    HyprlandFocusGrab {
+        windows: [root.QsWindow.window]
+        active: root.powerOpen
+        onCleared: root.powerOpen = false
+    }
+
+    Item {
+        id: powerArea
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
+        anchors.right: parent.right
+        anchors.rightMargin: Theme.bar.padding
+        width: powerMenu.width
+        height: root.powerOpen ? powerMenu.height : 0
+
+        PowerMenu {
+            id: powerMenu
+            anchors.top: parent.top
+            anchors.right: parent.right
+            open: root.powerOpen
+            onRequestClose: root.powerOpen = false
+        }
+    }
     implicitWidth: row.implicitWidth + Theme.bar.padding * 2
 
     Connections {
@@ -29,6 +56,7 @@ Island {
         anchors.left: parent.left
         anchors.leftMargin: Theme.bar.padding
         spacing: Theme.bar.gap
+
 
         Rectangle {
             id: clockPill
@@ -67,7 +95,7 @@ Island {
             IconButton {
                 anchors.centerIn: parent
                 icon: "power_settings_new"
-                onClicked: console.info("power")
+                onClicked: root.powerOpen = !root.powerOpen
             }
         }
     }

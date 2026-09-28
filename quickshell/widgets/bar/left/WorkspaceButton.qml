@@ -5,15 +5,12 @@ import qs.theme
 Rectangle {
     id: root
 
-    // Which workspace this button is
     property int wsId: 1
 
-    // Its state, straight from the Workspaces service
     readonly property bool active: Workspaces.activeId === root.wsId
     readonly property bool occupied: Workspaces.isOccupied(root.wsId)
     readonly property bool urgent: Workspaces.isUrgent(root.wsId)
 
-    // Active = wide pill, the rest = circle
     implicitWidth: active ? Theme.workspaces.activeWidth : Theme.button.size
     implicitHeight: Theme.button.size
     radius: Theme.radius.full
@@ -23,7 +20,6 @@ Rectangle {
          : occupied ? Colors.surfaceContainerLow
          :            Colors.surfaceContainer
 
-    // Grow into a pill / shrink back into a dot
     Behavior on implicitWidth {
         NumberAnimation {
             duration: Theme.anim.slow
@@ -32,7 +28,6 @@ Rectangle {
         }
     }
 
-    // Fade between colors (ColorAnimation instead of NumberAnimation, because it's a color)
     Behavior on color {
         ColorAnimation {
             duration: Theme.anim.slow

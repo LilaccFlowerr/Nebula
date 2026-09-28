@@ -1,4 +1,3 @@
-// The top bar: one transparent window per screen that holds the three islands.
 import qs.widgets.bar.left
 import qs.widgets.bar.right
 import qs.widgets.bar.center
@@ -19,22 +18,19 @@ Variants {
             left: true
             right: true
         }
-        // Taller than the bar so the center island can grow downward, but Hyprland only
-        // reserves the bar height, so windows stay where they are
         implicitHeight: Theme.bar.windowHeight
         exclusiveZone: Theme.bar.height
-        color: "transparent"   // the window itself is invisible, only the islands are drawn
+        color: "transparent"
 
-        // Only the islands catch the mouse; everywhere else clicks go through to the windows
         mask: Region {
             regions: [
                 Region { item: leftIsland },
                 Region { item: centerIsland },
-                Region { item: rightIsland }
+                Region { item: rightIsland },
+                Region { item: rightIsland.powerArea }
             ]
         }
 
-        // Name for Hyprland layer rules (blur): match = { namespace = "^quickshell:bar$" }
         WlrLayershell.namespace: "quickshell:bar"
 
         LeftIsland   { id: leftIsland;   anchors.left: parent.left }

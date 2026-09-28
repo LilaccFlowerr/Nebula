@@ -1,6 +1,3 @@
-// Current time and date, formatted for the bar.
-// Usage: import qs.services  →  text: Time.time
-
 pragma Singleton
 
 import QtQuick
@@ -9,7 +6,6 @@ import Quickshell
 Singleton {
     id: root
 
-    // Clock format. AM/PM for now; later this becomes a user setting.
     property bool use24h: false
 
     readonly property date now: clock.date
