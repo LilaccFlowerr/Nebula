@@ -18,8 +18,9 @@ Singleton {
     readonly property int percent: Math.round(level * 100)
 
     readonly property bool charging: available && device.state === UPowerDeviceState.Charging
+    readonly property bool pluggedIn: available && !UPower.onBattery   // follows the charger right away, faster than `charging`
     readonly property bool full: available && device.state === UPowerDeviceState.FullyCharged
-    readonly property bool low: available && !charging && level < 0.2
+    readonly property bool low: available && !pluggedIn && level < 0.2
 
     // Seconds, 0 when unknown
     readonly property real timeToEmpty: available ? device.timeToEmpty : 0

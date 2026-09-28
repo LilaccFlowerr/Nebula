@@ -16,6 +16,9 @@ hl.on("hyprland.start", function ()
 
     hl.exec_cmd("hypridle")
 
+    -- Quickshell: the bar and (later) all other widgets
+    hl.exec_cmd("qs")
+
     -- Apps on a specific workspace at login
     -- hl.dispatch(hl.dsp.exec_cmd("ghostty", { workspace = 1 }))
     -- hl.dispatch(hl.dsp.exec_cmd("code",    { workspace = 2 }))

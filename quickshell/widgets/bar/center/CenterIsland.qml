@@ -13,12 +13,15 @@ Island {
 
     readonly property int maxTitleWidth: 360
 
-    property bool showOsd: false
+    property string event: ""
     property bool armed: false
 
-    readonly property bool showMedia: Media.active && !showOsd
-    readonly property bool showWindow: ActiveWindow.hasWindow && !showMedia && !showOsd
-    readonly property bool empty: !showWindow && !showMedia && !showOsd
+    readonly property bool showEvent: event !== ""
+    readonly property bool batteryEvent: event === "charging" || event === "unplugged" || event === "low"
+
+    readonly property bool showMedia: Media.active && !showEvent
+    readonly property bool showWindow: ActiveWindow.hasWindow && !showMedia && !showEvent
+    readonly property bool empty: !showWindow && !showMedia && !showEvent
 
     Timer {
         interval: 1000
@@ -27,21 +30,27 @@ Island {
     }
 
     Timer {
-        id: osdTimer
-        interval: 1500
-        onTriggered: root.showOsd = false
+        id: eventTimer
+        onTriggered: root.event = ""
     }
 
-    function popOsd() {
+    function popEvent(name, duration = 1500) {
         if (!armed) return;
-        showOsd = true;
-        osdTimer.restart();
+        event = name;
+        eventTimer.interval = duration;
+        eventTimer.restart();
     }
 
     Connections {
         target: Audio
-        function onVolumeChanged() { root.popOsd(); }
-        function onMutedChanged() { root.popOsd(); }
+        function onVolumeChanged() { root.popEvent("volume"); }
+        function onMutedChanged() { root.popEvent("volume"); }
+    }
+
+    Connections {
+        target: Battery
+        function onPluggedInChanged() { root.popEvent(Battery.pluggedIn ? "charging" : "unplugged", 2500); }
+        function onLowChanged() { if (Battery.low) root.popEvent("low", 4000); }
     }
 
     Rectangle {
@@ -49,7 +58,8 @@ Island {
         anchors.centerIn: parent
 
         implicitWidth: root.empty ? Theme.button.size
-                     : (root.showOsd ? osd.implicitWidth
+                     : (root.event === "volume" ? osd.implicitWidth
+                        : root.batteryEvent ? battery.implicitWidth
                         : root.showMedia ? media.implicitWidth
                         : content.implicitWidth) + Theme.spacing.lg * 2
         implicitHeight: Theme.button.size
@@ -173,7 +183,7 @@ Island {
 
         RowLayout {
             id: osd
-            visible: root.showOsd
+            visible: root.event === "volume"
             anchors.centerIn: parent
             spacing: Theme.spacing.sm
 
@@ -197,6 +207,42 @@ Island {
                 font.family: Theme.font.family
                 font.pixelSize: Theme.font.normal
                 color: Colors.textOnSurface
+            }
+        }
+
+        RowLayout {
+            id: battery
+            visible: root.batteryEvent
+            anchors.centerIn: parent
+            spacing: Theme.spacing.sm
+
+            readonly property color accent: root.event === "low" ? Colors.errorColor
+                                          : root.event === "charging" ? Colors.primary
+                                          : Colors.textOnSurface
+
+            Text {
+                text: root.event === "charging" ? "bolt"
+                    : root.event === "low" ? "battery_alert"
+                    : "battery_full"
+                font.family: Theme.font.icons
+                font.pixelSize: Theme.button.iconSize
+                color: battery.accent
+            }
+
+            Text {
+                text: root.event === "charging" ? "Charging"
+                    : root.event === "low" ? "Battery low"
+                    : "On battery"
+                font.family: Theme.font.family
+                font.pixelSize: Theme.font.normal
+                color: Colors.textOnSurface
+            }
+
+            Text {
+                text: Battery.percent + "%"
+                font.family: Theme.font.family
+                font.pixelSize: Theme.font.normal
+                color: battery.accent
             }
         }
     }

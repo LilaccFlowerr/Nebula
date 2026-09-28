@@ -8,6 +8,11 @@ Island {
     roundLeft: true
     implicitWidth: row.implicitWidth + Theme.bar.padding * 2
 
+    Connections {
+        target: Battery
+        function onPluggedInChanged() { ring.ripple(Battery.pluggedIn ? 1500 : 0); }
+    }
+
     RowLayout {
         id: row
         anchors.verticalCenter: parent.verticalCenter
@@ -43,6 +48,7 @@ Island {
             implicitHeight: Theme.batteryRing.size
 
             BatteryRing {
+                id: ring
                 anchors.fill: parent
                 visible: Battery.available
                 level: Battery.level               
