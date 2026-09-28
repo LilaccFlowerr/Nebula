@@ -43,6 +43,8 @@ Singleton {
         readonly property int tileInnerRadius: 4
         readonly property int tileGap: 2
         readonly property int tileIconSize: 24
+        readonly property int neckWidth: 40
+        readonly property int neckCurve: 12
     }
     readonly property QuickSettings quickSettings: QuickSettings {}
 
