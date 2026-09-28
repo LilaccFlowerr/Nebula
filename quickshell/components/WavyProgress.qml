@@ -6,6 +6,14 @@ Item {
     id: root
 
     property real progress: 0.3
+
+    property bool smoothProgress: true
+    property real shownProgress: progress
+
+    Behavior on shownProgress {
+        enabled: root.smoothProgress
+        NumberAnimation { duration: 1000 }
+    }
     property bool animated: true
     property color color: Colors.secondary
 
@@ -29,7 +37,7 @@ Item {
     implicitWidth: 100
     implicitHeight: 12
     readonly property real mid: height / 2
-    readonly property real splitX: Math.max(thickness / 2, width * progress)
+    readonly property real splitX: Math.max(thickness / 2, width * shownProgress)
 
     readonly property var wavePoints: {
         const points = [];
@@ -37,6 +45,8 @@ Item {
             const y = mid + shownAmplitude * Math.sin(x / wavelength * 2 * Math.PI + phase);
             points.push(Qt.point(x, y));
         }
+        const endY = mid + shownAmplitude * Math.sin(splitX / wavelength * 2 * Math.PI + phase);
+        points.push(Qt.point(splitX, endY));
         return points;
     }
 

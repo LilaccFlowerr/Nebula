@@ -18,6 +18,7 @@ Singleton {
         readonly property int gap: 14           // space between items in an island
         readonly property int radius: 16        // outer island corner
         readonly property int centerMinWidth: 336   // center island never gets narrower
+        readonly property int windowHeight: 320     // room for islands that grow downward
         readonly property real opacity: 0.85    // islands are translucent, blur comes from Hyprland
     }
     readonly property Bar bar: Bar {}
