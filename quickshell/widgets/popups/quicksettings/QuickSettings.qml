@@ -10,7 +10,7 @@ Rectangle {
     property bool open: false
     signal requestClose()
 
-    implicitWidth: 360
+    implicitWidth: Theme.quickSettings.width
     implicitHeight: column.implicitHeight + Theme.spacing.lg * 2
     radius: Theme.radius.large
     color: Qt.alpha(Colors.surface, Theme.bar.opacity)
@@ -41,8 +41,8 @@ Rectangle {
             spacing: Theme.spacing.md
 
             ShapedImage {
-                implicitWidth: 56
-                implicitHeight: 56
+                implicitWidth: Theme.quickSettings.avatarSize
+                implicitHeight: Theme.quickSettings.avatarSize
                 source: SystemInfo.avatar
                 placeholderColor: Colors.surfaceContainerHigh
 
@@ -50,7 +50,7 @@ Rectangle {
                     anchors.centerIn: parent
                     text: "add_a_photo"
                     font.family: Theme.font.icons
-                    font.pixelSize: Theme.button.iconSize
+                    font.pixelSize: Theme.quickSettings.avatarIconSize
                     color: Colors.textOnSurface
                     opacity: avatarMouse.containsMouse ? 0.9 : 0
 
@@ -75,7 +75,7 @@ Rectangle {
                     text: SystemInfo.user + "@" + SystemInfo.host
                     color: Colors.textOnSurface
                     font.family: Theme.font.family
-                    font.pixelSize: Theme.font.large
+                    font.pixelSize: Theme.font.clock
                     font.weight: Font.DemiBold
                 }
 
@@ -83,8 +83,52 @@ Rectangle {
                     text: SystemInfo.uptime + (Battery.available ? " · " + Battery.percent + "%" : "")
                     color: Colors.textOnSurfaceVariant
                     font.family: Theme.font.family
-                    font.pixelSize: Theme.font.small
+                    font.pixelSize: Theme.font.normal
                 }
+            }
+        }
+
+        GridLayout {
+            Layout.fillWidth: true
+            columns: 2
+            rowSpacing: Theme.spacing.sm
+            columnSpacing: Theme.spacing.sm
+
+            Tile {
+                Layout.fillWidth: true
+                visible: Wifi.available
+                icon: Wifi.icon
+                title: "Wifi"
+                subtitle: Wifi.connected ? Wifi.ssid : Wifi.enabled ? "Not connected" : "Off"
+                active: Wifi.enabled
+                onClicked: Wifi.toggle()
+            }
+
+            Tile {
+                Layout.fillWidth: true
+                visible: BluetoothStatus.available
+                icon: BluetoothStatus.icon
+                title: "Bluetooth"
+                subtitle: BluetoothStatus.connected ? BluetoothStatus.deviceName : BluetoothStatus.enabled ? "On" : "Off"
+                active: BluetoothStatus.enabled
+                onClicked: BluetoothStatus.toggle()
+            }
+
+            Tile {
+                Layout.fillWidth: true
+                icon: Dnd.icon
+                title: "Do not disturb"
+                subtitle: Dnd.enabled ? "On" : "Off"
+                active: Dnd.enabled
+                onClicked: Dnd.toggle()
+            }
+
+            Tile {
+                Layout.fillWidth: true
+                icon: "settings"
+                title: "Settings"
+                subtitle: "All settings"
+                onClicked: console.info("settings window komt later")
             }
         }
 
