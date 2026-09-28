@@ -27,7 +27,8 @@ Variants {
                 Region { item: leftIsland },
                 Region { item: centerIsland },
                 Region { item: rightIsland },
-                Region { item: rightIsland.powerArea }
+                Region { item: rightIsland.powerArea },
+                Region { item: rightIsland.settingsArea }
             ]
         }
 
