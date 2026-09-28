@@ -35,6 +35,17 @@ Singleton {
     }
     readonly property BatteryRing batteryRing: BatteryRing {}
 
+    component QuickSettings: QtObject {
+        readonly property int width: 420
+        readonly property int avatarSize: 96
+        readonly property int avatarIconSize: 32
+        readonly property int tileHeight: 56
+        readonly property int tileInnerRadius: 4
+        readonly property int tileGap: 2
+        readonly property int tileIconSize: 24
+    }
+    readonly property QuickSettings quickSettings: QuickSettings {}
+
     component Radius: QtObject {
         readonly property int small: 8
         readonly property int medium: 16
