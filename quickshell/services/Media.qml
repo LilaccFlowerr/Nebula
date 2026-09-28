@@ -34,6 +34,7 @@ Singleton {
     function togglePlaying() { if (player?.canTogglePlaying) player.togglePlaying(); }
     function next()          { if (player?.canGoNext) player.next(); }
     function previous()      { if (player?.canGoPrevious) player.previous(); }
+    function seekTo(fraction) { if (player?.canSeek && length > 0) player.position = Math.max(0, Math.min(1, fraction)) * length; }
 
     function formatTime(seconds) {
         const s = Math.max(0, Math.floor(seconds));

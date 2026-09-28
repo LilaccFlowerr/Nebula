@@ -19,15 +19,26 @@ Variants {
             left: true
             right: true
         }
-        implicitHeight: Theme.bar.height
+        // Taller than the bar so the center island can grow downward, but Hyprland only
+        // reserves the bar height, so windows stay where they are
+        implicitHeight: Theme.bar.windowHeight
+        exclusiveZone: Theme.bar.height
         color: "transparent"   // the window itself is invisible, only the islands are drawn
+
+        // Only the islands catch the mouse; everywhere else clicks go through to the windows
+        mask: Region {
+            regions: [
+                Region { item: leftIsland },
+                Region { item: centerIsland },
+                Region { item: rightIsland }
+            ]
+        }
 
         // Name for Hyprland layer rules (blur): match = { namespace = "^quickshell:bar$" }
         WlrLayershell.namespace: "quickshell:bar"
 
-        // TODO step 3: the three islands
-          LeftIsland   { anchors.left: parent.left }
-          CenterIsland { anchors.horizontalCenter: parent.horizontalCenter }
-          RightIsland  { anchors.right: parent.right }
+        LeftIsland   { id: leftIsland;   anchors.left: parent.left }
+        CenterIsland { id: centerIsland; anchors.horizontalCenter: parent.horizontalCenter }
+        RightIsland  { id: rightIsland;  anchors.right: parent.right }
     }
 }

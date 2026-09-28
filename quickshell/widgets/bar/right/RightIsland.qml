@@ -5,12 +5,22 @@ import qs.services
 import qs.theme
 
 Island {
+    id: root
     roundLeft: true
+
+    property bool armed: false
+
+    Timer {
+        interval: 1000
+        running: true
+        onTriggered: root.armed = true
+    }
+
     implicitWidth: row.implicitWidth + Theme.bar.padding * 2
 
     Connections {
         target: Battery
-        function onPluggedInChanged() { ring.ripple(Battery.pluggedIn ? 1500 : 0); }
+        function onPluggedInChanged() { if (root.armed) ring.ripple(Battery.pluggedIn ? 1500 : 0); }
     }
 
     RowLayout {
@@ -19,7 +29,6 @@ Island {
         anchors.left: parent.left
         anchors.leftMargin: Theme.bar.padding
         spacing: Theme.bar.gap
-
 
         Rectangle {
             id: clockPill
