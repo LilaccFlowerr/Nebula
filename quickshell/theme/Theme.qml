@@ -10,6 +10,11 @@ Singleton {
         readonly property int gap: 14
         readonly property int radius: 16
         readonly property int centerMinWidth: 336
+        readonly property int eventArtSize: 22
+        readonly property int notificationWidth: 400
+        readonly property int notificationIconSize: 36
+        readonly property int notificationBadgeSize: 18
+        readonly property int notificationMaxLines: 6
         readonly property int windowHeight: 480
         readonly property real opacity: 0.85
     }
@@ -47,6 +52,19 @@ Singleton {
         readonly property int neckCurve: 12
     }
     readonly property QuickSettings quickSettings: QuickSettings {}
+
+    component Lyrics: QtObject {
+        readonly property int lineHeight: 20
+        readonly property int titleWidth: 120
+    }
+    readonly property Lyrics lyrics: Lyrics {}
+
+    component Visualizer: QtObject {
+        readonly property real pillOpacity: 0.3
+        readonly property real barWidth: 2
+        readonly property int cardHeight: 120
+    }
+    readonly property Visualizer visualizer: Visualizer {}
 
     component Radius: QtObject {
         readonly property int small: 8

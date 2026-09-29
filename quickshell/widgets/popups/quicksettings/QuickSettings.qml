@@ -128,7 +128,7 @@ Rectangle {
                 icon: "settings"
                 title: "Settings"
                 subtitle: "All settings"
-                onClicked: console.info("settings window komt later")
+                onClicked: console.info("settings window: not built yet")
             }
         }
 
