@@ -5,9 +5,6 @@ hl.on("hyprland.start", function ()
     -- Auth: password prompt when apps ask for admin rights
     hl.exec_cmd("/usr/libexec/polkit-mate-authentication-agent-1")
 
-    -- Notifications
-    hl.exec_cmd("mako")
-
     -- Clipboard history
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
@@ -16,7 +13,7 @@ hl.on("hyprland.start", function ()
 
     hl.exec_cmd("hypridle")
 
-    -- Quickshell: the bar and (later) all other widgets
+    -- Quickshell: the bar, notifications and (later) all other widgets
     hl.exec_cmd("qs")
 
     -- Apps on a specific workspace at login
