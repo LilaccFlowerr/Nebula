@@ -6,6 +6,7 @@ import Quickshell.Widgets
 import qs.components
 import qs.services
 import qs.theme
+import qs.widgets.bar.center.components
 
 Island {
     id: root
@@ -36,7 +37,7 @@ Island {
     readonly property bool mediaEvent: Media.active && showEvent && !isExpanded
     readonly property bool showNotification: event === "notification" && !isExpanded
     readonly property bool showBubble: event === "notification" && isExpanded
-    readonly property bool notificationOpen: (showNotification && pillHover.hovered) || (showBubble && bubbleHover.hovered)
+    readonly property bool notificationOpen: (showNotification && pillHover.hovered) || (showBubble && bubble.hovered)
     property alias bubble: bubble
     property string lastEvent: ""
     onEventChanged: if (event !== "") lastEvent = event
@@ -91,54 +92,13 @@ Island {
         function onLowChanged() { if (Battery.low) root.popEvent("low", 4000); }
     }
 
-    Rectangle {
+    NotificationBubble {
         id: bubble
         anchors.top: pill.bottom
-        anchors.topMargin: Theme.spacing.sm + (root.showBubble ? 0 : -Theme.spacing.lg)
+        anchors.topMargin: Theme.spacing.sm + offset
         anchors.horizontalCenter: parent.horizontalCenter
-        width: Theme.bar.notificationWidth
-        height: root.showBubble ? bubbleContent.implicitHeight + Theme.spacing.md * 2 : 0
-        radius: Theme.radius.large
-        color: Qt.alpha(Colors.surface, Theme.bar.opacity)
-        border.width: Notifications.urgent ? 2 : 0
-        border.color: Colors.errorColor
-        opacity: root.showBubble ? 1 : 0
-        scale: root.showBubble ? 1 : 0.9
-        visible: opacity > 0
-        clip: true
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.anim.fast }
-        }
-        Behavior on scale {
-            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
-        }
-        Behavior on anchors.topMargin {
-            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
-        }
-        Behavior on height {
-            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
-        }
-
-        HoverHandler {
-            id: bubbleHover
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: Notifications.activate()
-        }
-
-        NotificationContent {
-            id: bubbleContent
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: Theme.spacing.md
-            n: Notifications.current
-            open: root.notificationOpen
-        }
+        shown: root.showBubble
+        open: root.notificationOpen
     }
 
     Rectangle {
@@ -153,11 +113,33 @@ Island {
                         : root.batteryEvent ? battery.implicitWidth
                         : root.showMedia ? media.implicitWidth
                         : root.empty ? emptyContent.implicitWidth
-                        : content.implicitWidth) + Theme.spacing.lg * 2)
+                        : windowContent.implicitWidth) + Theme.spacing.lg * 2)
         implicitHeight: root.isExpanded ? card.implicitHeight + Theme.spacing.lg * 2
                       : root.showNotification ? notif.implicitHeight + Theme.spacing.md * 2
                       : Theme.button.size
         radius: root.isExpanded || root.showNotification ? Theme.radius.large : Theme.radius.full
+        color: Colors.surfaceContainer
+        border.width: root.showNotification && Notifications.urgent ? 2 : 0
+        border.color: Colors.errorColor
+        clip: true
+
+        Behavior on implicitHeight {
+            NumberAnimation { duration: Theme.anim.island; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+        }
+        Behavior on implicitWidth {
+            enabled: !media.resizing
+            NumberAnimation { duration: Theme.anim.island; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+        }
+
+        HoverHandler {
+            id: pillHover
+        }
+
+        Binding {
+            target: Notifications
+            property: "paused"
+            value: root.notificationOpen
+        }
 
         Visualizer {
             anchors.fill: parent
@@ -187,28 +169,6 @@ Island {
             }
         }
 
-        HoverHandler {
-            id: pillHover
-        }
-
-        Binding {
-            target: Notifications
-            property: "paused"
-            value: root.notificationOpen
-        }
-        color: Colors.surfaceContainer
-        border.width: root.showNotification && Notifications.urgent ? 2 : 0
-        border.color: Colors.errorColor
-        clip: true
-
-        Behavior on implicitHeight {
-            NumberAnimation {
-                duration: Theme.anim.island
-                easing.type: Easing.OutBack
-                easing.overshoot: Theme.anim.overshoot
-            }
-        }
-
         MouseArea {
             anchors.fill: parent
             cursorShape: root.showMedia || root.showNotification ? Qt.PointingHandCursor : Qt.ArrowCursor
@@ -218,155 +178,43 @@ Island {
             }
         }
 
-        Behavior on implicitWidth {
-            enabled: !textWidthAnim.running
-            NumberAnimation {
-                duration: Theme.anim.island
-                easing.type: Easing.OutBack
-                easing.overshoot: Theme.anim.overshoot
-            }
-        }
-
-        RowLayout {
+        EmptyContent {
             id: emptyContent
             anchors.centerIn: parent
             visible: root.empty
-            spacing: Theme.spacing.sm
-
-            Text {
-                text: SystemInfo.osLogo
-                font.family: Theme.font.logos
-                font.pixelSize: Theme.button.iconSize
-                color: Colors.textOnSurface
-            }
-
-            Text {
-                text: Time.date
-                color: Colors.textOnSurface
-                font.family: Theme.font.family
-                font.pixelSize: Theme.font.normal
-                font.weight: Font.DemiBold
-            }
         }
 
-        RowLayout {
-            id: content
-            visible: root.showWindow
+        WindowContent {
+            id: windowContent
             anchors.centerIn: parent
-            spacing: Theme.spacing.xs
-
-            IconImage {
-                source: ActiveWindow.icon
-                implicitSize: Theme.button.iconSize
-                visible: source !== ""
-            }
-
-            Text {
-                id: title
-                Layout.maximumWidth: root.maxTitleWidth
-                elide: Text.ElideRight
-
-                text: ActiveWindow.title
-                color: Colors.textOnSurface
-                font.family: Theme.font.family
-                font.pixelSize: Theme.font.normal
-            }
+            visible: root.showWindow
+            maxTitleWidth: root.maxTitleWidth
         }
 
-        RowLayout {
+        MediaRow {
             id: media
+            anchors.centerIn: parent
             visible: root.showMedia
             opacity: root.isExpanded ? 0 : 1
+            maxTextWidth: root.mediaTextWidth
+            waveWidth: root.waveWidth
 
             Behavior on opacity {
                 NumberAnimation { duration: Theme.anim.fast }
             }
-            anchors.centerIn: parent
-            spacing: Theme.spacing.sm
-
-            property real textWidth: Media.playing ? root.mediaTextWidth
-                : Math.min(root.mediaTextWidth, Math.max(mediaTitle.implicitWidth, mediaArtist.implicitWidth))
-
-            Behavior on textWidth {
-                NumberAnimation {
-                    id: textWidthAnim
-                    duration: Theme.anim.island
-                    easing.type: Easing.OutBack
-                    easing.overshoot: Theme.anim.overshoot
-                }
-            }
-
-            Item {
-                id: smallArtSlot
-                implicitWidth: 28
-                implicitHeight: 28
-            }
-
-            ColumnLayout {
-                Layout.preferredWidth: media.textWidth
-                spacing: 0
-
-                Text {
-                    id: mediaTitle
-                    Layout.maximumWidth: media.textWidth
-                    elide: Text.ElideRight
-                    text: Media.title
-                    color: Colors.textOnSurface
-                    font.family: Theme.font.family
-                    font.pixelSize: Theme.font.normal
-                }
-
-                Text {
-                    id: mediaArtist
-                    Layout.maximumWidth: media.textWidth
-                    elide: Text.ElideRight
-                    text: Media.artist
-                    color: Colors.textOnSurfaceVariant
-                    font.family: Theme.font.family
-                    font.pixelSize: Theme.font.small
-                }
-            }
-            WavyProgress {
-                implicitWidth: root.waveWidth
-                progress: Media.progress
-                animated: Media.playing
-            }
         }
 
-        RowLayout {
+        VolumeOsd {
             id: osd
-            visible: root.event === "volume"
             anchors.centerIn: parent
-            spacing: Theme.spacing.sm
+            visible: root.event === "volume"
+        }
 
-            Item {
-                id: osdArtSlot
-                visible: Media.active
-                implicitWidth: Theme.bar.eventArtSize
-                implicitHeight: Theme.bar.eventArtSize
-            }
-
-            Text {
-                text: Audio.icon
-                font.family: Theme.font.icons
-                font.pixelSize: Theme.button.iconSize
-                color: Colors.textOnSurface
-            }
-
-            Slider {
-                implicitWidth: 140
-                value: Audio.volume
-                onMoved: Audio.setVolume(value)
-            }
-
-            Text {
-                Layout.preferredWidth: 32
-                horizontalAlignment: Text.AlignRight
-                text: Audio.percent + "%"
-                font.family: Theme.font.family
-                font.pixelSize: Theme.font.normal
-                color: Colors.textOnSurface
-            }
+        BatteryEvent {
+            id: battery
+            anchors.centerIn: parent
+            visible: root.batteryEvent
+            event: root.event
         }
 
         NotificationContent {
@@ -380,246 +228,14 @@ Island {
             open: root.notificationOpen
         }
 
-        RowLayout {
-            id: battery
-            visible: root.batteryEvent
-            anchors.centerIn: parent
-            spacing: Theme.spacing.sm
-
-            Item {
-                id: batteryArtSlot
-                visible: Media.active
-                implicitWidth: Theme.bar.eventArtSize
-                implicitHeight: Theme.bar.eventArtSize
-            }
-
-            readonly property color accent: root.event === "low" ? Colors.errorColor
-                                          : root.event === "charging" ? Colors.primary
-                                          : Colors.textOnSurface
-
-            Text {
-                text: root.event === "charging" ? "bolt"
-                    : root.event === "low" ? "battery_alert"
-                    : "battery_full"
-                font.family: Theme.font.icons
-                font.pixelSize: Theme.button.iconSize
-                color: battery.accent
-            }
-
-            Text {
-                text: root.event === "charging" ? "Charging"
-                    : root.event === "low" ? "Battery low"
-                    : "On battery"
-                font.family: Theme.font.family
-                font.pixelSize: Theme.font.normal
-                color: Colors.textOnSurface
-            }
-
-            Text {
-                text: Battery.percent + "%"
-                font.family: Theme.font.family
-                font.pixelSize: Theme.font.normal
-                color: battery.accent
-            }
-        }
-
-        ColumnLayout {
+        MediaCard {
             id: card
             visible: root.showMedia
-            enabled: root.isExpanded
-            opacity: root.isExpanded ? 1 : 0
-
-            Behavior on opacity {
-                SequentialAnimation {
-                    PauseAnimation { duration: root.isExpanded ? Theme.anim.fast : 0 }
-                    NumberAnimation { duration: root.isExpanded ? Theme.anim.medium : Theme.anim.fast }
-                }
-            }
+            expanded: root.isExpanded
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: Theme.spacing.lg
             width: root.cardWidth
-            spacing: Theme.spacing.md
-
-            RowLayout {
-                id: cardTop
-                Layout.fillWidth: true
-                spacing: Theme.spacing.md
-
-                Item {
-                    id: bigArtSlot
-                    implicitWidth: 80
-                    implicitHeight: 80
-                }
-
-                ColumnLayout {
-                    Layout.preferredWidth: Theme.lyrics.titleWidth
-                    Layout.fillWidth: false
-                    spacing: 2
-
-                    Text {
-                        Layout.fillWidth: true
-                        elide: Text.ElideRight
-                        text: Media.title
-                        color: Colors.textOnSurface
-                        font.family: Theme.font.family
-                        font.pixelSize: Theme.font.normal
-                        font.weight: Font.DemiBold
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        elide: Text.ElideRight
-                        text: Media.artist
-                        color: Colors.textOnSurfaceVariant
-                        font.family: Theme.font.family
-                        font.pixelSize: Theme.font.normal
-                    }
-
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-
-                    ListView {
-                        id: lyricsView
-                        anchors.fill: parent
-                        visible: Lyrics.synced
-                        clip: true
-                        interactive: false
-
-                        model: Lyrics.lines
-                        currentIndex: Math.max(0, Lyrics.currentIndex)
-                        highlightRangeMode: ListView.StrictlyEnforceRange
-                        preferredHighlightBegin: Theme.lyrics.lineHeight
-                        preferredHighlightEnd: Theme.lyrics.lineHeight * 2
-                        highlightMoveDuration: Theme.anim.medium
-
-                        delegate: Text {
-                            required property var modelData
-                            required property int index
-                            readonly property bool current: index === Lyrics.currentIndex
-
-                            width: lyricsView.width
-                            height: Theme.lyrics.lineHeight
-                            verticalAlignment: Text.AlignVCenter
-                            elide: Text.ElideRight
-                            text: modelData.text || "♪"
-                            color: current ? Colors.primary : Colors.textOnSurfaceVariant
-                            opacity: current ? 1 : 0.6
-                            font.family: Theme.font.family
-                            font.pixelSize: Theme.font.small
-                            font.weight: current ? Font.DemiBold : Font.Normal
-
-                            Behavior on color {
-                                ColorAnimation { duration: Theme.anim.medium }
-                            }
-                            Behavior on opacity {
-                                NumberAnimation { duration: Theme.anim.medium }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: Lyrics.seekToLine(index)
-                            }
-                        }
-                    }
-
-                    Row {
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible: Lyrics.status === "loading"
-                        spacing: Theme.spacing.xs
-
-                        Repeater {
-                            model: 3
-
-                            Rectangle {
-                                required property int index
-                                width: 6
-                                height: 6
-                                radius: 3
-                                color: Colors.textOnSurfaceVariant
-
-                                SequentialAnimation on opacity {
-                                    running: Lyrics.status === "loading"
-                                    loops: Animation.Infinite
-                                    PauseAnimation { duration: index * 150 }
-                                    NumberAnimation { from: 0.3; to: 1; duration: 400; easing.type: Easing.InOutSine }
-                                    NumberAnimation { from: 1; to: 0.3; duration: 400; easing.type: Easing.InOutSine }
-                                    PauseAnimation { duration: (2 - index) * 150 }
-                                }
-                            }
-                        }
-                    }
-
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible: Lyrics.status === "instrumental"
-                        text: "Instrumental"
-                        color: Colors.textOnSurfaceVariant
-                        font.family: Theme.font.family
-                        font.pixelSize: Theme.font.small
-                        font.italic: true
-                    }
-                }
-            }
-
-            Item {
-                Layout.fillWidth: true
-                implicitHeight: 20
-
-                WavyProgress {
-                    anchors.fill: parent
-                    progress: seekArea.pressed ? seekArea.dragProgress : Media.progress
-                    animated: Media.playing
-                    smoothProgress: !seekArea.pressed
-                }
-
-                MouseArea {
-                    id: seekArea
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-
-                    property real dragProgress: 0
-
-                    function update(x) { dragProgress = Math.max(0, Math.min(1, x / width)); }
-
-                    onPressed: mouse => update(mouse.x)
-                    onPositionChanged: mouse => update(mouse.x)
-                    onReleased: Media.seekTo(dragProgress)
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                Text {
-                    text: Media.formatTime(Media.position)
-                    color: Colors.textOnSurfaceVariant
-                    font.family: Theme.font.family
-                    font.pixelSize: Theme.font.small
-                }
-
-                Item { Layout.fillWidth: true }
-
-                Text {
-                    text: Media.formatTime(Media.length)
-                    color: Colors.textOnSurfaceVariant
-                    font.family: Theme.font.family
-                    font.pixelSize: Theme.font.small
-                }
-            }
-
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: Theme.bar.gap
-
-                IconButton { icon: "skip_previous"; onClicked: Media.previous() }
-                IconButton { icon: Media.playing ? "pause" : "play_arrow"; onClicked: Media.togglePlaying() }
-                IconButton { icon: "skip_next"; onClicked: Media.next() }
-            }
         }
 
         ClippingRectangle {
@@ -636,10 +252,10 @@ Island {
                 }
             }
 
-            readonly property real smallX: media.x + smallArtSlot.x
-            readonly property real smallY: media.y + smallArtSlot.y
-            readonly property real bigX: card.x + cardTop.x + bigArtSlot.x
-            readonly property real bigY: card.y + cardTop.y + bigArtSlot.y
+            readonly property real smallX: media.x + media.artSlot.x
+            readonly property real smallY: media.y + media.artSlot.y
+            readonly property real bigX: card.x + card.artX
+            readonly property real bigY: card.y + card.artY
 
             property real e: root.mediaEvent ? 1 : 0
 
@@ -651,15 +267,15 @@ Island {
                 }
             }
 
-            readonly property Item eventSlot: root.lastEvent === "volume" ? osdArtSlot
+            readonly property Item eventSlot: root.lastEvent === "volume" ? osd.artSlot
                                             : root.lastEvent === "notification" ? notif.artSlot
-                                            : batteryArtSlot
+                                            : battery.artSlot
             readonly property real eventX: root.lastEvent === "notification" ? notif.x + notif.artX : eventSlot.parent.x + eventSlot.x
             readonly property real eventY: root.lastEvent === "notification" ? notif.y + notif.artY : eventSlot.parent.y + eventSlot.y
 
             readonly property real baseX: smallX + (bigX - smallX) * t
             readonly property real baseY: smallY + (bigY - smallY) * t
-            readonly property real baseSize: smallArtSlot.width + (bigArtSlot.width - smallArtSlot.width) * t
+            readonly property real baseSize: media.artSlot.width + (card.artSlot.width - media.artSlot.width) * t
 
             x: baseX + (eventX - baseX) * e
             y: baseY + (eventY - baseY) * e

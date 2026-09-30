@@ -6,7 +6,7 @@ import Quickshell
 Singleton {
     id: root
 
-    property bool use24h: false
+    readonly property bool use24h: Settings.clock.use24h
 
     readonly property date now: clock.date
     readonly property string time: Qt.formatDateTime(clock.date, use24h ? "HH:mm" : "h:mm AP")
