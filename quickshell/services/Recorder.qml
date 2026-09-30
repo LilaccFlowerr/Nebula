@@ -9,9 +9,9 @@ Singleton {
     id: root
 
     readonly property string directory: Quickshell.env("HOME") + "/Videos/Recordings"
-    property bool sound: true
-    property bool useRegion: false
-    property int framerate: 60
+    readonly property bool sound: Settings.recorder.sound
+    readonly property bool useRegion: Settings.recorder.useRegion
+    readonly property int framerate: Settings.recorder.framerate
 
     property bool external: false
     readonly property bool recording: proc.running || external

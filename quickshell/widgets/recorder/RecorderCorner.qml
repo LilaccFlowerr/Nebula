@@ -186,7 +186,7 @@ PanelWindow {
                 visible: window.mode !== "recording"
                 options: ["Screen", "Region"]
                 currentIndex: Recorder.useRegion ? 1 : 0
-                onSelected: index => Recorder.useRegion = index === 1
+                onSelected: index => Settings.recorder.useRegion = index === 1
             }
 
             RowLayout {
@@ -211,7 +211,7 @@ PanelWindow {
 
                 Switch {
                     checked: Recorder.sound
-                    onToggled: Recorder.sound = !Recorder.sound
+                    onToggled: Settings.recorder.sound = !Recorder.sound
                 }
             }
 

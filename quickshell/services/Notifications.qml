@@ -7,8 +7,8 @@ import Quickshell.Services.Notifications
 Singleton {
     id: root
 
-    property int normalTimeout: 3000
-    property int urgentTimeout: 5000
+    readonly property int normalTimeout: Settings.notifications.normalTimeout
+    readonly property int urgentTimeout: Settings.notifications.urgentTimeout
 
     property bool paused: false
     property real remaining: 0
