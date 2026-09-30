@@ -64,6 +64,13 @@ hl.layer_rule({
     ignore_alpha = 0.1,
 })
 
+hl.layer_rule({
+    name         = "blur-quickshell-recorder",
+    match        = { namespace = "^quickshell:recorder$" },
+    blur         = true,
+    ignore_alpha = 0.1,
+})
+
 -- Layer rules (later: more Quickshell widgets)
 -- hl.layer_rule({
 --     name  = "no-anim-overlay",

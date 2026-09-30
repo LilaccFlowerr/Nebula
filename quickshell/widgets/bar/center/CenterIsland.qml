@@ -149,10 +149,10 @@ Island {
 
         implicitWidth: root.isExpanded ? root.cardWidth + Theme.spacing.lg * 2
                      : root.showNotification ? Theme.bar.notificationWidth
-                     : root.empty ? Theme.button.size
                      : Math.max(root.minPillWidth, (root.event === "volume" ? osd.implicitWidth
                         : root.batteryEvent ? battery.implicitWidth
                         : root.showMedia ? media.implicitWidth
+                        : root.empty ? emptyContent.implicitWidth
                         : content.implicitWidth) + Theme.spacing.lg * 2)
         implicitHeight: root.isExpanded ? card.implicitHeight + Theme.spacing.lg * 2
                       : root.showNotification ? notif.implicitHeight + Theme.spacing.md * 2
@@ -227,13 +227,26 @@ Island {
             }
         }
 
-        Text {
+        RowLayout {
+            id: emptyContent
             anchors.centerIn: parent
             visible: root.empty
-            text: SystemInfo.osLogo
-            font.family: Theme.font.logos
-            font.pixelSize: Theme.button.iconSize
-            color: Colors.textOnSurface
+            spacing: Theme.spacing.sm
+
+            Text {
+                text: SystemInfo.osLogo
+                font.family: Theme.font.logos
+                font.pixelSize: Theme.button.iconSize
+                color: Colors.textOnSurface
+            }
+
+            Text {
+                text: Time.date
+                color: Colors.textOnSurface
+                font.family: Theme.font.family
+                font.pixelSize: Theme.font.normal
+                font.weight: Font.DemiBold
+            }
         }
 
         RowLayout {

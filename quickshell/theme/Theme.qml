@@ -53,6 +53,22 @@ Singleton {
     }
     readonly property QuickSettings quickSettings: QuickSettings {}
 
+    component RecorderCorner: QtObject {
+        readonly property int windowSize: 480
+        readonly property int margin: 24
+        readonly property int hotWidth: 300
+        readonly property int hotHeight: 10
+        readonly property int openWidth: 280
+        readonly property int tabHeight: 40
+        readonly property int flare: 16
+        readonly property int closeDelay: 150
+        readonly property int savedDuration: 6000
+        readonly property int buttonSize: 72
+        readonly property int timerSize: 32
+        readonly property int rowHeight: 40
+    }
+    readonly property RecorderCorner recorder: RecorderCorner {}
+
     component Lyrics: QtObject {
         readonly property int lineHeight: 20
         readonly property int titleWidth: 120
