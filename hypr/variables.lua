@@ -7,7 +7,7 @@ return {
     fileExplorer = "nautilus",
     editor       = "code",
     claude       = "claude-desktop-unofficial",
-    launcher     = "fuzzel",
+    launcher     = "qs -c nebula ipc call launcher toggle",
 
     -- Keybinds
     mainMod      = "SUPER",

@@ -3,11 +3,34 @@ import Quickshell
 import Quickshell.Wayland
 import qs.services
 import qs.theme
+import "../../components/Curves.js" as Curves
 
 PanelWindow {
     id: window
 
-    visible: GlobalStates.launcherOpen
+    readonly property bool open: GlobalStates.launcherOpen
+    property real progress: 0
+    readonly property real pillT: Curves.phase(progress, 0.45, 0.45)
+
+    NumberAnimation {
+        id: openAnim
+        target: window
+        property: "progress"
+        to: 1
+        duration: Theme.anim.slow + Theme.anim.medium
+        easing.type: Easing.Linear
+    }
+
+    NumberAnimation {
+        id: closeAnim
+        target: window
+        property: "progress"
+        to: 0
+        duration: Theme.anim.slow
+        easing.type: Easing.Linear
+    }
+
+    visible: open || progress > 0
     screen: Quickshell.screens.find(s => s.name === GlobalStates.screen) ?? Quickshell.screens[0]
 
     anchors {
@@ -21,7 +44,7 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:launcher"
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     property int selected: 0
     readonly property var results: Launcher.results
@@ -42,15 +65,22 @@ PanelWindow {
         onTriggered: window.rushing = false
     }
 
-    onVisibleChanged: if (visible) {
-        input.text = "";
-        selected = 0;
-        input.forceActiveFocus();
+    onOpenChanged: {
+        if (open) {
+            input.text = "";
+            selected = 0;
+            input.forceActiveFocus();
+            closeAnim.stop();
+            openAnim.restart();
+        } else {
+            openAnim.stop();
+            closeAnim.restart();
+        }
     }
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(Colors.scrim, Theme.launcher.dim)
+        color: Qt.alpha(Colors.scrim, Theme.launcher.dim * window.progress)
 
         MouseArea {
             anchors.fill: parent
@@ -60,6 +90,7 @@ PanelWindow {
 
     LauncherRing {
         anchors.centerIn: parent
+        intro: window.progress
         selected: window.selected
         rushing: window.rushing
     }
@@ -67,8 +98,9 @@ PanelWindow {
     Rectangle {
         id: pill
         anchors.centerIn: parent
-        width: Theme.launcher.searchWidth
+        width: Theme.launcher.searchHeight + (Theme.launcher.searchWidth - Theme.launcher.searchHeight) * Math.max(0, Curves.back(window.pillT, Theme.anim.overshoot))
         height: Theme.launcher.searchHeight
+        scale: Math.min(1, window.pillT * 4)
         radius: Theme.radius.full
         color: Colors.surfaceContainer
 
@@ -80,6 +112,7 @@ PanelWindow {
             verticalAlignment: TextInput.AlignVCenter
             horizontalAlignment: TextInput.AlignHCenter
             clip: true
+            opacity: Math.max(0, window.pillT * 3 - 2)
             color: text === ">" ? "transparent" : Colors.textOnSurface
             selectionColor: Colors.primary
             font.family: Theme.font.family
@@ -101,7 +134,7 @@ PanelWindow {
             visible: input.text === "" || input.text === ">"
             text: input.text === ">" ? "> Commands" : "Search"
             color: Colors.textOnSurfaceVariant
-            opacity: 0.6
+            opacity: 0.6 * input.opacity
             font: input.font
         }
     }

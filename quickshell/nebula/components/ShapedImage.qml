@@ -35,7 +35,7 @@ Item {
                 const s = c * Math.sin(d), co = c * Math.cos(d);
                 if (Math.abs(s) < rho && co > 0) sum += Math.pow(co + Math.sqrt(rho * rho - s * s), 24);
             }
-            return Math.pow(sum, 1 / 24);
+            return sum > 0 ? Math.pow(sum, 1 / 24) : c;
         };
         for (let i = 0; i <= 360; i += 2) {
             const a = i * Math.PI / 180;
