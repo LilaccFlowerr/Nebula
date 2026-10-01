@@ -15,6 +15,8 @@ Singleton {
 
     property bool external: false
     readonly property bool recording: proc.running || external
+    property bool started: false
+    readonly property bool capturing: external || started
     property bool paused: false
     property int elapsed: 0
     property string file: ""
@@ -52,6 +54,7 @@ Singleton {
         args.push("-f", String(framerate));
         if (sound) args.push("-a", "default_output");
         elapsed = 0;
+        started = false;
         paused = false;
         proc.command = ["sh", "-c", `
             dir=$1; out=$2; mon=$3; shift 3
@@ -110,10 +113,14 @@ Singleton {
     Process {
         id: proc
         stderr: SplitParser {
-            onRead: line => console.warn("recorder:", line)
+            onRead: line => {
+                root.started = true;
+                console.warn("recorder:", line);
+            }
         }
         onExited: code => {
             root.paused = false;
+            root.started = false;
             if (code === 0) {
                 root.lastFile = root.file;
                 Quickshell.execDetached(["sh", "-c", "printf 'file://%s\\n' \"$1\" | wl-copy --type text/uri-list", "sh", root.file]);
@@ -162,7 +169,7 @@ Singleton {
     Timer {
         interval: 1000
         repeat: true
-        running: root.recording && !root.paused
+        running: root.recording && root.capturing && !root.paused
         onTriggered: root.elapsed++
     }
 

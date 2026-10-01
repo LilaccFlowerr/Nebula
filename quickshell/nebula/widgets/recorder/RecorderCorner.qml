@@ -133,7 +133,7 @@ PanelWindow {
                 color: Colors.errorColor
 
                 SequentialAnimation on opacity {
-                    running: Recorder.recording && !Recorder.paused
+                    running: Recorder.recording && Recorder.capturing && !Recorder.paused
                     loops: Animation.Infinite
                     NumberAnimation { from: 1; to: 0.3; duration: 700; easing.type: Easing.InOutSine }
                     NumberAnimation { from: 0.3; to: 1; duration: 700; easing.type: Easing.InOutSine }
@@ -164,7 +164,7 @@ PanelWindow {
 
                 Text {
                     Layout.fillWidth: true
-                    text: window.mode === "recording" ? (Recorder.paused ? "Paused" : "Recording")
+                    text: window.mode === "recording" ? (Recorder.paused ? "Paused" : Recorder.capturing ? "Recording" : "Starting")
                         : window.mode === "saved" ? "Recording saved"
                         : "Screen recording"
                     color: Colors.textOnSurface
