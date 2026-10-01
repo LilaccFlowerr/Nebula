@@ -8,7 +8,7 @@ hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(vars.terminal))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(vars.editor))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(vars.fileExplorer))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(vars.claude))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(vars.launcher))
+hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd(vars.launcher), { release = true })
 
 -- Windows
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())

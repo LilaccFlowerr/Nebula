@@ -53,9 +53,14 @@ Singleton {
         if (sound) args.push("-a", "default_output");
         elapsed = 0;
         paused = false;
-        proc.command = ["sh", "-c",
-            "dir=$1; out=$2; shift 2; mkdir -p \"$dir\" && flatpak run --command=gpu-screen-recorder com.dec05eba.gpu_screen_recorder \"$@\" -o \"$out\"; test -s \"$out\"",
-            "sh", directory, file, ...args];
+        proc.command = ["sh", "-c", `
+            dir=$1; out=$2; mon=$3; shift 3
+            drv=$(basename "$(readlink -f /sys/class/drm/card*-"$mon"/device/device/driver)" 2>/dev/null)
+            env=""
+            [ -n "$drv" ] && [ "$drv" != nvidia ] && env="--env=__EGL_VENDOR_LIBRARY_FILENAMES=/usr/lib/x86_64-linux-gnu/GL/default/share/glvnd/egl_vendor.d/50_mesa.json"
+            mkdir -p "$dir" && flatpak run $env --command=gpu-screen-recorder com.dec05eba.gpu_screen_recorder "$@" -o "$out"
+            test -s "$out"`,
+            "sh", directory, file, monitor, ...args];
         proc.running = true;
     }
 

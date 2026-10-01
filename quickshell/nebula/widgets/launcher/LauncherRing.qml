@@ -1,5 +1,6 @@
 import QtQuick
 import qs.components
+import "../../components/Curves.js" as Curves
 import qs.services
 import qs.theme
 
@@ -8,6 +9,8 @@ Item {
 
     property int selected: 0
     property bool rushing: false
+    property real intro: 1
+    readonly property real cloverT: Curves.phase(intro, 0, 0.6)
     property real shownMorph: Launcher.commandMode ? 1 : 0
 
     Behavior on shownMorph {
@@ -22,11 +25,12 @@ Item {
 
     ShapedImage {
         anchors.fill: parent
+        scale: Math.max(0, Curves.back(root.cloverT, Theme.anim.overshoot))
         bumps: Launcher.appSlots
         bumpsTo: Launcher.commandSlots
         morph: root.shownMorph
         lobes: Theme.launcher.lobes
-        rotation: -90 + root.shownMorph * 360 / Launcher.commandSlots
+        rotation: -90 + root.shownMorph * 360 / Launcher.commandSlots - (1 - Curves.decel(root.cloverT)) * 120
         placeholderColor: Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
 
         Behavior on placeholderColor {
@@ -48,6 +52,7 @@ Item {
         radius: width / 2
         color: Qt.alpha(Colors.textOnPrimaryContainer, 0.25)
         visible: root.results.length > 0
+        scale: Curves.back(Curves.phase(root.intro, 0.3, 0.35), Theme.anim.overshoot)
     }
 
     Repeater {
@@ -61,6 +66,14 @@ Item {
             rushing: root.rushing
             entry: root.results[index] ?? null
             shape: root.shapes[index]
+            readonly property real appear: Math.max(0, Curves.back(Curves.phase(root.intro, 0.3 + position * 0.04, 0.35), Theme.anim.overshoot))
+            opacity: Math.min(1, appear * 2)
+            transform: Scale {
+                origin.x: Theme.launcher.labelWidth / 2
+                origin.y: Theme.launcher.itemSize / 2
+                xScale: appear
+                yScale: appear
+            }
             visible: index < root.slots
         }
     }
