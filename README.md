@@ -17,11 +17,20 @@ Each folder gets symlinked into `~/.config`.
 On Fedora:
 
 ```bash
-sudo dnf install hyprland quickshell matugen fuzzel mako swaybg cliphist mate-polkit playerctl brightnessctl rsms-inter-fonts
+sudo dnf install hyprland hypridle hyprlock quickshell matugen swaybg fuzzel cliphist wl-clipboard \
+    grim slurp mate-polkit playerctl brightnessctl cava zenity libnotify ffmpeg-free \
+    papirus-icon-theme rsms-inter-fonts
+```
+
+The screen recorder uses gpu-screen-recorder from Flathub:
+
+```bash
+flatpak install flathub com.dec05eba.gpu_screen_recorder
 ```
 
 Ghostty comes from the `scottames/ghostty` COPR. For icons I use Material Symbols Rounded
-and Symbols Nerd Font (both from GitHub, dropped in `~/.local/share/fonts`).
+and Symbols Nerd Font (both from GitHub, dropped in `~/.local/share/fonts`). App icons come
+from Papirus, the default GNOME ones show up as black squares in Quickshell.
 
 ```bash
 git clone git@github.com:LilaccFlowerr/Nebula.git ~/setup/dotfiles
@@ -33,12 +42,14 @@ matugen image path/to/wallpaper.jpg
 If something already exists in `~/.config` (Hyprland makes its own config on first
 start), move it out of the way first. Then log out and pick Hyprland on the login screen.
 
+Tap Super to open the launcher.
+
 ## Todo
 
 - now playing widget on the desktop
-- music + visualizer in the middle of the bar
-- quick settings, power menu, calendar
-- my own notifications, launcher and lockscreen instead of mako, fuzzel and hyprlock
+- settings window, calendar and tray popups
+- my own lockscreen instead of hyprlock
+- wallpaper picker
 
 ## Inspired by
 
