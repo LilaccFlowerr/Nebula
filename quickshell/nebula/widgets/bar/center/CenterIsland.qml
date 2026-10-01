@@ -22,8 +22,8 @@ Island {
     readonly property int waveWidth: 200
     readonly property int cardWidth: 440
 
-    property bool expanded: false
-    readonly property bool isExpanded: expanded && Media.active
+    readonly property string screenName: QsWindow.window?.screen?.name ?? ""
+    readonly property bool isExpanded: GlobalStates.mediaExpanded && GlobalStates.isOn(screenName) && Media.active
 
     implicitHeight: pill.height + (Theme.bar.height - Theme.button.size)
 
@@ -53,7 +53,7 @@ Island {
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
         active: root.isExpanded
-        onCleared: root.expanded = false
+        onCleared: GlobalStates.mediaExpanded = false
     }
 
     Timer {
@@ -174,7 +174,7 @@ Island {
             cursorShape: root.showMedia || root.showNotification ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: {
                 if (root.showNotification) Notifications.activate();
-                else if (root.showMedia) root.expanded = true;
+                else if (root.showMedia && !root.isExpanded) GlobalStates.toggleMedia(root.screenName);
             }
         }
 

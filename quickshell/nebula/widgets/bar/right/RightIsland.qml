@@ -11,8 +11,9 @@ Island {
     id: root
     roundLeft: true
 
-    property bool powerOpen: false
-    property bool settingsOpen: false
+    readonly property string screenName: QsWindow.window?.screen?.name ?? ""
+    readonly property bool powerOpen: GlobalStates.powerMenuOpen && GlobalStates.isOn(screenName)
+    readonly property bool settingsOpen: GlobalStates.quickSettingsOpen && GlobalStates.isOn(screenName)
     property bool armed: false
 
     Timer {
@@ -27,8 +28,8 @@ Island {
         windows: [root.QsWindow.window]
         active: root.powerOpen || root.settingsOpen
         onCleared: {
-            root.powerOpen = false;
-            root.settingsOpen = false;
+            GlobalStates.powerMenuOpen = false;
+            GlobalStates.quickSettingsOpen = false;
         }
     }
 
@@ -46,7 +47,7 @@ Island {
             anchors.top: parent.top
             anchors.right: parent.right
             open: root.powerOpen
-            onRequestClose: root.powerOpen = false
+            onRequestClose: GlobalStates.powerMenuOpen = false
         }
     }
     Neck {
@@ -72,7 +73,7 @@ Island {
             anchors.top: parent.top
             anchors.right: parent.right
             open: root.settingsOpen
-            onRequestClose: root.settingsOpen = false
+            onRequestClose: GlobalStates.quickSettingsOpen = false
         }
     }
 
@@ -112,7 +113,7 @@ Island {
         }
 
         IconButton { icon: "keyboard_arrow_up";   onClicked: console.info("tray") }
-        IconButton { id: gearButton; icon: "settings"; onClicked: { root.powerOpen = false; root.settingsOpen = !root.settingsOpen; } }
+        IconButton { id: gearButton; icon: "settings"; onClicked: GlobalStates.toggleQuickSettings(root.screenName) }
         Item {
             implicitWidth: Theme.batteryRing.size
             implicitHeight: Theme.batteryRing.size
@@ -128,7 +129,7 @@ Island {
             IconButton {
                 anchors.centerIn: parent
                 icon: "power_settings_new"
-                onClicked: { root.settingsOpen = false; root.powerOpen = !root.powerOpen; }
+                onClicked: GlobalStates.togglePowerMenu(root.screenName)
             }
         }
     }

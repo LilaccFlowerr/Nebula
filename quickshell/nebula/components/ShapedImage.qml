@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Effects
+import "Shapes.js" as Shapes
 
 Item {
     id: root
@@ -8,6 +9,8 @@ Item {
     property url source
     property int bumps: 9
     property real depth: 0.07
+    property real lobes: 0
+    property string shape: ""
     property color placeholderColor: "transparent"
 
     readonly property bool hasImage: image.status === Image.Ready
@@ -16,12 +19,24 @@ Item {
     implicitHeight: 56
 
     readonly property var points: {
+        if (shape !== "")
+            return Shapes.points(shape, width, height).map(p => Qt.point(p[0], p[1]));
         const pts = [];
         const cx = width / 2, cy = height / 2;
         const r = Math.min(width, height) / 2 / (1 + depth);
+        const c = Math.min(width, height) / 2 / (1 + lobes), rho = c * lobes;
         for (let i = 0; i <= 360; i += 2) {
             const a = i * Math.PI / 180;
-            const rr = r * (1 + depth * Math.cos(bumps * a));
+            let rr = r * (1 + depth * Math.cos(bumps * a));
+            if (lobes > 0) {
+                let sum = 0;
+                for (let k = 0; k < bumps; k++) {
+                    const d = a - k * 2 * Math.PI / bumps;
+                    const s = c * Math.sin(d), co = c * Math.cos(d);
+                    if (Math.abs(s) < rho && co > 0) sum += Math.pow(co + Math.sqrt(rho * rho - s * s), 24);
+                }
+                rr = Math.pow(sum, 1 / 24);
+            }
             pts.push(Qt.point(cx + rr * Math.cos(a), cy + rr * Math.sin(a)));
         }
         return pts;

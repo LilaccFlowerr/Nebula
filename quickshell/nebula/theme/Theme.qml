@@ -69,6 +69,21 @@ Singleton {
     }
     readonly property RecorderCorner recorder: RecorderCorner {}
 
+    component Launcher: QtObject {
+        readonly property int size: 380
+        readonly property int ringRadius: 136
+        readonly property int itemSize: 50
+        readonly property int selectionSize: 55
+        readonly property int labelGap: 4
+        readonly property int labelWidth: 80
+        readonly property int iconSize: 26
+        readonly property real lobes: 0.5
+        readonly property int searchWidth: 150
+        readonly property int searchHeight: 40
+        readonly property real dim: 0.4
+    }
+    readonly property Launcher launcher: Launcher {}
+
     component Lyrics: QtObject {
         readonly property int lineHeight: 20
         readonly property int titleWidth: 120
