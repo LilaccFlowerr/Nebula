@@ -27,9 +27,19 @@ PanelWindow {
     readonly property var results: Launcher.results
     onResultsChanged: selected = 0
 
-    function step(delta) {
+    property bool rushing: false
+
+    function step(delta, repeat) {
+        rushing = repeat;
+        if (repeat) rushTimer.restart();
         if (results.length > 0)
             selected = (selected + delta + results.length) % results.length;
+    }
+
+    Timer {
+        id: rushTimer
+        interval: Theme.anim.medium
+        onTriggered: window.rushing = false
     }
 
     onVisibleChanged: if (visible) {
@@ -51,6 +61,7 @@ PanelWindow {
     LauncherRing {
         anchors.centerIn: parent
         selected: window.selected
+        rushing: window.rushing
     }
 
     Rectangle {
@@ -77,8 +88,8 @@ PanelWindow {
 
             Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) Launcher.close();
-                else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) window.step(-1);
-                else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down || event.key === Qt.Key_Tab) window.step(1);
+                else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) window.step(-1, event.isAutoRepeat);
+                else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down || event.key === Qt.Key_Tab) window.step(1, event.isAutoRepeat);
                 else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) Launcher.activate(window.results[window.selected]);
                 else return;
                 event.accepted = true;

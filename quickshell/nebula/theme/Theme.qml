@@ -75,6 +75,7 @@ Singleton {
         readonly property int itemSize: 50
         readonly property int selectionSize: 55
         readonly property int labelGap: 4
+        readonly property int stagger: 25
         readonly property int labelWidth: 80
         readonly property int iconSize: 26
         readonly property real lobes: 0.5
