@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 
 Singleton {
     id: root
@@ -99,6 +100,12 @@ Singleton {
             id: adapter
             property var recent: []
         }
+    }
+
+    Connections {
+        target: Hyprland
+        function onFocusedWorkspaceChanged() { root.close(); }
+        function onFocusedMonitorChanged() { root.close(); }
     }
 
     IpcHandler {

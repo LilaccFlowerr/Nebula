@@ -44,7 +44,7 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:launcher"
-    WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
     property int selected: 0
     readonly property var results: Launcher.results
