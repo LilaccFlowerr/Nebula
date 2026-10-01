@@ -14,7 +14,7 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("hypridle")
 
     -- Quickshell: the bar, notifications and (later) all other widgets
-    hl.exec_cmd("qs")
+    hl.exec_cmd("qs -c nebula")
 
     -- Apps on a specific workspace at login
     -- hl.dispatch(hl.dsp.exec_cmd("ghostty", { workspace = 1 }))

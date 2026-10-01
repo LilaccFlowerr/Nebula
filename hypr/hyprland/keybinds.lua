@@ -21,8 +21,8 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle only
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
 
 -- Screen recording (Quickshell recorder): full screen / region
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("qs ipc call recorder toggle"))
-hl.bind(mainMod .. " + SHIFT + ALT + R", hl.dsp.exec_cmd("qs ipc call recorder region"))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder toggle"))
+hl.bind(mainMod .. " + SHIFT + ALT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder region"))
 
 -- Screenshot of a region: saved to ~/Pictures/Screenshots and copied to the clipboard
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd([[
