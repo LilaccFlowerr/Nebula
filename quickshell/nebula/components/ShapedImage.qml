@@ -10,6 +10,8 @@ Item {
     property int bumps: 9
     property real depth: 0.07
     property real lobes: 0
+    property int bumpsTo: bumps
+    property real morph: 0
     property string shape: ""
     property color placeholderColor: "transparent"
 
@@ -25,18 +27,20 @@ Item {
         const cx = width / 2, cy = height / 2;
         const r = Math.min(width, height) / 2 / (1 + depth);
         const c = Math.min(width, height) / 2 / (1 + lobes), rho = c * lobes;
+        const radius = (a, n) => {
+            if (lobes <= 0) return r * (1 + depth * Math.cos(n * a));
+            let sum = 0;
+            for (let k = 0; k < n; k++) {
+                const d = a - k * 2 * Math.PI / n;
+                const s = c * Math.sin(d), co = c * Math.cos(d);
+                if (Math.abs(s) < rho && co > 0) sum += Math.pow(co + Math.sqrt(rho * rho - s * s), 24);
+            }
+            return Math.pow(sum, 1 / 24);
+        };
         for (let i = 0; i <= 360; i += 2) {
             const a = i * Math.PI / 180;
-            let rr = r * (1 + depth * Math.cos(bumps * a));
-            if (lobes > 0) {
-                let sum = 0;
-                for (let k = 0; k < bumps; k++) {
-                    const d = a - k * 2 * Math.PI / bumps;
-                    const s = c * Math.sin(d), co = c * Math.cos(d);
-                    if (Math.abs(s) < rho && co > 0) sum += Math.pow(co + Math.sqrt(rho * rho - s * s), 24);
-                }
-                rr = Math.pow(sum, 1 / 24);
-            }
+            const from = radius(a, bumps);
+            const rr = morph === 0 || bumpsTo === bumps ? from : from + (radius(a, bumpsTo) - from) * morph;
             pts.push(Qt.point(cx + rr * Math.cos(a), cy + rr * Math.sin(a)));
         }
         return pts;
