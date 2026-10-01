@@ -5,7 +5,7 @@ This is my hyprland setup, currently working on it on fedora :3
 ## What's in here
 
 - `hypr/` Hyprland config, in Lua. `hyprland.lua` loads everything in `hypr/hyprland/`
-- `quickshell/` the bar and (later) widgets, popups, lockscreen
+- `quickshell/nebula/` the bar and (later) widgets, popups, lockscreen
 - `matugen/` templates that turn the wallpaper into colors for Hyprland, Ghostty, VS Code and Quickshell
 - `ghostty/` terminal config
 - `design/` Figma stuff, not installed anywhere
