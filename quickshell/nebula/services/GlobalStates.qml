@@ -12,6 +12,7 @@ Singleton {
     property bool quickSettingsOpen: false
     property bool mediaExpanded: false
     property string screen: ""
+    property bool capturing: false
 
     function isOn(screenName) {
         return screen === screenName;

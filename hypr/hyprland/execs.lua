@@ -9,8 +9,6 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
 
-    hl.exec_cmd("swaybg -i ~/Pictures/zelda.jpeg -m fill")
-
     hl.exec_cmd("hypridle")
 
     -- Quickshell: the bar, notifications and (later) all other widgets

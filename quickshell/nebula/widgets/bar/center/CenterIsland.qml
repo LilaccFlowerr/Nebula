@@ -52,7 +52,7 @@ Island {
 
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
-        active: root.isExpanded
+        active: root.isExpanded && !GlobalStates.capturing
         onCleared: GlobalStates.mediaExpanded = false
     }
 

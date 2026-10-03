@@ -48,7 +48,12 @@ PanelWindow {
 
     property int selected: 0
     readonly property var results: Launcher.results
-    onResultsChanged: selected = 0
+    onResultsChanged: selected = Launcher.wallpaperMode ? Math.max(0, results.findIndex(w => w.path === Wallpaper.current)) : 0
+
+    Connections {
+        target: Launcher
+        function onClearRequested() { input.text = ""; }
+    }
 
     property bool rushing: false
 
@@ -89,6 +94,7 @@ PanelWindow {
     }
 
     LauncherRing {
+        id: ring
         anchors.centerIn: parent
         intro: window.progress
         selected: window.selected
@@ -98,6 +104,7 @@ PanelWindow {
     Rectangle {
         id: pill
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: ring.shownWall * Theme.launcher.wallpaperPillOffset
         width: Theme.launcher.searchHeight + (Theme.launcher.searchWidth - Theme.launcher.searchHeight) * Math.max(0, Curves.back(window.pillT, Theme.anim.overshoot))
         height: Theme.launcher.searchHeight
         scale: Math.min(1, window.pillT * 4)
@@ -121,6 +128,7 @@ PanelWindow {
 
             Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) Launcher.close();
+                else if (event.key === Qt.Key_Backspace && input.text === "" && Launcher.wallpaperMode) Launcher.wallpaperMode = false;
                 else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) window.step(-1, event.isAutoRepeat);
                 else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down || event.key === Qt.Key_Tab) window.step(1, event.isAutoRepeat);
                 else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) Launcher.activate(window.results[window.selected]);
@@ -132,7 +140,7 @@ PanelWindow {
         Text {
             anchors.centerIn: parent
             visible: input.text === "" || input.text === ">"
-            text: input.text === ">" ? "> Commands" : "Search"
+            text: Launcher.wallpaperMode ? "Wallpapers" : input.text === ">" ? "> Commands" : "Search"
             color: Colors.textOnSurfaceVariant
             opacity: 0.6 * input.opacity
             font: input.font

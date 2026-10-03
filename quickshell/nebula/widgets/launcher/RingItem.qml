@@ -39,6 +39,7 @@ Item {
 
     readonly property bool empty: shownEntry === null
     readonly property bool isCommand: shownEntry?.run !== undefined
+    readonly property bool isWallpaper: shownEntry?.path !== undefined
     readonly property real radians: (angle - 90) * Math.PI / 180
 
     width: Theme.launcher.labelWidth
@@ -52,6 +53,8 @@ Item {
         width: Theme.launcher.itemSize
         height: Theme.launcher.itemSize
         shape: root.shape
+        source: root.isWallpaper ? Wallpaper.url(root.shownEntry.path) : ""
+        sourceSize: Qt.size(Theme.launcher.itemSize * 2, Theme.launcher.itemSize * 2)
         placeholderColor: Colors.surfaceContainerHigh
         opacity: root.empty ? 0.25 : 1
     }
@@ -59,7 +62,7 @@ Item {
     IconImage {
         anchors.centerIn: shape
         implicitSize: Theme.launcher.iconSize
-        source: root.shownEntry && !root.isCommand ? Quickshell.iconPath(root.shownEntry.icon, true) : ""
+        source: root.shownEntry && !root.isCommand && !root.isWallpaper ? Quickshell.iconPath(root.shownEntry.icon, true) : ""
         visible: source !== ""
     }
 

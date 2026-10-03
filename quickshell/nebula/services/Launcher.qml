@@ -14,7 +14,8 @@ Singleton {
     readonly property int recentLimit: 20
 
     property string query: ""
-    readonly property bool commandMode: query.startsWith(">")
+    property bool wallpaperMode: false
+    readonly property bool commandMode: !wallpaperMode && query.startsWith(">")
     readonly property string search: (commandMode ? query.slice(1) : query).trim().toLowerCase()
     readonly property int slots: commandMode ? commandSlots : appSlots
 
@@ -29,10 +30,22 @@ Singleton {
         { name: "Restart", icon: "restart_alt", run: () => Power.reboot() },
         { name: "Shutdown", icon: "power_settings_new", run: () => Power.shutdown() },
         { name: "Log out", icon: "logout", run: () => Power.logout() },
-        { name: "Record", icon: "screen_record", run: () => Recorder.record() }
+        { name: "Record", icon: "screen_record", run: () => Recorder.record() },
+        { name: "Wallpaper", icon: "wallpaper", keepOpen: true, run: () => root.enterWallpapers() }
     ]
 
+    readonly property var wallpapers: Wallpaper.files.map(path => ({ name: Wallpaper.name(path), path: path }))
+
+    signal clearRequested()
+
+    function enterWallpapers() {
+        wallpaperMode = true;
+        clearRequested();
+    }
+
     readonly property var results: {
+        if (wallpaperMode)
+            return rank(wallpapers, w => [w.name]).slice(0, appSlots);
         if (commandMode)
             return rank(commands, c => [c.name]).slice(0, slots);
         if (search === "") {
@@ -62,6 +75,7 @@ Singleton {
 
     function open() {
         query = "";
+        wallpaperMode = false;
         if (!GlobalStates.launcherOpen) GlobalStates.toggleLauncher();
     }
 
@@ -75,11 +89,17 @@ Singleton {
 
     function activate(item) {
         if (!item) return;
-        close();
+        if (wallpaperMode) {
+            close();
+            Wallpaper.set(item.path);
+            return;
+        }
         if (commandMode) {
+            if (!item.keepOpen) close();
             item.run();
             return;
         }
+        close();
         item.execute();
         adapter.recent = [item.id, ...adapter.recent.filter(id => id !== item.id)].slice(0, recentLimit);
     }

@@ -34,8 +34,8 @@ output_path = "~/.cache/wal/colors"
 input_path  = "~/.config/matugen/templates/pywal-colors.json"
 output_path = "~/.cache/wal/colors.json"
 
-# Quickshell colors (singleton): import qs.theme → Colors.primary
-# Quickshell hot-reloads when this file changes, so no post_hook needed
+# Quickshell colors: written as JSON outside the config dir, theme/Colors.qml reads it live
+# (no Quickshell reload, so the shell keeps its state when the wallpaper changes)
 [templates.quickshell]
-input_path  = "~/.config/matugen/templates/quickshell-colors.qml"
-output_path = "~/.config/quickshell/nebula/theme/Colors.qml"
+input_path  = "~/.config/matugen/templates/quickshell-colors.json"
+output_path = "~/.local/state/nebula/colors.json"
