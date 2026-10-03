@@ -11,6 +11,7 @@ Singleton {
     readonly property alias clock: adapter.clock
     readonly property alias notifications: adapter.notifications
     readonly property alias recorder: adapter.recorder
+    readonly property alias wallpaper: adapter.wallpaper
 
     Process {
         running: true
@@ -45,6 +46,11 @@ Singleton {
                 property bool sound: true
                 property bool useRegion: false
                 property int framerate: 60
+            }
+
+            property JsonObject wallpaper: JsonObject {
+                property string path: ""
+                property string directory: ""
             }
         }
     }

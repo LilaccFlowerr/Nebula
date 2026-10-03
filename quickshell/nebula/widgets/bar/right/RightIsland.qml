@@ -26,7 +26,7 @@ Island {
 
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
-        active: root.powerOpen || root.settingsOpen
+        active: (root.powerOpen || root.settingsOpen) && !GlobalStates.capturing
         onCleared: {
             GlobalStates.powerMenuOpen = false;
             GlobalStates.quickSettingsOpen = false;

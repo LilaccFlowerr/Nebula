@@ -78,7 +78,10 @@ function radius(name, a) {
     return lo;
 }
 
-function points(name, width, height) {
+const cache = {};
+
+function unit(name) {
+    if (cache[name]) return cache[name];
     const raw = [];
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (let i = 0; i <= 360; i += 2) {
@@ -89,8 +92,14 @@ function points(name, width, height) {
         minX = Math.min(minX, x); maxX = Math.max(maxX, x);
         minY = Math.min(minY, y); maxY = Math.max(maxY, y);
     }
-    const s = Math.min(width / (maxX - minX), height / (maxY - minY));
-    const ox = (width - (maxX - minX) * s) / 2 - minX * s;
-    const oy = (height - (maxY - minY) * s) / 2 - minY * s;
-    return raw.map(p => [ox + p[0] * s, oy + p[1] * s]);
+    return cache[name] = { raw, minX, minY, maxX, maxY };
+}
+
+function points(name, width, height, stretch) {
+    const u = unit(name);
+    let sx = width / (u.maxX - u.minX), sy = height / (u.maxY - u.minY);
+    if (!stretch) sx = sy = Math.min(sx, sy);
+    const ox = (width - (u.maxX - u.minX) * sx) / 2 - u.minX * sx;
+    const oy = (height - (u.maxY - u.minY) * sy) / 2 - u.minY * sy;
+    return u.raw.map(p => [ox + p[0] * sx, oy + p[1] * sy]);
 }

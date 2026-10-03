@@ -16,6 +16,11 @@ Item {
     Behavior on shownMorph {
         NumberAnimation { duration: Theme.anim.island; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
     }
+    property real shownWall: Launcher.wallpaperMode ? 1 : 0
+
+    Behavior on shownWall {
+        NumberAnimation { duration: Theme.anim.island; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+    }
     readonly property var results: Launcher.results
     readonly property int slots: Launcher.slots
     readonly property var shapes: ["cookie4", "clover4", "cookie6", "circle", "cookie9", "clover8", "cookie12", "cookie7"]
@@ -31,7 +36,7 @@ Item {
         morph: root.shownMorph
         lobes: Theme.launcher.lobes
         rotation: -90 + root.shownMorph * 360 / Launcher.commandSlots - (1 - Curves.decel(root.cloverT)) * 120
-        placeholderColor: Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
+        placeholderColor: Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
 
         Behavior on placeholderColor {
             ColorAnimation { duration: Theme.anim.island; easing.type: Easing.OutCubic }
@@ -76,5 +81,19 @@ Item {
             }
             visible: index < root.slots
         }
+    }
+
+    ShapedImage {
+        readonly property var wallpaper: Launcher.wallpaperMode ? root.results[root.selected] ?? null : null
+        anchors.centerIn: parent
+        width: Theme.launcher.previewSize
+        height: Theme.launcher.previewSize
+        shape: "cookie9"
+        source: wallpaper ? Wallpaper.url(wallpaper.path) : ""
+        sourceSize: Qt.size(width * 2, height * 2)
+        placeholderColor: Colors.surfaceContainer
+        scale: Math.max(0, root.shownWall)
+        rotation: (1 - root.shownWall) * -90
+        visible: scale > 0.01
     }
 }

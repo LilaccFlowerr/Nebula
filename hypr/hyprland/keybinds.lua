@@ -24,13 +24,10 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder toggle"))
 hl.bind(mainMod .. " + SHIFT + ALT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder region"))
 
--- Screenshot of a region: saved to ~/Pictures/Screenshots and copied to the clipboard
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd([[
-    region=$(slurp) || exit  # Esc cancels, no empty file
-    dir=~/Pictures/Screenshots; mkdir -p "$dir"
-    file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
-    grim -g "$region" "$file" && wl-copy < "$file" && notify-send -i "$file" "Screenshot" "Saved to $file"
-]]))
+-- Screenshots (Quickshell screenshot service): saved to ~/Pictures/Screenshots and copied to the
+-- clipboard. Open popups stay open while selecting, so they end up in the shot.
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs -c nebula ipc call screenshot region"))
+hl.bind("Print", hl.dsp.exec_cmd("qs -c nebula ipc call screenshot screen"))
 
 -- Clipboard history: pick an entry with fuzzel
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"))
