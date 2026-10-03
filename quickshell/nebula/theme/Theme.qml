@@ -69,6 +69,17 @@ Singleton {
     }
     readonly property RecorderCorner recorder: RecorderCorner {}
 
+    component NowPlaying: QtObject {
+        readonly property int margin: 32
+        readonly property int cookieSize: 280
+        readonly property int artSize: 88
+        readonly property int textWidth: 170
+        readonly property int progressWidth: 140
+        readonly property int spinDuration: 30000
+        readonly property int coastDuration: 1200
+    }
+    readonly property NowPlaying nowPlaying: NowPlaying {}
+
     component Launcher: QtObject {
         readonly property int size: 380
         readonly property int ringRadius: 136

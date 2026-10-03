@@ -71,6 +71,13 @@ hl.layer_rule({
     ignore_alpha = 0.1,
 })
 
+hl.layer_rule({
+    name         = "blur-quickshell-nowplaying",
+    match        = { namespace = "^quickshell:nowplaying$" },
+    blur         = true,
+    ignore_alpha = 0.1,
+})
+
 -- Quickshell launcher: no slide-in (the pill animation happens in QML), blur behind it
 hl.layer_rule({
     name    = "quickshell-launcher",

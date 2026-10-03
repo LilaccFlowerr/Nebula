@@ -12,6 +12,7 @@ Singleton {
     readonly property alias notifications: adapter.notifications
     readonly property alias recorder: adapter.recorder
     readonly property alias wallpaper: adapter.wallpaper
+    readonly property alias nowPlaying: adapter.nowPlaying
 
     Process {
         running: true
@@ -51,6 +52,11 @@ Singleton {
             property JsonObject wallpaper: JsonObject {
                 property string path: ""
                 property string directory: ""
+            }
+
+            property JsonObject nowPlaying: JsonObject {
+                property real x: -1
+                property real y: -1
             }
         }
     }
