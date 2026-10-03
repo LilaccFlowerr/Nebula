@@ -37,16 +37,19 @@ Controls.Slider {
         Rectangle {
             width: Math.max(0, root.handleX - root.handleGap)
             height: parent.height
-            radius: height / 2
+            radius: Math.min(width, height) / 2
             color: Colors.primary
+            visible: width > 0
         }
 
         Rectangle {
+            id: inactive
             x: root.handleX + root.handleWidth + root.handleGap
             width: Math.max(0, parent.width - x)
             height: parent.height
-            radius: height / 2
+            radius: Math.min(width, height) / 2
             color: Colors.secondaryContainer
+            visible: width > 0
         }
 
         Rectangle {
@@ -56,6 +59,7 @@ Controls.Slider {
             anchors.verticalCenter: parent.verticalCenter
             x: parent.width - width - (root.trackHeight - height) / 2
             color: Colors.primary
+            visible: x - inactive.x >= (root.trackHeight - height) / 2
         }
     }
 

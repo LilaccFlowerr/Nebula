@@ -31,6 +31,7 @@ Island {
     property bool armed: false
 
     readonly property bool showEvent: event !== ""
+    readonly property bool levelEvent: event === "volume" || event === "brightness"
     readonly property bool batteryEvent: event === "charging" || event === "unplugged" || event === "low"
 
     readonly property bool showMedia: Media.active && (!showEvent || isExpanded)
@@ -75,6 +76,11 @@ Island {
     }
 
     Connections {
+        target: Brightness
+        function onCurrentChanged() { root.popEvent("brightness"); }
+    }
+
+    Connections {
         target: Notifications
         function onCurrentChanged() {
             if (Notifications.current) {
@@ -109,7 +115,7 @@ Island {
 
         implicitWidth: root.isExpanded ? root.cardWidth + Theme.spacing.lg * 2
                      : root.showNotification ? Theme.bar.notificationWidth
-                     : Math.max(root.minPillWidth, (root.event === "volume" ? osd.implicitWidth
+                     : Math.max(root.minPillWidth, (root.levelEvent ? osd.implicitWidth
                         : root.batteryEvent ? battery.implicitWidth
                         : root.showMedia ? media.implicitWidth
                         : root.empty ? emptyContent.implicitWidth
@@ -204,10 +210,11 @@ Island {
             }
         }
 
-        VolumeOsd {
+        LevelOsd {
             id: osd
             anchors.centerIn: parent
-            visible: root.event === "volume"
+            kind: root.event === "brightness" ? "brightness" : "volume"
+            visible: root.levelEvent
         }
 
         BatteryEvent {
@@ -267,7 +274,7 @@ Island {
                 }
             }
 
-            readonly property Item eventSlot: root.lastEvent === "volume" ? osd.artSlot
+            readonly property Item eventSlot: root.lastEvent === "volume" || root.lastEvent === "brightness" ? osd.artSlot
                                             : root.lastEvent === "notification" ? notif.artSlot
                                             : battery.artSlot
             readonly property real eventX: root.lastEvent === "notification" ? notif.x + notif.artX : eventSlot.parent.x + eventSlot.x
