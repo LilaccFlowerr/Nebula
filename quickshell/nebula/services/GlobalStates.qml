@@ -14,6 +14,8 @@ Singleton {
     property bool mediaExpanded: false
     property bool settingsOpen: false
     property bool settingsFromQuick: false
+    property string settingsPage: ""
+    property string settingsTab: ""
     property string screen: ""
     property bool capturing: false
 
@@ -76,6 +78,12 @@ Singleton {
         }
     }
 
+    function openSettings(page, tab = "", fromQuick = false) {
+        settingsPage = page;
+        settingsTab = tab;
+        if (!settingsOpen) toggleSettings(focusedScreen(), fromQuick);
+    }
+
     function closeAll() {
         launcherOpen = false;
         powerMenuOpen = false;
@@ -94,5 +102,6 @@ Singleton {
         target: "settings"
 
         function toggle(): void { root.toggleSettings(); }
+        function open(page: string, tab: string): void { root.openSettings(page, tab); }
     }
 }

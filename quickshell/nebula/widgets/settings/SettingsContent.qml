@@ -23,12 +23,13 @@ Item {
     readonly property var current: shownSub !== "" ? subpages[shownSub] : pages[shownPage]
 
     readonly property var pages: [
-        { title: "Appearance", subtitle: "Wallpaper, colors and light or dark", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml" },
-        { title: "Desktop", subtitle: "Widgets that live on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml" },
-        { title: "Bar", subtitle: "Customize each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml" },
-        { title: "Notifications", subtitle: "Popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml" },
-        { title: "Recorder", subtitle: "Screen recording in the bottom-right corner", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml" },
-        { title: "About", subtitle: "This machine and this shell", icon: "info", shape: MaterialShape.Clover4Leaf, source: "AboutPage.qml" }
+        { key: "appearance", title: "Appearance", subtitle: "Wallpaper, colors and light or dark", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml" },
+        { key: "desktop", title: "Desktop", subtitle: "Widgets that live on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml" },
+        { key: "bar", title: "Bar", subtitle: "Customize each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml" },
+        { key: "connections", title: "Connections", subtitle: "Wifi, ethernet and bluetooth", icon: "wifi", shape: MaterialShape.Cookie12Sided, source: "ConnectionsPage.qml" },
+        { key: "notifications", title: "Notifications", subtitle: "Popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml" },
+        { key: "recorder", title: "Recorder", subtitle: "Screen recording in the bottom-right corner", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml" },
+        { key: "about", title: "About", subtitle: "This machine and this shell", icon: "info", shape: MaterialShape.Clover4Leaf, source: "AboutPage.qml" }
     ]
 
     function go(index) {
@@ -54,9 +55,18 @@ Item {
         else GlobalStates.settingsOpen = false;
     }
 
-    onVisibleChanged: if (!visible) {
-        sub = "";
-        shownSub = "";
+    onVisibleChanged: {
+        if (!visible) {
+            sub = "";
+            shownSub = "";
+            return;
+        }
+        const index = pages.findIndex(p => p.key === GlobalStates.settingsPage);
+        GlobalStates.settingsPage = "";
+        if (index >= 0) {
+            page = index;
+            shownPage = index;
+        }
     }
     Keys.onUpPressed: go(page - 1)
     Keys.onDownPressed: go(page + 1)
