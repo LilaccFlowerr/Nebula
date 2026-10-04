@@ -29,11 +29,25 @@ Variants {
             height: window.height
         }
 
+        visible: Settings.nowPlaying.enabled
+
         WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:nowplaying"
 
         readonly property real maxX: width - widget.width
         readonly property real maxY: height - widget.height
+
+        Connections {
+            target: Settings.nowPlaying
+
+            function onXChanged() {
+                if (Settings.nowPlaying.x < 0) widget.x = Qt.binding(() => Theme.nowPlaying.margin);
+            }
+
+            function onYChanged() {
+                if (Settings.nowPlaying.y < 0) widget.y = Qt.binding(() => window.maxY - Theme.nowPlaying.margin);
+            }
+        }
 
         NowPlaying {
             id: widget

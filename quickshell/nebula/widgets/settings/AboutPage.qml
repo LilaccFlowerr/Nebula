@@ -15,15 +15,43 @@ ColumnLayout {
 
         ShapedArt {
             id: avatar
+
+            readonly property var hoverShapes: [
+                MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Flower, MaterialShape.Puffy,
+                MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided,
+                MaterialShape.Cookie12Sided, MaterialShape.SoftBurst, MaterialShape.Pentagon, MaterialShape.Gem,
+                MaterialShape.Heart, MaterialShape.Ghostish
+            ]
+            property int hoverShape: MaterialShape.Sunny
+            property bool shownHover: false
+
+            function sync() {
+                if (morphLock.running || shownHover === avatarMouse.containsMouse) return;
+                if (avatarMouse.containsMouse) shuffle();
+                shownHover = avatarMouse.containsMouse;
+                morphLock.restart();
+            }
+
+            function shuffle() {
+                let next = hoverShape;
+                while (next === hoverShape) next = hoverShapes[Math.floor(Math.random() * hoverShapes.length)];
+                hoverShape = next;
+            }
             Layout.alignment: Qt.AlignHCenter
             implicitWidth: Theme.settings.avatarSize
             implicitHeight: Theme.settings.avatarSize
-            shape: avatarMouse.containsMouse ? MaterialShape.Sunny : MaterialShape.Cookie9Sided
+            shape: shownHover ? hoverShape : MaterialShape.Cookie9Sided
             source: SystemInfo.avatar
             color: Colors.primaryContainer
-            animationDuration: Theme.anim.slow
-            animationEasing.type: Easing.OutBack
-            animationEasing.overshoot: Theme.anim.overshoot
+            animationDuration: Theme.anim.medium
+            animationEasing.type: Easing.BezierSpline
+            animationEasing.bezierCurve: Theme.anim.emphasizedDecel
+
+            Timer {
+                id: morphLock
+                interval: avatar.animationDuration
+                onTriggered: avatar.sync()
+            }
 
             Text {
                 anchors.centerIn: parent
@@ -42,6 +70,7 @@ ColumnLayout {
                 id: avatarMouse
                 anchors.fill: parent
                 hoverEnabled: true
+                onContainsMouseChanged: avatar.sync()
                 cursorShape: Qt.PointingHandCursor
                 onClicked: SystemInfo.pickAvatar()
             }

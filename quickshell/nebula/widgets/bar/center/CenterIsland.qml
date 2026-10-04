@@ -62,7 +62,7 @@ Island {
         onTriggered: root.event = Notifications.current ? "notification" : ""
     }
 
-    function popEvent(name, duration = 1500) {
+    function popEvent(name, duration = Settings.bar.osdDuration) {
         if (!armed || Notifications.current || isExpanded) return;
         event = name;
         eventTimer.interval = duration;

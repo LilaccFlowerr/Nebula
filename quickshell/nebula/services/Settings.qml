@@ -14,6 +14,7 @@ Singleton {
     readonly property alias wallpaper: adapter.wallpaper
     readonly property alias nowPlaying: adapter.nowPlaying
     readonly property alias theme: adapter.theme
+    readonly property alias bar: adapter.bar
 
     Process {
         running: true
@@ -56,8 +57,20 @@ Singleton {
             }
 
             property JsonObject nowPlaying: JsonObject {
+                property bool enabled: true
+                property bool spin: true
                 property real x: -1
                 property real y: -1
+            }
+
+            property JsonObject bar: JsonObject {
+                property int workspaces: 5
+                property bool visualizer: true
+                property bool lyrics: true
+                property int osdDuration: 1500
+                property bool osLogo: true
+                property bool trayButton: true
+                property bool batteryRing: true
             }
 
             property JsonObject theme: JsonObject {

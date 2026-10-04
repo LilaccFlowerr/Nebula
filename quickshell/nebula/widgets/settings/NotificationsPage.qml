@@ -9,10 +9,6 @@ ColumnLayout {
 
     spacing: Theme.spacing.xl
 
-    function seconds(ms) {
-        return (ms / 1000).toFixed(1).replace(".0", "") + " s";
-    }
-
     SettingGroup {
         title: "Behavior"
 
@@ -36,30 +32,56 @@ ColumnLayout {
         SettingRow {
             icon: "timer"
             title: "Popup duration"
-            subtitle: page.seconds(Notifications.normalTimeout)
+            subtitle: "How long a popup stays in the island"
 
             Slider {
-                width: Theme.settings.controlWidth
+                width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
+                anchors.verticalCenter: parent.verticalCenter
                 from: 1000
                 to: 10000
                 stepSize: 500
                 value: Notifications.normalTimeout
                 onMoved: Settings.notifications.normalTimeout = value
             }
+
+            NumberField {
+                anchors.verticalCenter: parent.verticalCenter
+                value: Notifications.normalTimeout
+                from: 1000
+                to: 10000
+                step: 500
+                factor: 1000
+                decimals: 1
+                suffix: " s"
+                onEdited: value => Settings.notifications.normalTimeout = value
+            }
         }
 
         SettingRow {
             icon: "priority_high"
             title: "Urgent popup duration"
-            subtitle: page.seconds(Notifications.urgentTimeout)
+            subtitle: "For notifications marked as urgent"
 
             Slider {
-                width: Theme.settings.controlWidth
+                width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
+                anchors.verticalCenter: parent.verticalCenter
                 from: 1000
                 to: 15000
                 stepSize: 500
                 value: Notifications.urgentTimeout
                 onMoved: Settings.notifications.urgentTimeout = value
+            }
+
+            NumberField {
+                anchors.verticalCenter: parent.verticalCenter
+                value: Notifications.urgentTimeout
+                from: 1000
+                to: 15000
+                step: 500
+                factor: 1000
+                decimals: 1
+                suffix: " s"
+                onEdited: value => Settings.notifications.urgentTimeout = value
             }
         }
     }
