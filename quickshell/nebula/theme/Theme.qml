@@ -76,7 +76,9 @@ Singleton {
         readonly property int textWidth: 170
         readonly property int progressWidth: 140
         readonly property int spinDuration: 30000
-        readonly property int coastDuration: 1200
+        readonly property int spinUpDuration: 1200
+        readonly property int emptySize: 120
+        readonly property int emptyIconSize: 48
     }
     readonly property NowPlaying nowPlaying: NowPlaying {}
 
