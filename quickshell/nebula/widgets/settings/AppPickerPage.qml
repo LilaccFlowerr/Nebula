@@ -22,7 +22,7 @@ ColumnLayout {
         Text {
             visible: page.options.length === 0
             Layout.margins: Theme.spacing.lg
-            text: "No installed apps found for this"
+            text: "Nothing installed for this"
             font.family: Theme.font.family
             font.pixelSize: Theme.font.normal
             color: Colors.textOnSurfaceVariant
@@ -66,7 +66,7 @@ ColumnLayout {
         SettingRow {
             icon: "apps"
             title: "Show all apps"
-            subtitle: "Also list apps that aren't marked as this kind of app"
+            subtitle: "Also show apps that don't really fit"
             clickable: true
             onClicked: page.showAll = !page.showAll
 

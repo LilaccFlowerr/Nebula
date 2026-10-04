@@ -15,19 +15,22 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: Theme.settings.rowHeight
-    radius: Theme.radius.small
-    color: mouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.04) : "transparent"
+    radius: Theme.radius.large - Theme.spacing.xs
+    color: root.clickable && hover.hovered ? Qt.alpha(Colors.textOnSurface, 0.06) : "transparent"
 
     Behavior on color {
         ColorAnimation { duration: Theme.anim.fast }
     }
 
+    HoverHandler {
+        id: hover
+        enabled: root.clickable
+        cursorShape: Qt.PointingHandCursor
+    }
+
     MouseArea {
-        id: mouse
         anchors.fill: parent
         enabled: root.clickable
-        hoverEnabled: root.clickable
-        cursorShape: Qt.PointingHandCursor
         onClicked: root.clicked()
     }
 

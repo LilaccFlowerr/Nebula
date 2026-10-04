@@ -118,7 +118,65 @@ ColumnLayout {
         SettingRow {
             icon: "auto_awesome"
             title: "Shell"
-            subtitle: "Nebula, built from scratch in Quickshell"
+            subtitle: "Nebula Shell - made by Ize <3"
+        }
+    }
+
+    SettingGroup {
+        title: "Made by"
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.margins: Theme.spacing.lg
+            spacing: Theme.spacing.lg
+
+            Image {
+                id: localAvatar
+                visible: false
+                source: Qt.resolvedUrl("../../assets/author.png")
+            }
+
+            ShapedArt {
+                implicitWidth: Theme.settings.authorSize
+                implicitHeight: Theme.settings.authorSize
+                shape: MaterialShape.Cookie9Sided
+                color: Colors.primaryContainer
+                source: localAvatar.status === Image.Ready ? localAvatar.source : "https://github.com/" + Theme.settings.github + ".png?size=256"
+                sourceSize: Qt.size(width * 2, height * 2)
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 2
+
+                Text {
+                    text: "Ize"
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.large + 4
+                    font.weight: Font.Bold
+                    color: Colors.textOnSurface
+                }
+
+                Text {
+                    text: "@" + Theme.settings.github
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.normal
+                    color: Colors.textOnSurfaceVariant
+                }
+            }
+
+            ActionButton {
+                icon: "code"
+                text: "Nebula"
+                onClicked: Qt.openUrlExternally("https://github.com/" + Theme.settings.github + "/Nebula")
+            }
+
+            ActionButton {
+                icon: "open_in_new"
+                text: "GitHub"
+                filled: true
+                onClicked: Qt.openUrlExternally("https://github.com/" + Theme.settings.github)
+            }
         }
     }
 }

@@ -58,6 +58,7 @@ Singleton {
             property JsonObject wallpaper: JsonObject {
                 property string path: ""
                 property string directory: ""
+                property string transition: "cookie9"
             }
 
             property JsonObject nowPlaying: JsonObject {

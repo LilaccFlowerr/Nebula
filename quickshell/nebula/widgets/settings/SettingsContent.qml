@@ -18,24 +18,24 @@ Item {
     property int direction: 0
 
     readonly property var subpages: ({
-        wallpapers: { title: "Wallpapers", subtitle: "Pick one, it applies right away", source: "WallpapersPage.qml" }
+        wallpapers: { title: "Wallpapers", subtitle: "Click one to use it", source: "WallpapersPage.qml" }
     })
     readonly property string subKey: shownSub.split(":")[0]
     readonly property string subArg: shownSub.split(":")[1] ?? ""
     readonly property var current: shownSub === "" ? pages?.[shownPage]
-        : subKey === "app" ? ({ title: Apps.roles.find(r => r.key === subArg)?.title ?? "App", subtitle: "Pick the app to use", source: "AppPickerPage.qml" })
+        : subKey === "app" ? ({ title: Apps.roles.find(r => r.key === subArg)?.title ?? "App", subtitle: "Pick one", source: "AppPickerPage.qml" })
         : subpages?.[subKey] ?? pages?.[shownPage]
 
     readonly property var pages: [
-        { key: "appearance", title: "Appearance", subtitle: "Wallpaper, colors and light or dark", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml" },
-        { key: "desktop", title: "Desktop", subtitle: "Widgets that live on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml" },
-        { key: "bar", title: "Bar", subtitle: "Customize each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml" },
-        { key: "connections", title: "Connections", subtitle: "Wifi, ethernet and bluetooth", icon: "wifi", shape: MaterialShape.Cookie12Sided, source: "ConnectionsPage.qml" },
-        { key: "system", title: "System", subtitle: "Displays, power and input", icon: "tune", shape: MaterialShape.Gem, source: "SystemPage.qml" },
-        { key: "apps", title: "Apps", subtitle: "Which apps open for what", icon: "apps", shape: MaterialShape.Puffy, source: "AppsPage.qml" },
-        { key: "notifications", title: "Notifications", subtitle: "Popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml" },
-        { key: "recorder", title: "Recorder", subtitle: "Screen recording in the bottom-right corner", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml" },
-        { key: "about", title: "About", subtitle: "This machine and this shell", icon: "info", shape: MaterialShape.Clover4Leaf, source: "AboutPage.qml" }
+        { key: "appearance", title: "Appearance", subtitle: "Wallpaper and colors", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml" },
+        { key: "desktop", title: "Desktop", subtitle: "Stuff on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml" },
+        { key: "bar", title: "Bar", subtitle: "Tweak each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml" },
+        { key: "connections", title: "Connections", subtitle: "Wifi, cable and bluetooth", icon: "wifi", shape: MaterialShape.Cookie12Sided, source: "ConnectionsPage.qml" },
+        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "SystemPage.qml" },
+        { key: "apps", title: "Apps", subtitle: "What opens what", icon: "apps", shape: MaterialShape.Puffy, source: "AppsPage.qml" },
+        { key: "notifications", title: "Notifications", subtitle: "The popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml" },
+        { key: "recorder", title: "Recorder", subtitle: "Screen recording", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml" },
+        { key: "about", title: "About", subtitle: "This machine", icon: "info", shape: MaterialShape.Clover4Leaf, source: "AboutPage.qml" }
     ]
 
     function go(index) {

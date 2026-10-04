@@ -104,6 +104,96 @@ ColumnLayout {
     }
 
     SettingGroup {
+        title: "Wallpaper transition"
+
+        Flow {
+            Layout.fillWidth: true
+            Layout.margins: Theme.spacing.md
+            spacing: Theme.spacing.sm
+
+            Repeater {
+                model: Wallpaper.transitions
+
+                Rectangle {
+                    id: chip
+                    required property var modelData
+                    readonly property bool active: modelData.key === Wallpaper.transition.key
+                    readonly property bool special: modelData.key === "random"
+                    property int cycle: 0
+
+                    implicitWidth: chipRow.implicitWidth + Theme.spacing.lg * 2
+                    implicitHeight: Theme.button.size
+                    radius: active ? height / 2 : Theme.radius.medium
+                    color: special ? (active ? Colors.tertiary : Colors.tertiaryContainer)
+                         : active ? Colors.secondaryContainer : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.08) : "transparent"
+                    border.width: active || special ? 0 : 1
+                    border.color: Colors.outlineVariant
+
+                    Timer {
+                        running: chip.special && chip.visible
+                        interval: Theme.anim.slow
+                        repeat: true
+                        onTriggered: chip.cycle = (chip.cycle + 1) % Wallpaper.shapes.length
+                    }
+
+                    Behavior on radius {
+                        NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                    }
+
+                    Row {
+                        id: chipRow
+                        anchors.centerIn: parent
+                        spacing: Theme.spacing.sm
+
+                        MaterialShape {
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: chip.modelData.shape >= 0 || chip.special
+                            width: Theme.settings.iconSize
+                            height: width
+                            shape: chip.special ? Wallpaper.shapes[chip.cycle] : chip.modelData.shape >= 0 ? chip.modelData.shape : MaterialShape.Circle
+                            animationDuration: Theme.anim.medium
+                            animationEasing.type: Easing.BezierSpline
+                            animationEasing.bezierCurve: Theme.anim.emphasizedDecel
+                            color: chip.special ? (chip.active ? Colors.textOnTertiary : Colors.textOnTertiaryContainer)
+                                 : chip.active ? Colors.textOnSecondaryContainer : Colors.primary
+                        }
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: chip.modelData.shape < 0 && !chip.special
+                            text: chip.modelData.key === "random" ? "shuffle" : chip.modelData.key === "fade" ? "gradient" : "block"
+                            font.family: Theme.font.icons
+                            font.pixelSize: Theme.settings.iconSize
+                            color: chip.active ? Colors.textOnSecondaryContainer : Colors.primary
+                        }
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: chip.modelData.name
+                            font.family: Theme.font.family
+                            font.pixelSize: Theme.font.normal
+                            font.weight: chip.active || chip.special ? Font.DemiBold : Font.Normal
+                            color: chip.special ? (chip.active ? Colors.textOnTertiary : Colors.textOnTertiaryContainer)
+                                 : chip.active ? Colors.textOnSecondaryContainer : Colors.textOnSurface
+                        }
+                    }
+
+                    MouseArea {
+                        id: chipMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            Settings.wallpaper.transition = chip.modelData.key;
+                            Wallpaper.replay();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    SettingGroup {
         title: "Color style"
 
         GridLayout {
@@ -209,7 +299,6 @@ ColumnLayout {
         SettingRow {
             icon: Scheme.dark ? "dark_mode" : "light_mode"
             title: "Dark mode"
-            subtitle: "Shell, Hyprland, Ghostty and VS Code follow along"
             clickable: true
             onClicked: Scheme.toggleMode()
 

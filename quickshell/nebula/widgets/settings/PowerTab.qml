@@ -69,8 +69,8 @@ ColumnLayout {
         SettingRow {
             icon: PowerProfiles.profile === PowerProfile.PowerSaver ? "energy_savings_leaf" : PowerProfiles.profile === PowerProfile.Performance ? "bolt" : "balance"
             title: "Profile"
-            subtitle: PowerProfiles.profile === PowerProfile.PowerSaver ? "Longer battery, slower"
-                    : PowerProfiles.profile === PowerProfile.Performance ? "Fastest, uses more power" : "A bit of both"
+            subtitle: PowerProfiles.profile === PowerProfile.PowerSaver ? "Saves battery"
+                    : PowerProfiles.profile === PowerProfile.Performance ? "Full speed" : "Somewhere in between"
 
             SegmentedButton {
                 width: Theme.settings.controlWidth + Theme.settings.fieldWidth
