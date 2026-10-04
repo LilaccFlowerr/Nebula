@@ -10,28 +10,38 @@ Item {
     id: root
 
     readonly property bool playing: Media.playing
+    readonly property bool empty: !Media.active
+    property real size: empty ? Theme.nowPlaying.emptySize : Theme.nowPlaying.cookieSize
     property real spin: 0
     property real speed: playing ? 360000 / Theme.nowPlaying.spinDuration : 0
 
-    implicitWidth: Theme.nowPlaying.cookieSize
-    implicitHeight: Theme.nowPlaying.cookieSize
+    implicitWidth: size
+    implicitHeight: size
+
+    Behavior on size {
+        NumberAnimation {
+            duration: Theme.anim.island
+            easing.type: Easing.OutBack
+            easing.overshoot: Theme.anim.overshoot
+        }
+    }
 
     Behavior on speed {
         NumberAnimation {
-            duration: Theme.nowPlaying.coastDuration
+            duration: Theme.nowPlaying.spinUpDuration
             easing.type: Easing.BezierSpline
             easing.bezierCurve: Theme.anim.standard
         }
     }
 
     FrameAnimation {
-        running: root.speed > 0
+        running: root.playing && root.speed > 0
         onTriggered: root.spin = (root.spin + root.speed * frameTime) % 360
     }
 
     MaterialShape {
         anchors.fill: parent
-        shape: root.playing ? MaterialShape.Cookie12Sided : MaterialShape.Pentagon
+        shape: root.empty ? MaterialShape.Sunny : root.playing ? MaterialShape.Cookie12Sided : MaterialShape.Pentagon
         color: Colors.secondaryContainer
         rotation: root.spin
         animationDuration: Theme.anim.slow
@@ -39,9 +49,46 @@ Item {
         animationEasing.overshoot: Theme.anim.overshoot
     }
 
+    Text {
+        anchors.centerIn: parent
+        text: "music_note"
+        font.family: Theme.font.icons
+        font.pixelSize: Theme.nowPlaying.emptyIconSize
+        color: Colors.textOnSecondaryContainer
+        opacity: root.empty ? 1 : 0
+        scale: root.empty ? 1 : 0.4
+
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.anim.medium }
+        }
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: Theme.anim.island
+                easing.type: Easing.OutBack
+                easing.overshoot: Theme.anim.overshoot
+            }
+        }
+    }
+
     ColumnLayout {
         anchors.centerIn: parent
         spacing: Theme.spacing.xs
+        opacity: root.empty ? 0 : 1
+        scale: root.empty ? 0.6 : 1
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: Theme.anim.fast }
+        }
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: Theme.anim.island
+                easing.type: Easing.OutBack
+                easing.overshoot: Theme.anim.overshoot
+            }
+        }
 
         ClippingRectangle {
             Layout.alignment: Qt.AlignHCenter
