@@ -15,6 +15,10 @@ Singleton {
     readonly property alias nowPlaying: adapter.nowPlaying
     readonly property alias theme: adapter.theme
     readonly property alias bar: adapter.bar
+    readonly property alias apps: adapter.apps
+    readonly property alias input: adapter.input
+    readonly property alias displays: adapter.displays
+    readonly property alias power: adapter.power
 
     Process {
         running: true
@@ -61,6 +65,32 @@ Singleton {
                 property bool spin: true
                 property real x: -1
                 property real y: -1
+            }
+
+            property JsonObject apps: JsonObject {
+                property string terminal: "com.mitchellh.ghostty"
+                property string browser: "org.mozilla.firefox"
+                property string files: "org.gnome.Nautilus"
+                property string editor: "com.microsoft.VSCode"
+            }
+
+            property JsonObject input: JsonObject {
+                property string layout: "us"
+                property int repeatRate: 25
+                property int repeatDelay: 600
+                property real sensitivity: 0
+                property bool flatAccel: false
+                property bool naturalScroll: false
+                property bool tapToClick: true
+                property bool disableWhileTyping: true
+            }
+
+            property JsonObject displays: JsonObject {
+                property string monitors: "{}"
+            }
+
+            property JsonObject power: JsonObject {
+                property int lowBattery: 20
             }
 
             property JsonObject bar: JsonObject {

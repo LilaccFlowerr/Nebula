@@ -3,10 +3,11 @@
 local vars    = require("variables")
 local mainMod = vars.mainMod
 
--- Apps
+-- Apps (defaults can be changed in Settings > Apps, see variables.lua)
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(vars.terminal))
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(vars.browser))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(vars.editor))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(vars.fileExplorer))
+hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(vars.files))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(vars.claude))
 hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd(vars.launcher), { release = true })
 

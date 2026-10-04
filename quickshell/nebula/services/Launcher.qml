@@ -85,6 +85,10 @@ Singleton {
             .map(r => r.item);
     }
 
+    function clearRecent() {
+        adapter.recent = [];
+    }
+
     function open() {
         query = "";
         picker = "";
