@@ -86,4 +86,5 @@ After that, put your wallpapers in `~/Pictures/Wallpapers` and switch between th
 [Caelestia](https://github.com/caelestia-dots/shell),
 [end-4](https://github.com/end-4/dots-hyprland),
 [DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell)
-and a lot of scrolling through r/unixporn.
+and a lot of scrolling through r/unixporn. The loading animation is borrowed (with permission) from
+[dynbar](https://github.com/leithXD/dynbar).

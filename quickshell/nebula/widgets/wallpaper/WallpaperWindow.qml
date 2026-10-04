@@ -29,13 +29,13 @@ Variants {
         WlrLayershell.layer: WlrLayer.Background
         WlrLayershell.namespace: "quickshell:wallpaper"
 
-        property string target: ""
+        property url target
         property real reveal: 0
         readonly property real endScale: Math.hypot(width, height) / (Theme.launcher.previewSize * 0.9)
 
         function show(path) {
             target = Wallpaper.url(path);
-            if (String(base.source) === target && !incoming.visible) return;
+            if (String(base.source) === String(target) && !incoming.visible) return;
             if (base.status !== Image.Ready) {
                 base.source = target;
                 return;
@@ -75,7 +75,7 @@ Variants {
             asynchronous: true
             sourceSize.width: window.width
             sourceSize.height: window.height
-            onStatusChanged: if (status === Image.Ready && String(source) === window.target && window.reveal === 1) incoming.visible = false
+            onStatusChanged: if (status === Image.Ready && String(source) === String(window.target) && window.reveal === 1) incoming.visible = false
         }
 
         Image {
@@ -86,7 +86,7 @@ Variants {
             sourceSize.width: window.width
             sourceSize.height: window.height
             visible: false
-            onStatusChanged: if (status === Image.Ready && String(source) === window.target && window.reveal === 0) revealAnim.restart()
+            onStatusChanged: if (status === Image.Ready && String(source) === String(window.target) && window.reveal === 0) revealAnim.restart()
             layer.enabled: visible
             layer.effect: MultiEffect {
                 maskEnabled: true
