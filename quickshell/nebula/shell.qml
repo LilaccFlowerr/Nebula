@@ -11,6 +11,7 @@ ShellRoot {
     WallpaperWindow {}
     NowPlayingWindow {}
     readonly property bool screenshotBusy: Screenshot.busy
+    readonly property var hyprMonitors: HyprConfig.monitors
 
     
     Bar {}
