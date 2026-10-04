@@ -57,6 +57,13 @@ Singleton {
         preview.running = true;
     }
 
+    Connections {
+        target: Settings
+        function onGroupReset(group) {
+            if (group === "theme") root.apply();
+        }
+    }
+
     Process {
         id: matugen
         stderr: SplitParser {

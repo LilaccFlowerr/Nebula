@@ -56,6 +56,13 @@ Singleton {
         if (role === "files") Quickshell.execDetached(["xdg-mime", "default", e.id + ".desktop", "inode/directory"]);
     }
 
+    Connections {
+        target: Settings
+        function onGroupReset(group) {
+            if (group === "apps") root.writeHyprland();
+        }
+    }
+
     Process {
         id: writer
     }

@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import M3Shapes
 
 Singleton {
     component Bar: QtObject {
@@ -28,6 +29,18 @@ Singleton {
 
     component Workspaces: QtObject {
         readonly property int activeWidth: 88
+        readonly property int innerShapeSize: 18
+        readonly property int shapeSize: 34
+        readonly property int activeShapeSize: 40
+        readonly property var shapes: [
+            MaterialShape.Circle, MaterialShape.Cookie4Sided, MaterialShape.Clover4Leaf, MaterialShape.Cookie6Sided,
+            MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Cookie7Sided, MaterialShape.Puffy,
+            MaterialShape.Clover8Leaf, MaterialShape.Cookie9Sided
+        ]
+        readonly property var activeShapes: [
+            MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Flower, MaterialShape.SoftBurst,
+            MaterialShape.Cookie12Sided, MaterialShape.Heart, MaterialShape.Ghostish, MaterialShape.Clover8Leaf
+        ]
     }
     readonly property Workspaces workspaces: Workspaces {}
 

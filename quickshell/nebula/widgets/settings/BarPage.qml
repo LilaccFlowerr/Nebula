@@ -72,6 +72,22 @@ ColumnLayout {
                         onEdited: value => Settings.bar.workspaces = value
                     }
                 }
+
+                SettingRow {
+                    icon: "category"
+                    title: "Style"
+                    subtitle: "What each workspace looks like"
+
+                    SegmentedButton {
+                        readonly property var styles: ["numbers", "pills", "shapes"]
+
+                        width: Theme.settings.controlWidth
+                        anchors.verticalCenter: parent.verticalCenter
+                        options: ["Numbers", "Pills", "Shapes"]
+                        currentIndex: Math.max(0, styles.indexOf(Settings.bar.workspaceStyle))
+                        onSelected: index => Settings.bar.workspaceStyle = styles[index]
+                    }
+                }
             }
         }
     }
