@@ -10,7 +10,10 @@ Item {
     property string subtitle: ""
     property bool active: false
 
+    property bool splittable: false
+
     signal clicked()
+    signal openRequested()
 
     implicitHeight: Theme.quickSettings.tileHeight
 
@@ -100,7 +103,7 @@ Item {
                 id: textMouse
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.clicked()
+                onClicked: root.splittable ? root.openRequested() : root.clicked()
             }
         }
     }

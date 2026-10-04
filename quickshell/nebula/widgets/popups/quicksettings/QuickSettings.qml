@@ -182,7 +182,9 @@ Rectangle {
                 title: "Wifi"
                 subtitle: Wifi.connected ? Wifi.ssid : Wifi.enabled ? "Not connected" : "Off"
                 active: Wifi.enabled
+                splittable: true
                 onClicked: Wifi.toggle()
+                onOpenRequested: GlobalStates.openSettings("connections", "wifi", true)
             }
 
             Tile {
@@ -192,7 +194,9 @@ Rectangle {
                 title: "Bluetooth"
                 subtitle: BluetoothStatus.connected ? BluetoothStatus.deviceName : BluetoothStatus.enabled ? "On" : "Off"
                 active: BluetoothStatus.enabled
+                splittable: true
                 onClicked: BluetoothStatus.toggle()
+                onOpenRequested: GlobalStates.openSettings("connections", "bluetooth", true)
             }
 
             Tile {
