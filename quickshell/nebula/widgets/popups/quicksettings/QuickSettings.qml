@@ -1,30 +1,96 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
+import qs.widgets.settings
+import "../../../components/Curves.js" as Curves
 
 Rectangle {
     id: root
 
     property bool open: false
+    property bool full: false
+    property real expand: 0
+    property real fade: 1
+    property point offset: Qt.point(0, 0)
+    readonly property real presence: expand * fade
     signal requestClose()
+
+    readonly property real targetX: ((QsWindow.window?.width ?? 0) - Theme.settings.width) / 2 - offset.x
+    readonly property real targetY: ((QsWindow.window?.height ?? 0) - Theme.settings.height) / 2 - offset.y
+
+    function lerp(a, b, t) {
+        return a + (b - a) * t;
+    }
+
+    onFullChanged: {
+        expandAnim.stop();
+        fadeAnim.stop();
+        if (full) {
+            offset = parent.mapToItem(null, 0, 0);
+            content.forceActiveFocus();
+            if (GlobalStates.settingsFromQuick) {
+                fade = 1;
+                expandAnim.restart();
+            } else {
+                expand = 1;
+                fade = 0;
+                fadeAnim.to = 1;
+                fadeAnim.restart();
+            }
+        } else {
+            fadeAnim.to = 0;
+            fadeAnim.restart();
+        }
+    }
+
+    onOpenChanged: if (open && !full) fade = 1
+
+    NumberAnimation {
+        id: expandAnim
+        target: root
+        property: "expand"
+        to: 1
+        duration: Theme.settings.expandDuration
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Theme.anim.standard
+    }
+
+    NumberAnimation {
+        id: fadeAnim
+        target: root
+        property: "fade"
+        duration: Theme.anim.medium
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Theme.anim.standard
+        onFinished: if (root.fade === 0) root.expand = 0
+    }
 
     implicitWidth: Theme.quickSettings.width
     implicitHeight: column.implicitHeight + Theme.spacing.lg * 2
-    radius: Theme.radius.large
+    x: lerp(0, targetX, expand)
+    y: lerp(0, targetY, expand)
+    width: lerp(implicitWidth, Theme.settings.width, expand)
+    height: lerp(implicitHeight, Theme.settings.height, expand)
+    radius: lerp(Theme.radius.large, Theme.radius.large + Theme.spacing.sm, expand)
     color: Qt.alpha(Colors.surface, Theme.bar.opacity)
+    clip: expand > 0
+
+    property real shown: open ? 1 : 0
+    property real openScale: open ? 1 : 0.9
 
     visible: opacity > 0
-    opacity: open ? 1 : 0
-    scale: open ? 1 : 0.9
-    transformOrigin: Item.Top
+    opacity: shown * fade
+    scale: openScale * lerp(Theme.settings.fadeScale, 1, fade)
+    transformOrigin: expand > 0 ? Item.Center : Item.Top
 
-    Behavior on opacity {
+    Behavior on shown {
         NumberAnimation { duration: Theme.anim.fast }
     }
-    Behavior on scale {
+    Behavior on openScale {
         NumberAnimation {
             duration: Theme.anim.medium
             easing.type: Easing.OutBack
@@ -32,11 +98,24 @@ Rectangle {
         }
     }
 
+    SettingsContent {
+        id: content
+        anchors.centerIn: parent
+        width: Theme.settings.width
+        height: Theme.settings.height
+        opacity: Curves.phase(root.expand, 0.5, 0.5)
+        visible: opacity > 0
+    }
+
     ColumnLayout {
         id: column
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.right: parent.right
         anchors.margins: Theme.spacing.lg
+        width: root.implicitWidth - Theme.spacing.lg * 2
         spacing: Theme.spacing.lg
+        opacity: 1 - Curves.phase(root.expand, 0, 0.35)
+        visible: opacity > 0
 
         RowLayout {
             spacing: Theme.spacing.md
@@ -130,7 +209,7 @@ Rectangle {
                 icon: "settings"
                 title: "Settings"
                 subtitle: "All settings"
-                onClicked: console.info("settings window: not built yet")
+                onClicked: GlobalStates.toggleSettings(GlobalStates.focusedScreen(), true)
             }
         }
 

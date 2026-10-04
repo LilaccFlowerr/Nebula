@@ -102,6 +102,26 @@ Singleton {
     }
     readonly property Launcher launcher: Launcher {}
 
+    component SettingsWindow: QtObject {
+        readonly property int width: 940
+        readonly property int height: 640
+        readonly property int padding: 24
+        readonly property int railWidth: 232
+        readonly property int railItemHeight: 52
+        readonly property int indicatorSize: 36
+        readonly property int iconSize: 22
+        readonly property int rowHeight: 68
+        readonly property int titleSize: 30
+        readonly property int heroHeight: 210
+        readonly property int swatchSize: 56
+        readonly property int avatarSize: 128
+        readonly property int controlWidth: 220
+        readonly property int expandDuration: 400
+        readonly property real fadeScale: 0.96
+        readonly property int slide: 24
+    }
+    readonly property SettingsWindow settings: SettingsWindow {}
+
     component Lyrics: QtObject {
         readonly property int lineHeight: 20
         readonly property int titleWidth: 120

@@ -27,6 +27,7 @@ Singleton {
 
     readonly property var commands: [
         { name: "Theme", icon: "palette", keepOpen: true, run: () => root.enterThemes() },
+        { name: "Settings", icon: "settings", run: () => GlobalStates.toggleSettings() },
         { name: "Lock", icon: "lock", run: () => Power.lock() },
         { name: "Sleep", icon: "bedtime", run: () => Power.suspend() },
         { name: "Restart", icon: "restart_alt", run: () => Power.reboot() },

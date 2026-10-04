@@ -6,6 +6,7 @@ import qs.components
 import qs.widgets.popups.quicksettings
 import qs.services
 import qs.theme
+import "../../../components/Curves.js" as Curves
 
 Island {
     id: root
@@ -14,6 +15,8 @@ Island {
     readonly property string screenName: QsWindow.window?.screen?.name ?? ""
     readonly property bool powerOpen: GlobalStates.powerMenuOpen && GlobalStates.isOn(screenName)
     readonly property bool settingsOpen: GlobalStates.quickSettingsOpen && GlobalStates.isOn(screenName)
+    readonly property bool fullSettings: GlobalStates.settingsOpen && GlobalStates.isOn(screenName)
+    readonly property real presence: quickSettings.presence
     property bool armed: false
 
     Timer {
@@ -56,7 +59,7 @@ Island {
         x: row.x + gearButton.x + gearButton.width / 2 - width / 2
         neckWidth: Theme.quickSettings.neckWidth
         curve: Theme.quickSettings.neckCurve
-        opacity: quickSettings.opacity
+        opacity: quickSettings.opacity * (1 - Curves.phase(quickSettings.expand, 0, 0.3))
         visible: opacity > 0
     }
 
@@ -65,14 +68,13 @@ Island {
         anchors.top: neck.bottom
         anchors.right: parent.right
         anchors.rightMargin: Theme.bar.padding
-        width: quickSettings.width
-        height: root.settingsOpen ? quickSettings.height : 0
+        width: quickSettings.implicitWidth
+        height: root.settingsOpen || root.fullSettings ? quickSettings.implicitHeight : 0
 
         QuickSettings {
             id: quickSettings
-            anchors.top: parent.top
-            anchors.right: parent.right
-            open: root.settingsOpen
+            open: root.settingsOpen || root.fullSettings || expand > 0
+            full: root.fullSettings
             onRequestClose: GlobalStates.quickSettingsOpen = false
         }
     }
