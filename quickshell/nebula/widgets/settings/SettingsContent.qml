@@ -27,14 +27,14 @@ Item {
         : subpages?.[subKey] ?? pages?.[shownPage]
 
     readonly property var pages: [
-        { key: "appearance", title: "Appearance", subtitle: "Wallpaper and colors", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml" },
-        { key: "desktop", title: "Desktop", subtitle: "Stuff on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml" },
-        { key: "bar", title: "Bar", subtitle: "Tweak each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml" },
+        { key: "appearance", title: "Appearance", subtitle: "Wallpaper and colors", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml", reset: ["theme", "wallpaper.transition"] },
+        { key: "desktop", title: "Desktop", subtitle: "Stuff on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml", reset: ["nowPlaying"] },
+        { key: "bar", title: "Bar", subtitle: "Tweak each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml", reset: ["bar", "clock"] },
         { key: "connections", title: "Connections", subtitle: "Wifi, cable and bluetooth", icon: "wifi", shape: MaterialShape.Cookie12Sided, source: "ConnectionsPage.qml" },
-        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "SystemPage.qml" },
-        { key: "apps", title: "Apps", subtitle: "What opens what", icon: "apps", shape: MaterialShape.Puffy, source: "AppsPage.qml" },
-        { key: "notifications", title: "Notifications", subtitle: "The popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml" },
-        { key: "recorder", title: "Recorder", subtitle: "Screen recording", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml" },
+        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "SystemPage.qml", reset: ["input", "power"] },
+        { key: "apps", title: "Apps", subtitle: "What opens what", icon: "apps", shape: MaterialShape.Puffy, source: "AppsPage.qml", reset: ["apps"] },
+        { key: "notifications", title: "Notifications", subtitle: "The popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml", reset: ["notifications"] },
+        { key: "recorder", title: "Recorder", subtitle: "Screen recording", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml", reset: ["recorder"] },
         { key: "about", title: "About", subtitle: "This machine", icon: "info", shape: MaterialShape.Clover4Leaf, source: "AboutPage.qml" }
     ]
 
@@ -248,6 +248,7 @@ Item {
                 opacity: root.pageT
 
                 RowLayout {
+                    Layout.fillWidth: true
                     spacing: Theme.spacing.md
 
                     IconButton {
@@ -273,6 +274,15 @@ Item {
                             font.pixelSize: Theme.font.normal
                             color: Colors.textOnSurfaceVariant
                         }
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    ActionButton {
+                        visible: root.shownSub === "" && !!root.current?.reset
+                        icon: "restart_alt"
+                        text: "Reset"
+                        onClicked: Settings.reset(root.current.reset)
                     }
                 }
 

@@ -139,7 +139,7 @@ ColumnLayout {
             ShapedArt {
                 implicitWidth: Theme.settings.authorSize
                 implicitHeight: Theme.settings.authorSize
-                shape: MaterialShape.Cookie9Sided
+                shape: MaterialShape.Clover8Leaf
                 color: Colors.primaryContainer
                 source: localAvatar.status === Image.Ready ? localAvatar.source : "https://github.com/" + Theme.settings.github + ".png?size=256"
                 sourceSize: Qt.size(width * 2, height * 2)
@@ -176,6 +176,42 @@ ColumnLayout {
                 text: "GitHub"
                 filled: true
                 onClicked: Qt.openUrlExternally("https://github.com/" + Theme.settings.github)
+            }
+        }
+    }
+
+    SettingGroup {
+        title: "Reset"
+
+        SettingRow {
+            icon: "restart_alt"
+            title: "Reset all settings"
+            subtitle: "Your wallpaper and screens stay as they are"
+
+            ActionButton {
+                id: resetAll
+
+                property bool armed: false
+
+                icon: "restart_alt"
+                text: armed ? "Click again" : "Reset all"
+                danger: true
+                filled: armed
+                onClicked: {
+                    if (armed) {
+                        Settings.resetAll();
+                        armed = false;
+                    } else {
+                        armed = true;
+                        disarm.restart();
+                    }
+                }
+
+                Timer {
+                    id: disarm
+                    interval: 3000
+                    onTriggered: resetAll.armed = false
+                }
             }
         }
     }
