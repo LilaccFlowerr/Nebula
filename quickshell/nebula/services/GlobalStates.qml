@@ -12,6 +12,8 @@ Singleton {
     property bool powerMenuOpen: false
     property bool quickSettingsOpen: false
     property bool mediaExpanded: false
+    property bool settingsOpen: false
+    property bool settingsFromQuick: false
     property string screen: ""
     property bool capturing: false
 
@@ -63,16 +65,34 @@ Singleton {
         }
     }
 
+    function toggleSettings(screenName = focusedScreen(), fromQuick = false) {
+        if (settingsOpen) {
+            settingsOpen = false;
+        } else {
+            closeAll();
+            screen = screenName;
+            settingsFromQuick = fromQuick;
+            settingsOpen = true;
+        }
+    }
+
     function closeAll() {
         launcherOpen = false;
         powerMenuOpen = false;
         quickSettingsOpen = false;
         mediaExpanded = false;
+        settingsOpen = false;
     }
 
     IpcHandler {
         target: "media"
 
         function toggle(): void { if (Media.active) root.toggleMedia(); }
+    }
+
+    IpcHandler {
+        target: "settings"
+
+        function toggle(): void { root.toggleSettings(); }
     }
 }
