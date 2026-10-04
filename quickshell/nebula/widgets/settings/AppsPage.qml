@@ -54,7 +54,7 @@ ColumnLayout {
         SettingRow {
             icon: "history"
             title: "Recent apps"
-            subtitle: "The launcher shows your most opened apps first"
+            subtitle: "Forget what you opened lately"
 
             IconButton {
                 icon: "delete_sweep"

@@ -13,7 +13,7 @@ ColumnLayout {
         SettingRow {
             icon: "album"
             title: "Now playing widget"
-            subtitle: "The cookie with the album art on your desktop"
+            subtitle: "The spinning cookie"
             clickable: true
             onClicked: Settings.nowPlaying.enabled = !Settings.nowPlaying.enabled
 
@@ -26,7 +26,7 @@ ColumnLayout {
         SettingRow {
             icon: "autorenew"
             title: "Spin while playing"
-            subtitle: "One slow turn every " + Theme.nowPlaying.spinDuration / 1000 + " seconds"
+            subtitle: "Turns slowly while music plays"
             clickable: true
             onClicked: Settings.nowPlaying.spin = !Settings.nowPlaying.spin
 
@@ -39,7 +39,7 @@ ColumnLayout {
         SettingRow {
             icon: "open_with"
             title: "Position"
-            subtitle: Settings.nowPlaying.x < 0 ? "Bottom left" : "Dragged to a custom spot"
+            subtitle: Settings.nowPlaying.x < 0 ? "Bottom left" : "Somewhere you dragged it"
 
             IconButton {
                 icon: "restart_alt"

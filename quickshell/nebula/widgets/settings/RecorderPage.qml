@@ -18,7 +18,7 @@ ColumnLayout {
         SettingRow {
             icon: Recorder.sound ? "mic" : "mic_off"
             title: "Record audio"
-            subtitle: "Desktop audio goes into the recording"
+            subtitle: "Records what you hear too"
             clickable: true
             onClicked: Settings.recorder.sound = !Recorder.sound
 
@@ -31,7 +31,7 @@ ColumnLayout {
         SettingRow {
             icon: "crop_free"
             title: "Start with a region"
-            subtitle: "The Record button asks for a region first"
+            subtitle: "Pick an area before it starts"
             clickable: true
             onClicked: Settings.recorder.useRegion = !Recorder.useRegion
 
@@ -44,7 +44,6 @@ ColumnLayout {
         SettingRow {
             icon: "speed"
             title: "Framerate"
-            subtitle: "Frames per second"
 
             SegmentedButton {
                 width: Theme.settings.controlWidth

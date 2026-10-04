@@ -13,7 +13,7 @@ ColumnLayout {
         SettingRow {
             icon: "keyboard"
             title: "Layout"
-            subtitle: "Comma separated, like us,nl"
+            subtitle: "Like us, or us,nl for two"
 
             TextField {
                 text: Settings.input.layout
@@ -25,7 +25,6 @@ ColumnLayout {
         SettingRow {
             icon: "keyboard_double_arrow_right"
             title: "Repeat rate"
-            subtitle: "Characters per second while holding a key"
 
             Slider {
                 width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
@@ -49,7 +48,6 @@ ColumnLayout {
         SettingRow {
             icon: "hourglass_top"
             title: "Repeat delay"
-            subtitle: "How long to hold before it starts repeating"
 
             Slider {
                 width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
@@ -79,7 +77,7 @@ ColumnLayout {
         SettingRow {
             icon: "mouse"
             title: "Speed"
-            subtitle: "0 is the default"
+            subtitle: "0 is normal"
 
             Slider {
                 width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
@@ -104,7 +102,7 @@ ColumnLayout {
         SettingRow {
             icon: "trending_flat"
             title: "Flat acceleration"
-            subtitle: "Same speed no matter how fast you move, nice for games"
+            subtitle: "Higher = faster"
             clickable: true
             onClicked: Settings.input.flatAccel = !Settings.input.flatAccel
 
@@ -121,7 +119,6 @@ ColumnLayout {
         SettingRow {
             icon: "swipe_vertical"
             title: "Natural scrolling"
-            subtitle: "Content moves with your fingers"
             clickable: true
             onClicked: Settings.input.naturalScroll = !Settings.input.naturalScroll
 
@@ -134,7 +131,6 @@ ColumnLayout {
         SettingRow {
             icon: "touch_app"
             title: "Tap to click"
-            subtitle: "A light tap counts as a click"
             clickable: true
             onClicked: Settings.input.tapToClick = !Settings.input.tapToClick
 
@@ -147,7 +143,6 @@ ColumnLayout {
         SettingRow {
             icon: "keyboard_hide"
             title: "Ignore while typing"
-            subtitle: "Stops your palm from moving the cursor"
             clickable: true
             onClicked: Settings.input.disableWhileTyping = !Settings.input.disableWhileTyping
 

@@ -115,6 +115,8 @@ Singleton {
         readonly property int swatchSize: 56
         readonly property int thumbWidth: 320
         readonly property int avatarSize: 128
+        readonly property int authorSize: 64
+        readonly property string github: "LilaccFlowerr"
         readonly property int controlWidth: 260
         readonly property int fieldWidth: 76
         readonly property int dialogWidth: 380

@@ -99,7 +99,7 @@ Item {
         anchors.centerIn: parent
         width: Theme.launcher.previewSize
         height: Theme.launcher.previewSize
-        shape: MaterialShape.Cookie9Sided
+        shape: Wallpaper.transitionShape
         source: wallpaper ? Wallpaper.url(wallpaper.path) : ""
         sourceSize: Qt.size(width * 2, height * 2)
         color: Colors.surfaceContainer

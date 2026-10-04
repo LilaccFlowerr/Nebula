@@ -48,7 +48,7 @@ ColumnLayout {
                 SettingRow {
                     icon: "view_week"
                     title: "Workspaces per group"
-                    subtitle: "Dots in the left island before the next group starts"
+                    subtitle: "Dots before a new group starts"
 
                     Slider {
                         width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
@@ -88,7 +88,7 @@ ColumnLayout {
                 SettingRow {
                     icon: "graphic_eq"
                     title: "Visualizer"
-                    subtitle: "Bars behind the island while music plays"
+                    subtitle: "The cava bar!"
                     clickable: true
                     onClicked: Settings.bar.visualizer = !Settings.bar.visualizer
 
@@ -101,7 +101,7 @@ ColumnLayout {
                 SettingRow {
                     icon: "lyrics"
                     title: "Synced lyrics"
-                    subtitle: "Shown in the expanded media card, fetched from LRCLIB"
+                    subtitle: "In the sized media card  "
                     clickable: true
                     onClicked: Settings.bar.lyrics = !Settings.bar.lyrics
 
@@ -118,7 +118,6 @@ ColumnLayout {
                 SettingRow {
                     icon: "timer"
                     title: "Volume and brightness popup"
-                    subtitle: "How long it stays in the island"
 
                     Slider {
                         width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
@@ -146,7 +145,6 @@ ColumnLayout {
                 SettingRow {
                     icon: "deployed_code"
                     title: "Logo when idle"
-                    subtitle: "OS logo next to the date when nothing else is going on"
                     clickable: true
                     onClicked: Settings.bar.osLogo = !Settings.bar.osLogo
 
@@ -218,7 +216,6 @@ ColumnLayout {
                 SettingRow {
                     icon: "keyboard_arrow_up"
                     title: "Tray button"
-                    subtitle: "The arrow next to the clock"
                     clickable: true
                     onClicked: Settings.bar.trayButton = !Settings.bar.trayButton
 
@@ -232,7 +229,6 @@ ColumnLayout {
                     visible: Battery.available
                     icon: "battery_horiz_075"
                     title: "Battery ring"
-                    subtitle: "Charge level around the power button"
                     clickable: true
                     onClicked: Settings.bar.batteryRing = !Settings.bar.batteryRing
 

@@ -32,7 +32,7 @@ ColumnLayout {
         SettingRow {
             icon: "timer"
             title: "Popup duration"
-            subtitle: "How long a popup stays in the island"
+            subtitle: "How long they show"
 
             Slider {
                 width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
@@ -60,7 +60,7 @@ ColumnLayout {
         SettingRow {
             icon: "priority_high"
             title: "Urgent popup duration"
-            subtitle: "For notifications marked as urgent"
+            subtitle: "How long the important notifications show"
 
             Slider {
                 width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm

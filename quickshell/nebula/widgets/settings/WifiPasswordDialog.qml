@@ -78,7 +78,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: "This network is secured. Enter its password to join."
+                text: "Type the password to connect."
                 wrapMode: Text.Wrap
                 font.family: Theme.font.family
                 font.pixelSize: Theme.font.normal

@@ -41,7 +41,6 @@ ColumnLayout {
                 visible: !monitor.modelData.disabled
                 icon: "aspect_ratio"
                 title: "Resolution"
-                subtitle: "Size and refresh rate"
             }
 
             Flow {
@@ -96,7 +95,7 @@ ColumnLayout {
                 visible: !monitor.modelData.disabled
                 icon: "zoom_in"
                 title: "Scale"
-                subtitle: "Bigger text and windows"
+                subtitle: "WARNING dont select 2x size unless you wanna be stuck"
 
                 SegmentedButton {
                     width: Theme.settings.controlWidth
