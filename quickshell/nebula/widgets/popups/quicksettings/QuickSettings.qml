@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
@@ -40,11 +41,12 @@ Rectangle {
         RowLayout {
             spacing: Theme.spacing.md
 
-            ShapedImage {
+            ShapedArt {
                 implicitWidth: Theme.quickSettings.avatarSize
                 implicitHeight: Theme.quickSettings.avatarSize
+                shape: MaterialShape.Cookie9Sided
                 source: SystemInfo.avatar
-                placeholderColor: Colors.surfaceContainerHigh
+                color: Colors.surfaceContainerHigh
 
                 Text {
                     anchors.centerIn: parent
