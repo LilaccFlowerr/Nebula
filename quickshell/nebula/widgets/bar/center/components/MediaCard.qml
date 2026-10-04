@@ -63,6 +63,7 @@ ColumnLayout {
         LyricsView {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            visible: Settings.bar.lyrics
         }
     }
 

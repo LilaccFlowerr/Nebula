@@ -13,7 +13,7 @@ Item {
     readonly property bool empty: !Media.active
     property real size: empty ? Theme.nowPlaying.emptySize : Theme.nowPlaying.cookieSize
     property real spin: 0
-    property real speed: playing ? 360000 / Theme.nowPlaying.spinDuration : 0
+    property real speed: playing && Settings.nowPlaying.spin ? 360000 / Theme.nowPlaying.spinDuration : 0
 
     implicitWidth: size
     implicitHeight: size

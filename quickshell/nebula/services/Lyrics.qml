@@ -32,6 +32,11 @@ Singleton {
 
     onKeyChanged: fetchTimer.restart()
 
+    Connections {
+        target: Settings.bar
+        function onLyricsChanged() { fetchTimer.restart(); }
+    }
+
     Timer {
         id: fetchTimer
         interval: 300
@@ -57,7 +62,7 @@ Singleton {
     function fetch() {
         lines = [];
         plain = "";
-        if (!Media.active) {
+        if (!Media.active || !Settings.bar.lyrics) {
             status = "none";
             return;
         }

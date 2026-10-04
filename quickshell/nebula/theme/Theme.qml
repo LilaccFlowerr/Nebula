@@ -27,7 +27,6 @@ Singleton {
     readonly property Button button: Button {}
 
     component Workspaces: QtObject {
-        readonly property int shown: 5
         readonly property int activeWidth: 88
     }
     readonly property Workspaces workspaces: Workspaces {}
@@ -114,11 +113,14 @@ Singleton {
         readonly property int titleSize: 30
         readonly property int heroHeight: 210
         readonly property int swatchSize: 56
+        readonly property int thumbWidth: 320
         readonly property int avatarSize: 128
-        readonly property int controlWidth: 220
+        readonly property int controlWidth: 260
+        readonly property int fieldWidth: 76
         readonly property int expandDuration: 400
         readonly property real fadeScale: 0.96
-        readonly property int slide: 24
+        readonly property real fadeThroughScale: 0.92
+        readonly property int subSlide: 80
     }
     readonly property SettingsWindow settings: SettingsWindow {}
 

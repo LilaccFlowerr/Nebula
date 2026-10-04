@@ -114,7 +114,7 @@ Island {
             }
         }
 
-        IconButton { icon: "keyboard_arrow_up";   onClicked: console.info("tray") }
+        IconButton { visible: Settings.bar.trayButton; icon: "keyboard_arrow_up"; onClicked: console.info("tray") }
         IconButton { id: gearButton; icon: "settings"; onClicked: GlobalStates.toggleQuickSettings(root.screenName) }
         Item {
             implicitWidth: Theme.batteryRing.size
@@ -123,7 +123,7 @@ Island {
             BatteryRing {
                 id: ring
                 anchors.fill: parent
-                visible: Battery.available
+                visible: Battery.available && Settings.bar.batteryRing
                 level: Battery.level               
                 low: Battery.low                 
             }

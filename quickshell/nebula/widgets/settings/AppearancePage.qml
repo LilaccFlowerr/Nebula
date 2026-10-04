@@ -9,6 +9,8 @@ import qs.theme
 ColumnLayout {
     id: root
 
+    signal navigate(string target)
+
     spacing: Theme.spacing.xl
 
     Component.onCompleted: Scheme.loadPreviews()
@@ -96,10 +98,7 @@ ColumnLayout {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    Launcher.open();
-                    Launcher.enterWallpapers();
-                }
+                onClicked: root.navigate("wallpapers")
             }
         }
     }

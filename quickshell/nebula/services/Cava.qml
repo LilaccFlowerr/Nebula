@@ -9,7 +9,7 @@ Singleton {
 
     property int bars: 64
     property var values: []
-    readonly property bool running: Media.playing
+    readonly property bool running: Media.playing && Settings.bar.visualizer
 
     readonly property string config: [
         "[general]", "bars = " + bars, "framerate = 60",

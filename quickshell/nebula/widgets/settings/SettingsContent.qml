@@ -10,36 +10,80 @@ Item {
 
     property int page: 0
     property int shownPage: 0
+    property string sub: ""
+    property string shownSub: ""
     property real pageT: 1
+    property real slideX: 0
+    property real pageScale: 1
+    property int direction: 0
+
+    readonly property var subpages: ({
+        wallpapers: { title: "Wallpapers", subtitle: "Pick one, it applies right away", source: "WallpapersPage.qml" }
+    })
+    readonly property var current: shownSub !== "" ? subpages[shownSub] : pages[shownPage]
 
     readonly property var pages: [
         { title: "Appearance", subtitle: "Wallpaper, colors and light or dark", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml" },
-        { title: "Clock", subtitle: "How the time shows up in the bar", icon: "schedule", shape: MaterialShape.Cookie9Sided, source: "ClockPage.qml" },
+        { title: "Desktop", subtitle: "Widgets that live on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml" },
+        { title: "Bar", subtitle: "Customize each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml" },
         { title: "Notifications", subtitle: "Popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml" },
         { title: "Recorder", subtitle: "Screen recording in the bottom-right corner", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml" },
         { title: "About", subtitle: "This machine and this shell", icon: "info", shape: MaterialShape.Clover4Leaf, source: "AboutPage.qml" }
     ]
 
     function go(index) {
-        if (index < 0 || index >= pages.length || index === page) return;
+        if (index < 0 || index >= pages.length || (index === page && sub === "")) return;
         page = index;
+        sub = "";
         swap.restart();
+    }
+
+    function navigate(target) {
+        if (target === sub) return;
+        direction = target !== "" ? 1 : -1;
+        sub = target;
+        slide.restart();
     }
 
     implicitWidth: Theme.settings.width
     implicitHeight: Theme.settings.height
     focus: true
 
-    Keys.onEscapePressed: GlobalStates.settingsOpen = false
+    Keys.onEscapePressed: {
+        if (sub !== "") navigate("");
+        else GlobalStates.settingsOpen = false;
+    }
+
+    onVisibleChanged: if (!visible) {
+        sub = "";
+        shownSub = "";
+    }
     Keys.onUpPressed: go(page - 1)
     Keys.onDownPressed: go(page + 1)
     Keys.onTabPressed: go((page + 1) % pages.length)
 
     SequentialAnimation {
         id: swap
+        ScriptAction { script: root.slideX = 0 }
         NumberAnimation { target: root; property: "pageT"; to: 0; duration: Theme.anim.fast; easing.type: Easing.InCubic }
-        ScriptAction { script: { root.shownPage = root.page; flick.contentY = 0; } }
-        NumberAnimation { target: root; property: "pageT"; to: 1; duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        ScriptAction { script: { root.shownPage = root.page; root.shownSub = root.sub; root.pageScale = Theme.settings.fadeThroughScale; flick.contentY = 0; } }
+        ParallelAnimation {
+            NumberAnimation { target: root; property: "pageT"; to: 1; duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+            NumberAnimation { target: root; property: "pageScale"; to: 1; duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        }
+    }
+
+    SequentialAnimation {
+        id: slide
+        ParallelAnimation {
+            NumberAnimation { target: root; property: "pageT"; to: 0; duration: Theme.anim.fast; easing.type: Easing.InCubic }
+            NumberAnimation { target: root; property: "slideX"; to: -root.direction * Theme.settings.subSlide; duration: Theme.anim.fast; easing.type: Easing.InCubic }
+        }
+        ScriptAction { script: { root.shownPage = root.page; root.shownSub = root.sub; root.slideX = root.direction * Theme.settings.subSlide; flick.contentY = 0; } }
+        ParallelAnimation {
+            NumberAnimation { target: root; property: "pageT"; to: 1; duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+            NumberAnimation { target: root; property: "slideX"; to: 0; duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        }
     }
 
     Item {
@@ -155,13 +199,6 @@ Item {
             }
         }
 
-        IconButton {
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.margins: Theme.spacing.sm
-            icon: "close"
-            onClicked: GlobalStates.settingsOpen = false
-        }
     }
 
     Rectangle {
@@ -184,36 +221,66 @@ Item {
 
             ColumnLayout {
                 id: body
-                x: Theme.settings.padding
-                y: Theme.settings.padding + (1 - root.pageT) * Theme.settings.slide
+                x: Theme.settings.padding + root.slideX
+                y: Theme.settings.padding
+                scale: root.pageScale
+                transformOrigin: Item.Top
                 width: flick.width - Theme.settings.padding * 2
                 spacing: Theme.spacing.xl
                 opacity: root.pageT
 
-                ColumnLayout {
-                    spacing: Theme.spacing.xs
+                RowLayout {
+                    spacing: Theme.spacing.md
 
-                    Text {
-                        text: root.pages[root.shownPage].title
-                        font.family: Theme.font.family
-                        font.pixelSize: Theme.settings.titleSize
-                        font.weight: Font.Bold
-                        color: Colors.textOnSurface
+                    IconButton {
+                        visible: root.shownSub !== ""
+                        icon: "arrow_back"
+                        onClicked: root.navigate("")
                     }
 
-                    Text {
-                        text: root.pages[root.shownPage].subtitle
-                        font.family: Theme.font.family
-                        font.pixelSize: Theme.font.normal
-                        color: Colors.textOnSurfaceVariant
+                    ColumnLayout {
+                        spacing: Theme.spacing.xs
+
+                        Text {
+                            text: root.current.title
+                            font.family: Theme.font.family
+                            font.pixelSize: Theme.settings.titleSize
+                            font.weight: Font.Bold
+                            color: Colors.textOnSurface
+                        }
+
+                        Text {
+                            text: root.current.subtitle
+                            font.family: Theme.font.family
+                            font.pixelSize: Theme.font.normal
+                            color: Colors.textOnSurfaceVariant
+                        }
                     }
                 }
 
                 Loader {
+                    id: loader
                     Layout.fillWidth: true
-                    source: root.visible ? root.pages[root.shownPage].source : ""
+                    source: root.visible ? root.current.source : ""
+                }
+
+                Connections {
+                    target: loader.item
+                    ignoreUnknownSignals: true
+
+                    function onNavigate(target) {
+                        root.navigate(target);
+                    }
                 }
             }
         }
+    }
+
+    IconButton {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: Theme.spacing.md + Theme.spacing.sm
+        icon: "close"
+        onClicked: GlobalStates.settingsOpen = false
     }
 }

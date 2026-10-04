@@ -16,7 +16,7 @@ Island {
         spacing: Theme.bar.gap
 
         Repeater {
-            model: Theme.workspaces.shown
+            model: Workspaces.groupSize
 
             WorkspaceButton {
                 required property int index

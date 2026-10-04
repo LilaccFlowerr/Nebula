@@ -7,7 +7,7 @@ import Quickshell.Hyprland
 Singleton {
     id: root
 
-    readonly property int groupSize: 5
+    readonly property int groupSize: Math.max(1, Settings.bar.workspaces)
 
     readonly property int activeId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
 
