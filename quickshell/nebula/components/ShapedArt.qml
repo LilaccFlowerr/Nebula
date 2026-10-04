@@ -46,6 +46,14 @@ Item {
         visible: false
     }
 
+    LoadingIndicator {
+        anchors.centerIn: parent
+        width: Math.min(parent.width, parent.height) * 0.6
+        height: width
+        contained: false
+        running: image.status === Image.Loading
+    }
+
     MultiEffect {
         anchors.fill: parent
         source: image
