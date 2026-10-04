@@ -1,4 +1,5 @@
 import QtQuick
+import M3Shapes
 import qs.components
 import "../../components/Curves.js" as Curves
 import qs.services
@@ -23,22 +24,31 @@ Item {
     }
     readonly property var results: Launcher.results
     readonly property int slots: Launcher.slots
-    readonly property var shapes: ["cookie4", "clover4", "cookie6", "circle", "cookie9", "clover8", "cookie12", "cookie7"]
+    readonly property var shapes: [MaterialShape.Cookie4Sided, MaterialShape.Clover4Leaf, MaterialShape.Cookie6Sided, MaterialShape.Circle, MaterialShape.Cookie9Sided, MaterialShape.Clover8Leaf, MaterialShape.Cookie12Sided, MaterialShape.Cookie7Sided]
 
     width: Theme.launcher.size
     height: Theme.launcher.size
 
-    ShapedImage {
+    MaterialShape {
+        function clover(leaves) {
+            const tip = (-90 + 180 / leaves) * Math.PI / 180;
+            return polygon([
+                point(0.5, 0.5 - Theme.launcher.valleyRadius),
+                point(0.5 + Theme.launcher.leafRadius * Math.cos(tip), 0.5 + Theme.launcher.leafRadius * Math.sin(tip), Theme.launcher.leafRounding)
+            ], leaves).normalized();
+        }
+
+        readonly property real leafOffset: 180 / Launcher.appSlots + (180 / Launcher.commandSlots - 180 / Launcher.appSlots) * root.shownMorph
+
         anchors.fill: parent
         scale: Math.max(0, Curves.back(root.cloverT, Theme.anim.overshoot))
-        bumps: Launcher.appSlots
-        bumpsTo: Launcher.commandSlots
-        morph: root.shownMorph
-        lobes: Theme.launcher.lobes
-        rotation: -90 + root.shownMorph * 360 / Launcher.commandSlots - (1 - Curves.decel(root.cloverT)) * 120
-        placeholderColor: Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
+        fromShape: MaterialShape.Clover8Leaf
+        customToShape: clover(Launcher.commandSlots)
+        morphProgress: root.shownMorph
+        rotation: root.shownMorph * 360 / Launcher.commandSlots - leafOffset - (1 - Curves.decel(root.cloverT)) * 120
+        color: Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
 
-        Behavior on placeholderColor {
+        Behavior on color {
             ColorAnimation { duration: Theme.anim.island; easing.type: Easing.OutCubic }
         }
     }
@@ -83,15 +93,15 @@ Item {
         }
     }
 
-    ShapedImage {
+    ShapedArt {
         readonly property var wallpaper: Launcher.wallpaperMode ? root.results[root.selected] ?? null : null
         anchors.centerIn: parent
         width: Theme.launcher.previewSize
         height: Theme.launcher.previewSize
-        shape: "cookie9"
+        shape: MaterialShape.Cookie9Sided
         source: wallpaper ? Wallpaper.url(wallpaper.path) : ""
         sourceSize: Qt.size(width * 2, height * 2)
-        placeholderColor: Colors.surfaceContainer
+        color: Colors.surfaceContainer
         scale: Math.max(0, root.shownWall)
         rotation: (1 - root.shownWall) * -90
         visible: scale > 0.01

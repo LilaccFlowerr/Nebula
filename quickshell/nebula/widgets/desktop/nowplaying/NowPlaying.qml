@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Widgets
+import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
@@ -28,11 +29,14 @@ Item {
         onTriggered: root.spin = (root.spin + root.speed * frameTime) % 360
     }
 
-    ShapedImage {
+    MaterialShape {
         anchors.fill: parent
-        shape: "cookie12"
-        placeholderColor: Colors.secondaryContainer
+        shape: root.playing ? MaterialShape.Cookie12Sided : MaterialShape.Pentagon
+        color: Colors.secondaryContainer
         rotation: root.spin
+        animationDuration: Theme.anim.slow
+        animationEasing.type: Easing.OutBack
+        animationEasing.overshoot: Theme.anim.overshoot
     }
 
     ColumnLayout {

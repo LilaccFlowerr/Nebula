@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
+import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
@@ -101,12 +102,12 @@ Variants {
             layer.enabled: true
             visible: false
 
-            ShapedImage {
+            MaterialShape {
                 anchors.centerIn: parent
                 width: Theme.launcher.previewSize
                 height: Theme.launcher.previewSize
-                shape: "cookie9"
-                placeholderColor: "black"
+                shape: MaterialShape.Cookie9Sided
+                color: "black"
                 scale: 1 + (window.endScale - 1) * window.reveal
                 rotation: (1 - window.reveal) * -90
             }

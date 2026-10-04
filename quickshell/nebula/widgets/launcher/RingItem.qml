@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Widgets
+import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
@@ -10,7 +11,7 @@ Item {
 
     property real angle: 0
     property var entry: null
-    property string shape: "circle"
+    property int shape: MaterialShape.Circle
     property int delay: 0
     property bool rushing: false
 
@@ -47,7 +48,7 @@ Item {
     x: parent.width / 2 + Theme.launcher.ringRadius * Math.cos(radians) - width / 2
     y: parent.height / 2 + Theme.launcher.ringRadius * Math.sin(radians) - height / 2
 
-    ShapedImage {
+    ShapedArt {
         id: shape
         anchors.horizontalCenter: parent.horizontalCenter
         width: Theme.launcher.itemSize
@@ -55,7 +56,7 @@ Item {
         shape: root.shape
         source: root.isWallpaper ? Wallpaper.url(root.shownEntry.path) : ""
         sourceSize: Qt.size(Theme.launcher.itemSize * 2, Theme.launcher.itemSize * 2)
-        placeholderColor: Colors.surfaceContainerHigh
+        color: Colors.surfaceContainerHigh
         opacity: root.empty ? 0.25 : 1
     }
 

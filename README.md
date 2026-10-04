@@ -45,6 +45,20 @@ The screen recorder uses gpu-screen-recorder from Flathub:
 flatpak install flathub com.dec05eba.gpu_screen_recorder
 ```
 
+All the shapes (the cookies, the launcher flower and the morphing between them) come from
+[m3shapes](https://github.com/soramanew/m3shapes), a QML port of Google's Material 3
+shapes. It's not packaged, so you build it yourself:
+
+```bash
+sudo dnf install qt6-qtshadertools-devel gcc-c++ cmake ninja-build
+git clone https://github.com/soramanew/m3shapes ~/others/m3shapes
+cmake -S ~/others/m3shapes -B ~/others/m3shapes/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+ninja -C ~/others/m3shapes/build
+sudo ninja -C ~/others/m3shapes/build install
+```
+
+If the bar doesn't show up after a Qt update, rebuild it (`git pull`, then the last two lines again).
+
 Ghostty comes from the `scottames/ghostty` COPR. For icons I use Material Symbols Rounded
 and Symbols Nerd Font (both from GitHub, dropped in `~/.local/share/fonts`). App icons come
 from Papirus, because the default GNOME ones show up as black squares in Quickshell.
@@ -63,7 +77,6 @@ After that, put your wallpapers in `~/Pictures/Wallpapers` and switch between th
 
 ## Todo
 
-- now playing widget on the desktop
 - settings window
 - calendar and tray popups
 - my own lockscreen and polkit prompt

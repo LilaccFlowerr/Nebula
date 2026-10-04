@@ -91,7 +91,9 @@ Singleton {
         readonly property int wallpaperPillOffset: 220
         readonly property int labelWidth: 80
         readonly property int iconSize: 26
-        readonly property real lobes: 0.5
+        readonly property real leafRadius: 0.654
+        readonly property real valleyRadius: 0.464
+        readonly property real leafRounding: 0.209
         readonly property int searchWidth: 150
         readonly property int searchHeight: 40
         readonly property real dim: 0.4
