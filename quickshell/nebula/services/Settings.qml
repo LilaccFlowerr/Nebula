@@ -13,6 +13,7 @@ Singleton {
     readonly property alias recorder: adapter.recorder
     readonly property alias wallpaper: adapter.wallpaper
     readonly property alias nowPlaying: adapter.nowPlaying
+    readonly property alias theme: adapter.theme
 
     Process {
         running: true
@@ -57,6 +58,11 @@ Singleton {
             property JsonObject nowPlaying: JsonObject {
                 property real x: -1
                 property real y: -1
+            }
+
+            property JsonObject theme: JsonObject {
+                property string scheme: "scheme-tonal-spot"
+                property string mode: "dark"
             }
         }
     }

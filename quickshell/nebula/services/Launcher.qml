@@ -14,8 +14,10 @@ Singleton {
     readonly property int recentLimit: 20
 
     property string query: ""
-    property bool wallpaperMode: false
-    readonly property bool commandMode: !wallpaperMode && query.startsWith(">")
+    property string picker: ""
+    readonly property bool wallpaperMode: picker === "wallpaper"
+    readonly property bool themeMode: picker === "theme"
+    readonly property bool commandMode: picker === "" && query.startsWith(">")
     readonly property string search: (commandMode ? query.slice(1) : query).trim().toLowerCase()
     readonly property int slots: commandMode ? commandSlots : appSlots
 
@@ -24,14 +26,15 @@ Singleton {
         .sort((a, b) => a.name.localeCompare(b.name))
 
     readonly property var commands: [
-        { name: "Calculator", icon: "calculate", run: () => {} },
+        { name: "Theme", icon: "palette", keepOpen: true, run: () => root.enterThemes() },
         { name: "Lock", icon: "lock", run: () => Power.lock() },
         { name: "Sleep", icon: "bedtime", run: () => Power.suspend() },
         { name: "Restart", icon: "restart_alt", run: () => Power.reboot() },
         { name: "Shutdown", icon: "power_settings_new", run: () => Power.shutdown() },
         { name: "Log out", icon: "logout", run: () => Power.logout() },
         { name: "Record", icon: "screen_record", run: () => Recorder.record() },
-        { name: "Wallpaper", icon: "wallpaper", keepOpen: true, run: () => root.enterWallpapers() }
+        { name: "Wallpaper", icon: "wallpaper", keepOpen: true, run: () => root.enterWallpapers() },
+        { name: Scheme.dark ? "Light mode" : "Dark mode", icon: Scheme.dark ? "light_mode" : "dark_mode", run: () => Scheme.toggleMode() }
     ]
 
     readonly property var wallpapers: Wallpaper.files.map(path => ({ name: Wallpaper.name(path), path: path }))
@@ -39,13 +42,21 @@ Singleton {
     signal clearRequested()
 
     function enterWallpapers() {
-        wallpaperMode = true;
+        picker = "wallpaper";
+        clearRequested();
+    }
+
+    function enterThemes() {
+        picker = "theme";
+        Scheme.loadPreviews();
         clearRequested();
     }
 
     readonly property var results: {
         if (wallpaperMode)
             return rank(wallpapers, w => [w.name]).slice(0, appSlots);
+        if (themeMode)
+            return rank(Scheme.schemes, s => [s.name]).slice(0, appSlots);
         if (commandMode)
             return rank(commands, c => [c.name]).slice(0, slots);
         if (search === "") {
@@ -75,7 +86,7 @@ Singleton {
 
     function open() {
         query = "";
-        wallpaperMode = false;
+        picker = "";
         if (!GlobalStates.launcherOpen) GlobalStates.toggleLauncher();
     }
 
@@ -92,6 +103,11 @@ Singleton {
         if (wallpaperMode) {
             close();
             Wallpaper.set(item.path);
+            return;
+        }
+        if (themeMode) {
+            close();
+            Scheme.set(item.scheme);
             return;
         }
         if (commandMode) {

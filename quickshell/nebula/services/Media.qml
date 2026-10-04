@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Services.Mpris
 
 Singleton {
@@ -34,6 +35,20 @@ Singleton {
     function togglePlaying() { if (player?.canTogglePlaying) player.togglePlaying(); }
     function next()          { if (player?.canGoNext) player.next(); }
     function previous()      { if (player?.canGoPrevious) player.previous(); }
+    readonly property var windows: Hyprland.toplevels.values
+
+    function raise() {
+        if (!player) return;
+        const names = [player.desktopEntry, player.identity].filter(n => n).map(n => n.toLowerCase());
+        const window = windows.find(t => names.includes((t.wayland?.appId ?? "").toLowerCase()));
+        if (window) {
+            const address = String(window.address);
+            Hyprland.dispatch(`hl.dsp.focus({ window = "address:${address.startsWith("0x") ? address : "0x" + address}" })`);
+        } else if (player.canRaise) {
+            player.raise();
+        }
+    }
+
     function seekTo(fraction) { if (player?.canSeek && length > 0) player.position = Math.max(0, Math.min(1, fraction)) * length; }
 
     function formatTime(seconds) {

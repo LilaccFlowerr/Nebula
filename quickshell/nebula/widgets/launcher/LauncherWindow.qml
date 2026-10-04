@@ -48,7 +48,8 @@ PanelWindow {
 
     property int selected: 0
     readonly property var results: Launcher.results
-    onResultsChanged: selected = Launcher.wallpaperMode ? Math.max(0, results.findIndex(w => w.path === Wallpaper.current)) : 0
+    onResultsChanged: selected = Launcher.wallpaperMode ? Math.max(0, results.findIndex(w => w.path === Wallpaper.current))
+        : Launcher.themeMode ? Math.max(0, results.findIndex(s => s.scheme === Scheme.current)) : 0
 
     Connections {
         target: Launcher
@@ -128,7 +129,7 @@ PanelWindow {
 
             Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) Launcher.close();
-                else if (event.key === Qt.Key_Backspace && input.text === "" && Launcher.wallpaperMode) Launcher.wallpaperMode = false;
+                else if (event.key === Qt.Key_Backspace && input.text === "" && Launcher.picker !== "") Launcher.picker = "";
                 else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) window.step(-1, event.isAutoRepeat);
                 else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down || event.key === Qt.Key_Tab) window.step(1, event.isAutoRepeat);
                 else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) Launcher.activate(window.results[window.selected]);
@@ -140,7 +141,7 @@ PanelWindow {
         Text {
             anchors.centerIn: parent
             visible: input.text === "" || input.text === ">"
-            text: Launcher.wallpaperMode ? "Wallpapers" : input.text === ">" ? "> Commands" : "Search"
+            text: Launcher.wallpaperMode ? "Wallpapers" : Launcher.themeMode ? "Themes" : input.text === ">" ? "> Commands" : "Search"
             color: Colors.textOnSurfaceVariant
             opacity: 0.6 * input.opacity
             font: input.font

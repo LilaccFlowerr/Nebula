@@ -24,9 +24,7 @@ Singleton {
     function set(path) {
         if (!path) return;
         Settings.wallpaper.path = path;
-        matugen.command = ["sh", "-c", "matugen image \"$1\" < /dev/null", "sh", path];
-        matugen.running = false;
-        matugen.running = true;
+        Scheme.apply();
     }
 
     FolderListModel {
@@ -42,13 +40,6 @@ Singleton {
 
         onCountChanged: update()
         onStatusChanged: if (status === FolderListModel.Ready) update()
-    }
-
-    Process {
-        id: matugen
-        stderr: SplitParser {
-            onRead: line => console.warn("matugen:", line)
-        }
     }
 
     IpcHandler {

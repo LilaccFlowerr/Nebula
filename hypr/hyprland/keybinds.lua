@@ -24,6 +24,9 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder toggle"))
 hl.bind(mainMod .. " + SHIFT + ALT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder region"))
 
+-- Now playing: expand/collapse the media card in the center island
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs -c nebula ipc call media toggle"))
+
 -- Screenshots (Quickshell screenshot service): saved to ~/Pictures/Screenshots and copied to the
 -- clipboard. Open popups stay open while selecting, so they end up in the shot.
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs -c nebula ipc call screenshot region"))

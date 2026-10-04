@@ -324,6 +324,15 @@ Island {
                     }
                 }
             }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    GlobalStates.mediaExpanded = false;
+                    Media.raise();
+                }
+            }
         }
     }
 }
