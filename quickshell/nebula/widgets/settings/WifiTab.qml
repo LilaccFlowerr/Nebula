@@ -7,8 +7,6 @@ import qs.theme
 ColumnLayout {
     id: tab
 
-    property string expanded: ""
-
     spacing: Theme.spacing.xl
 
     Component.onCompleted: Wifi.scanning = true
@@ -74,55 +72,38 @@ ColumnLayout {
         Repeater {
             model: Wifi.networks.filter(n => !n.connected)
 
-            ColumnLayout {
+            SettingRow {
                 id: entry
                 required property var modelData
-                readonly property bool open: tab.expanded === modelData.name
 
-                Layout.fillWidth: true
-                spacing: 0
-
-                SettingRow {
-                    icon: Wifi.strengthIcon(entry.modelData)
-                    title: entry.modelData.name
-                    subtitle: Wifi.pending === entry.modelData.name || entry.modelData.stateChanging ? "Connecting"
-                            : entry.modelData.known ? "Saved"
-                            : Wifi.secured(entry.modelData) ? "Secured" : "Open"
-                    clickable: true
-                    onClicked: {
-                        if (Wifi.needsPassword(entry.modelData)) {
-                            tab.expanded = entry.open ? "" : entry.modelData.name;
-                        } else {
-                            Wifi.connect(entry.modelData);
-                        }
-                    }
-
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible: Wifi.secured(entry.modelData)
-                        text: "lock"
-                        font.family: Theme.font.icons
-                        font.pixelSize: Theme.settings.iconSize * 0.8
-                        color: Colors.textOnSurfaceVariant
-                    }
-
-                    IconButton {
-                        visible: entry.modelData.known
-                        icon: "delete"
-                        onClicked: Wifi.forget(entry.modelData)
+                icon: Wifi.strengthIcon(entry.modelData)
+                title: entry.modelData.name
+                subtitle: Wifi.pending === entry.modelData.name || entry.modelData.stateChanging ? "Connecting"
+                        : entry.modelData.known ? "Saved"
+                        : Wifi.secured(entry.modelData) ? "Secured" : "Open"
+                clickable: true
+                onClicked: {
+                    if (Wifi.needsPassword(entry.modelData)) {
+                        Wifi.error = "";
+                        Wifi.prompt = entry.modelData;
+                    } else {
+                        Wifi.connect(entry.modelData);
                     }
                 }
 
-                PasswordField {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: Theme.spacing.lg
-                    Layout.rightMargin: Theme.spacing.lg
-                    Layout.bottomMargin: Theme.spacing.md
-                    visible: entry.open
-                    busy: Wifi.pending === entry.modelData.name
-                    error: Wifi.pending === "" ? Wifi.error : ""
-                    onSubmitted: password => Wifi.connect(entry.modelData, password)
-                    onVisibleChanged: if (visible) focusField()
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Wifi.secured(entry.modelData)
+                    text: "lock"
+                    font.family: Theme.font.icons
+                    font.pixelSize: Theme.settings.iconSize * 0.8
+                    color: Colors.textOnSurfaceVariant
+                }
+
+                IconButton {
+                    visible: entry.modelData.known
+                    icon: "delete"
+                    onClicked: Wifi.forget(entry.modelData)
                 }
             }
         }

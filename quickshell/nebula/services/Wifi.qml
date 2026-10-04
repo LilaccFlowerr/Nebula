@@ -29,6 +29,7 @@ Singleton {
 
     property bool scanning: false
     property string pending: ""
+    property var prompt: null
     property string error: ""
 
     Binding {
@@ -85,7 +86,10 @@ Singleton {
             onStreamFinished: root.error = text.trim().replace(/^Error: /, "")
         }
         onExited: code => {
-            if (code === 0) root.error = "";
+            if (code === 0) {
+                root.error = "";
+                root.prompt = null;
+            }
             root.pending = "";
         }
     }

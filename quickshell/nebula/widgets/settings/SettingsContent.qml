@@ -51,7 +51,8 @@ Item {
     focus: true
 
     Keys.onEscapePressed: {
-        if (sub !== "") navigate("");
+        if (Wifi.prompt) Wifi.prompt = null;
+        else if (sub !== "") navigate("");
         else GlobalStates.settingsOpen = false;
     }
 
@@ -59,6 +60,7 @@ Item {
         if (!visible) {
             sub = "";
             shownSub = "";
+            Wifi.prompt = null;
             return;
         }
         const index = pages.findIndex(p => p.key === GlobalStates.settingsPage);
@@ -284,6 +286,11 @@ Item {
                 }
             }
         }
+    }
+
+    WifiPasswordDialog {
+        anchors.fill: parent
+        z: 1
     }
 
     IconButton {

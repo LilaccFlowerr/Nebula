@@ -117,6 +117,7 @@ Singleton {
         readonly property int avatarSize: 128
         readonly property int controlWidth: 260
         readonly property int fieldWidth: 76
+        readonly property int dialogWidth: 380
         readonly property int expandDuration: 400
         readonly property real fadeScale: 0.96
         readonly property real fadeThroughScale: 0.92
