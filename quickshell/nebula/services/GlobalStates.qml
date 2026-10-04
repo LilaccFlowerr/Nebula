@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 
 Singleton {
     id: root
@@ -67,5 +68,11 @@ Singleton {
         powerMenuOpen = false;
         quickSettingsOpen = false;
         mediaExpanded = false;
+    }
+
+    IpcHandler {
+        target: "media"
+
+        function toggle(): void { if (Media.active) root.toggleMedia(); }
     }
 }

@@ -46,7 +46,8 @@ Item {
         customToShape: clover(Launcher.commandSlots)
         morphProgress: root.shownMorph
         rotation: root.shownMorph * 360 / Launcher.commandSlots - leafOffset - (1 - Curves.decel(root.cloverT)) * 120
-        color: Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
+        color: Launcher.themeMode ? Scheme.previews[root.results[root.selected]?.scheme]?.primaryContainer ?? Colors.primaryContainer
+             : Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
 
         Behavior on color {
             ColorAnimation { duration: Theme.anim.island; easing.type: Easing.OutCubic }
