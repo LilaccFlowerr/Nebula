@@ -20,6 +20,7 @@ Singleton {
     readonly property alias displays: adapter.displays
     readonly property alias power: adapter.power
     readonly property alias quickSettings: adapter.quickSettings
+    readonly property alias screenshot: adapter.screenshot
 
     component ClockGroup: JsonObject {
         property bool use24h: false
@@ -95,6 +96,11 @@ Singleton {
         property string tiles: "wifi,bluetooth,dnd"
     }
 
+    component ScreenshotGroup: JsonObject {
+        property bool copy: true
+        property bool notify: true
+    }
+
     component ThemeGroup: JsonObject {
         property string scheme: "scheme-tonal-spot"
         property string mode: "dark"
@@ -118,6 +124,7 @@ Singleton {
         readonly property BarGroup bar: BarGroup {}
         readonly property ThemeGroup theme: ThemeGroup {}
         readonly property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
+        readonly property ScreenshotGroup screenshot: ScreenshotGroup {}
     }
 
     function keys(group) {
@@ -143,7 +150,7 @@ Singleton {
     }
 
     function resetAll() {
-        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "bar", "theme", "quickSettings"]);
+        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "bar", "theme", "quickSettings", "screenshot"]);
     }
 
     Process {
@@ -177,6 +184,7 @@ Singleton {
             property BarGroup bar: BarGroup {}
             property ThemeGroup theme: ThemeGroup {}
             property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
+            property ScreenshotGroup screenshot: ScreenshotGroup {}
         }
     }
 }
