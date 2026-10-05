@@ -29,7 +29,15 @@ Item {
 
     property var shownEntry: null
     Component.onCompleted: shownEntry = entry
-    onEntryChanged: swap.restart()
+    function key(e) {
+        return e ? e.path ?? e.scheme ?? e.id ?? e.name : "";
+    }
+
+    function sync() {
+        if (key(entry) !== key(shownEntry)) swap.restart();
+    }
+
+    onEntryChanged: Qt.callLater(sync)
 
     SequentialAnimation {
         id: swap

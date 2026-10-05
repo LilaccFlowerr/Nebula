@@ -9,6 +9,8 @@ Item {
     id: root
 
     property int selected: 0
+    property int cursor: 0
+    property bool infinite: false
     property bool rushing: false
     property real intro: 1
     readonly property real cloverT: Curves.phase(intro, 0, 0.6)
@@ -25,6 +27,12 @@ Item {
     readonly property var results: Launcher.results
     readonly property int slots: Launcher.slots
     readonly property var shapes: [MaterialShape.Cookie4Sided, MaterialShape.Clover4Leaf, MaterialShape.Cookie6Sided, MaterialShape.Circle, MaterialShape.Cookie9Sided, MaterialShape.Clover8Leaf, MaterialShape.Cookie12Sided, MaterialShape.Cookie7Sided]
+
+    function entryAt(position) {
+        const offset = position <= root.slots / 2 ? position : position - root.slots;
+        const n = root.results.length;
+        return root.results[((root.cursor + offset) % n + n) % n] ?? null;
+    }
 
     width: Theme.launcher.size
     height: Theme.launcher.size
@@ -46,7 +54,7 @@ Item {
         customToShape: clover(Launcher.commandSlots)
         morphProgress: root.shownMorph
         rotation: root.shownMorph * 360 / Launcher.commandSlots - leafOffset - (1 - Curves.decel(root.cloverT)) * 120
-        color: Launcher.themeMode ? Scheme.previews[root.results[root.selected]?.scheme]?.primaryContainer ?? Colors.primaryContainer
+        color: Launcher.themeMode ? Scheme.previews[root.results[root.cursor]?.scheme]?.primaryContainer ?? Colors.primaryContainer
              : Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
 
         Behavior on color {
@@ -80,7 +88,7 @@ Item {
             angle: position * 360 / root.slots
             delay: root.rushing ? 0 : Math.min(position, root.slots - position) * Theme.launcher.stagger
             rushing: root.rushing
-            entry: root.results[index] ?? null
+            entry: root.infinite ? root.entryAt(position) : root.results[index] ?? null
             shape: root.shapes[index]
             readonly property real appear: Math.max(0, Curves.back(Curves.phase(root.intro, 0.3 + position * 0.04, 0.35), Theme.anim.overshoot))
             opacity: Math.min(1, appear * 2)
@@ -95,7 +103,7 @@ Item {
     }
 
     ShapedArt {
-        readonly property var wallpaper: Launcher.wallpaperMode ? root.results[root.selected] ?? null : null
+        readonly property var wallpaper: Launcher.wallpaperMode ? root.results[root.cursor] ?? null : null
         anchors.centerIn: parent
         width: Theme.launcher.previewSize
         height: Theme.launcher.previewSize
