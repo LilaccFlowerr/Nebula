@@ -36,7 +36,7 @@ Item {
         { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "pages/system/SystemPage.qml", reset: ["input", "power"] },
         { key: "apps", title: "Apps", subtitle: "What opens what", icon: "apps", shape: MaterialShape.Puffy, source: "pages/apps/AppsPage.qml", reset: ["apps"] },
         { key: "notifications", title: "Notifications", subtitle: "The popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "pages/NotificationsPage.qml", reset: ["notifications"] },
-        { key: "recorder", title: "Recorder", subtitle: "Screen recording", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "pages/RecorderPage.qml", reset: ["recorder"] },
+        { key: "recorder", title: "Recorder", subtitle: "Recordings and screenshots", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "pages/recorder/RecorderPage.qml", reset: ["recorder", "screenshot"] },
         { key: "about", title: "About", subtitle: "This machine", icon: "info", shape: MaterialShape.Clover4Leaf, source: "pages/AboutPage.qml" }
     ]
 
