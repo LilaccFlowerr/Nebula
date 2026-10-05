@@ -4,6 +4,8 @@ import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
+import qs.widgets.settings.components
+import qs.widgets.settings.pages.connections
 
 Item {
     id: root
@@ -18,24 +20,24 @@ Item {
     property int direction: 0
 
     readonly property var subpages: ({
-        wallpapers: { title: "Wallpapers", subtitle: "Click one to use it", source: "WallpapersPage.qml" }
+        wallpapers: { title: "Wallpapers", subtitle: "Click one to use it", source: "pages/appearance/WallpapersPage.qml" }
     })
     readonly property string subKey: shownSub.split(":")[0]
     readonly property string subArg: shownSub.split(":")[1] ?? ""
     readonly property var current: shownSub === "" ? pages?.[shownPage]
-        : subKey === "app" ? ({ title: Apps.roles.find(r => r.key === subArg)?.title ?? "App", subtitle: "Pick one", source: "AppPickerPage.qml" })
+        : subKey === "app" ? ({ title: Apps.roles.find(r => r.key === subArg)?.title ?? "App", subtitle: "Pick one", source: "pages/apps/AppPickerPage.qml" })
         : subpages?.[subKey] ?? pages?.[shownPage]
 
     readonly property var pages: [
-        { key: "appearance", title: "Appearance", subtitle: "Wallpaper and colors", icon: "palette", shape: MaterialShape.Flower, source: "AppearancePage.qml", reset: ["theme", "wallpaper.transition"] },
-        { key: "desktop", title: "Desktop", subtitle: "Stuff on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "DesktopPage.qml", reset: ["nowPlaying"] },
-        { key: "bar", title: "Bar", subtitle: "Tweak each island", icon: "toolbar", shape: MaterialShape.Pill, source: "BarPage.qml", reset: ["bar", "clock"] },
-        { key: "connections", title: "Connections", subtitle: "Wifi, cable and bluetooth", icon: "wifi", shape: MaterialShape.Cookie12Sided, source: "ConnectionsPage.qml" },
-        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "SystemPage.qml", reset: ["input", "power"] },
-        { key: "apps", title: "Apps", subtitle: "What opens what", icon: "apps", shape: MaterialShape.Puffy, source: "AppsPage.qml", reset: ["apps"] },
-        { key: "notifications", title: "Notifications", subtitle: "The popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "NotificationsPage.qml", reset: ["notifications"] },
-        { key: "recorder", title: "Recorder", subtitle: "Screen recording", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "RecorderPage.qml", reset: ["recorder"] },
-        { key: "about", title: "About", subtitle: "This machine", icon: "info", shape: MaterialShape.Clover4Leaf, source: "AboutPage.qml" }
+        { key: "appearance", title: "Appearance", subtitle: "Wallpaper and colors", icon: "palette", shape: MaterialShape.Flower, source: "pages/appearance/AppearancePage.qml", reset: ["theme", "wallpaper.transition"] },
+        { key: "desktop", title: "Desktop", subtitle: "Stuff on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "pages/DesktopPage.qml", reset: ["nowPlaying"] },
+        { key: "bar", title: "Bar", subtitle: "Tweak each island", icon: "toolbar", shape: MaterialShape.Pill, source: "pages/BarPage.qml", reset: ["bar", "clock"] },
+        { key: "connections", title: "Connections", subtitle: "Wifi, cable and bluetooth", icon: "wifi", shape: MaterialShape.Cookie12Sided, source: "pages/connections/ConnectionsPage.qml" },
+        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "pages/system/SystemPage.qml", reset: ["input", "power"] },
+        { key: "apps", title: "Apps", subtitle: "What opens what", icon: "apps", shape: MaterialShape.Puffy, source: "pages/apps/AppsPage.qml", reset: ["apps"] },
+        { key: "notifications", title: "Notifications", subtitle: "The popups in the island", icon: "notifications", shape: MaterialShape.Sunny, source: "pages/NotificationsPage.qml", reset: ["notifications"] },
+        { key: "recorder", title: "Recorder", subtitle: "Screen recording", icon: "screen_record", shape: MaterialShape.Cookie4Sided, source: "pages/RecorderPage.qml", reset: ["recorder"] },
+        { key: "about", title: "About", subtitle: "This machine", icon: "info", shape: MaterialShape.Clover4Leaf, source: "pages/AboutPage.qml" }
     ]
 
     function go(index) {
@@ -280,6 +282,7 @@ Item {
 
                     ActionButton {
                         visible: root.shownSub === "" && !!root.current?.reset
+                        Layout.rightMargin: Theme.button.size - Theme.spacing.sm
                         icon: "restart_alt"
                         text: "Reset"
                         onClicked: Settings.reset(root.current.reset)

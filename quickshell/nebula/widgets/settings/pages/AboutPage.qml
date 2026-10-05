@@ -4,6 +4,7 @@ import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
+import qs.widgets.settings.components
 
 ColumnLayout {
     spacing: Theme.spacing.xl
@@ -133,7 +134,7 @@ ColumnLayout {
             Image {
                 id: localAvatar
                 visible: false
-                source: Qt.resolvedUrl("../../assets/author.png")
+                source: Qt.resolvedUrl("../../../assets/author.png")
             }
 
             ShapedArt {
