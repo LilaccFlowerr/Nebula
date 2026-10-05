@@ -4,6 +4,7 @@ import Quickshell.Services.UPower
 import qs.components
 import qs.services
 import qs.theme
+import qs.widgets.settings.components
 
 ColumnLayout {
     id: tab

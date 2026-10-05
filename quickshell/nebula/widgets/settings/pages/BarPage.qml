@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.components
 import qs.services
 import qs.theme
+import qs.widgets.settings.components
 
 ColumnLayout {
     id: page
@@ -167,6 +168,65 @@ ColumnLayout {
                     Switch {
                         checked: Settings.bar.osLogo
                         onToggled: Settings.bar.osLogo = !Settings.bar.osLogo
+                    }
+                }
+            }
+
+            SettingGroup {
+                title: "Popups"
+
+                SettingRow {
+                    icon: "volume_up"
+                    title: "Volume"
+                    subtitle: "When the volume changes"
+                    clickable: true
+                    onClicked: Settings.bar.eventVolume = !Settings.bar.eventVolume
+
+                    Switch {
+                        checked: Settings.bar.eventVolume
+                        onToggled: Settings.bar.eventVolume = !Settings.bar.eventVolume
+                    }
+                }
+
+                SettingRow {
+                    visible: Brightness.available
+                    icon: "brightness_6"
+                    title: "Brightness"
+                    subtitle: "When the screen brightness changes"
+                    clickable: true
+                    onClicked: Settings.bar.eventBrightness = !Settings.bar.eventBrightness
+
+                    Switch {
+                        checked: Settings.bar.eventBrightness
+                        onToggled: Settings.bar.eventBrightness = !Settings.bar.eventBrightness
+                    }
+                }
+
+                SettingRow {
+                    visible: Battery.available
+                    icon: "power"
+                    title: "Charger"
+                    subtitle: "When you plug it in or out"
+                    clickable: true
+                    onClicked: Settings.bar.eventCharger = !Settings.bar.eventCharger
+
+                    Switch {
+                        checked: Settings.bar.eventCharger
+                        onToggled: Settings.bar.eventCharger = !Settings.bar.eventCharger
+                    }
+                }
+
+                SettingRow {
+                    visible: Battery.available
+                    icon: "battery_alert"
+                    title: "Low battery"
+                    subtitle: "When the battery runs low"
+                    clickable: true
+                    onClicked: Settings.bar.eventLowBattery = !Settings.bar.eventLowBattery
+
+                    Switch {
+                        checked: Settings.bar.eventLowBattery
+                        onToggled: Settings.bar.eventLowBattery = !Settings.bar.eventLowBattery
                     }
                 }
             }

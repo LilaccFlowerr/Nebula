@@ -62,8 +62,17 @@ Island {
         onTriggered: root.event = Notifications.current ? "notification" : ""
     }
 
+    readonly property var eventSettings: ({
+        volume: "eventVolume",
+        brightness: "eventBrightness",
+        charging: "eventCharger",
+        unplugged: "eventCharger",
+        low: "eventLowBattery"
+    })
+
     function popEvent(name, duration = Settings.bar.osdDuration) {
         if (!armed || Notifications.current || isExpanded) return;
+        if (Settings.bar[eventSettings[name]] === false) return;
         event = name;
         eventTimer.interval = duration;
         eventTimer.restart();

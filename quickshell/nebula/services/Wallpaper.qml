@@ -11,7 +11,7 @@ Singleton {
 
     readonly property string home: Quickshell.env("HOME")
     readonly property string directory: Settings.wallpaper.directory || home + "/Pictures/Wallpapers"
-    readonly property string fallback: Quickshell.shellDir + "/assets/angel.jpg"
+    readonly property string fallback: Quickshell.shellDir + "/assets/default.jpg"
     readonly property string current: Settings.wallpaper.path || fallback
     property var files: []
 

@@ -84,6 +84,10 @@ Singleton {
         property bool osLogo: true
         property bool trayButton: true
         property bool batteryRing: true
+        property bool eventVolume: true
+        property bool eventBrightness: true
+        property bool eventCharger: true
+        property bool eventLowBattery: true
     }
 
     component ThemeGroup: JsonObject {
