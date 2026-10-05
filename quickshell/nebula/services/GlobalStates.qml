@@ -99,6 +99,12 @@ Singleton {
     }
 
     IpcHandler {
+        target: "quicksettings"
+
+        function toggle(): void { root.toggleQuickSettings(); }
+    }
+
+    IpcHandler {
         target: "settings"
 
         function toggle(): void { root.toggleSettings(); }

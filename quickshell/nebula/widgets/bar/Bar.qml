@@ -27,6 +27,11 @@ Variants {
         exclusiveZone: Theme.bar.height
         color: "transparent"
 
+        IdleInhibitor {
+            window: window
+            enabled: KeepAwake.enabled
+        }
+
         mask: Region {
             regions: [
                 Region { item: leftIsland },

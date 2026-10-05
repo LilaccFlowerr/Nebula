@@ -8,6 +8,7 @@ Singleton {
     id: root
 
     readonly property PwNode sink: Pipewire.defaultAudioSink
+    readonly property PwNode source: Pipewire.defaultAudioSource
 
     readonly property bool ready: sink !== null && sink.ready
     readonly property real volume: ready ? sink.audio.volume : 0
@@ -18,8 +19,12 @@ Singleton {
                                   : volume < 0.5         ? "volume_down"
                                   :                        "volume_up"
 
+    readonly property bool micReady: source !== null && source.ready
+    readonly property bool micMuted: micReady ? source.audio.muted : false
+    readonly property string micIcon: micMuted ? "mic_off" : "mic"
+
     PwObjectTracker {
-        objects: [root.sink]
+        objects: [root.sink, root.source]
     }
 
     function setVolume(value) {
@@ -28,5 +33,9 @@ Singleton {
 
     function toggleMute() {
         if (ready) sink.audio.muted = !muted;
+    }
+
+    function toggleMic() {
+        if (micReady) source.audio.muted = !micMuted;
     }
 }

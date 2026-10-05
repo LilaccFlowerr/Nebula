@@ -19,6 +19,7 @@ Singleton {
     readonly property alias input: adapter.input
     readonly property alias displays: adapter.displays
     readonly property alias power: adapter.power
+    readonly property alias quickSettings: adapter.quickSettings
 
     component ClockGroup: JsonObject {
         property bool use24h: false
@@ -90,6 +91,10 @@ Singleton {
         property bool eventLowBattery: true
     }
 
+    component QuickSettingsGroup: JsonObject {
+        property string tiles: "wifi,bluetooth,dnd"
+    }
+
     component ThemeGroup: JsonObject {
         property string scheme: "scheme-tonal-spot"
         property string mode: "dark"
@@ -112,6 +117,7 @@ Singleton {
         readonly property PowerGroup power: PowerGroup {}
         readonly property BarGroup bar: BarGroup {}
         readonly property ThemeGroup theme: ThemeGroup {}
+        readonly property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
     }
 
     function keys(group) {
@@ -137,7 +143,7 @@ Singleton {
     }
 
     function resetAll() {
-        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "bar", "theme"]);
+        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "bar", "theme", "quickSettings"]);
     }
 
     Process {
@@ -170,6 +176,7 @@ Singleton {
             property PowerGroup power: PowerGroup {}
             property BarGroup bar: BarGroup {}
             property ThemeGroup theme: ThemeGroup {}
+            property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
         }
     }
 }

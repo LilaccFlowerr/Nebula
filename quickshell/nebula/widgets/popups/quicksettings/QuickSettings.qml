@@ -175,37 +175,26 @@ Rectangle {
             rowSpacing: Theme.spacing.sm
             columnSpacing: Theme.spacing.sm
 
-            Tile {
-                Layout.fillWidth: true
-                visible: Wifi.available
-                icon: Wifi.icon
-                title: "Wifi"
-                subtitle: Wifi.connected ? Wifi.ssid : Wifi.enabled ? "Not connected" : "Off"
-                active: Wifi.enabled
-                splittable: true
-                onClicked: Wifi.toggle()
-                onOpenRequested: GlobalStates.openSettings("connections", "wifi", true)
-            }
+            Repeater {
+                model: Tiles.keys
 
-            Tile {
-                Layout.fillWidth: true
-                visible: BluetoothStatus.available
-                icon: BluetoothStatus.icon
-                title: "Bluetooth"
-                subtitle: BluetoothStatus.connected ? BluetoothStatus.deviceName : BluetoothStatus.enabled ? "On" : "Off"
-                active: BluetoothStatus.enabled
-                splittable: true
-                onClicked: BluetoothStatus.toggle()
-                onOpenRequested: GlobalStates.openSettings("connections", "bluetooth", true)
-            }
+                Loader {
+                    required property string modelData
 
-            Tile {
-                Layout.fillWidth: true
-                icon: Dnd.icon
-                title: "Do not disturb"
-                subtitle: Dnd.enabled ? "On" : "Off"
-                active: Dnd.enabled
-                onClicked: Dnd.toggle()
+                    Layout.fillWidth: true
+                    visible: Tiles.available(modelData)
+                    sourceComponent: ({
+                        wifi: wifiTile,
+                        bluetooth: bluetoothTile,
+                        dnd: dndTile,
+                        darkMode: darkModeTile,
+                        record: recordTile,
+                        screenshot: screenshotTile,
+                        powerMode: powerModeTile,
+                        keepAwake: keepAwakeTile,
+                        mic: micTile
+                    })[modelData] ?? null
+                }
             }
 
             Tile {
@@ -250,6 +239,127 @@ Rectangle {
                 value: Brightness.level
                 onMoved: Brightness.setBrightness(value)
             }
+        }
+    }
+
+    Component {
+        id: wifiTile
+
+        Tile {
+            icon: Wifi.icon
+            title: "Wifi"
+            subtitle: Wifi.connected ? Wifi.ssid : Wifi.enabled ? "Not connected" : "Off"
+            active: Wifi.enabled
+            splittable: true
+            onClicked: Wifi.toggle()
+            onOpenRequested: GlobalStates.openSettings("connections", "wifi", true)
+        }
+    }
+
+    Component {
+        id: bluetoothTile
+
+        Tile {
+            icon: BluetoothStatus.icon
+            title: "Bluetooth"
+            subtitle: BluetoothStatus.connected ? BluetoothStatus.deviceName : BluetoothStatus.enabled ? "On" : "Off"
+            active: BluetoothStatus.enabled
+            splittable: true
+            onClicked: BluetoothStatus.toggle()
+            onOpenRequested: GlobalStates.openSettings("connections", "bluetooth", true)
+        }
+    }
+
+    Component {
+        id: dndTile
+
+        Tile {
+            icon: Dnd.icon
+            title: "Do not disturb"
+            subtitle: Dnd.enabled ? "On" : "Off"
+            active: Dnd.enabled
+            onClicked: Dnd.toggle()
+        }
+    }
+
+    Component {
+        id: darkModeTile
+
+        Tile {
+            icon: Scheme.dark ? "dark_mode" : "light_mode"
+            title: "Dark mode"
+            subtitle: Scheme.dark ? "On" : "Off"
+            active: Scheme.dark
+            onClicked: Scheme.toggleMode()
+        }
+    }
+
+    Component {
+        id: recordTile
+
+        Tile {
+            icon: Recorder.recording ? "stop_circle" : "screen_record"
+            title: "Record"
+            subtitle: !Recorder.recording ? "Off"
+                    : !Recorder.capturing ? "Starting"
+                    : Recorder.elapsedText
+            active: Recorder.recording
+            onClicked: {
+                if (!Recorder.recording) GlobalStates.quickSettingsOpen = false;
+                Recorder.toggle();
+            }
+        }
+    }
+
+    Component {
+        id: screenshotTile
+
+        Tile {
+            icon: "screenshot_region"
+            title: "Screenshot"
+            subtitle: "Pick a region"
+            onClicked: {
+                GlobalStates.quickSettingsOpen = false;
+                Screenshot.region();
+            }
+        }
+    }
+
+    Component {
+        id: powerModeTile
+
+        Tile {
+            icon: Power.profileIcon
+            title: "Power mode"
+            subtitle: Power.profileName
+            active: Power.profileName !== "Balanced"
+            splittable: true
+            onClicked: Power.cycleProfile()
+            onOpenRequested: GlobalStates.openSettings("system", "power", true)
+        }
+    }
+
+    Component {
+        id: keepAwakeTile
+
+        Tile {
+            icon: KeepAwake.icon
+            title: "Keep awake"
+            subtitle: KeepAwake.enabled ? "On" : "Off"
+            active: KeepAwake.enabled
+            onClicked: KeepAwake.toggle()
+        }
+    }
+
+    Component {
+        id: micTile
+
+        Tile {
+            icon: Audio.micIcon
+            title: "Microphone"
+            subtitle: Audio.micMuted ? "Muted" : "On"
+            active: !Audio.micMuted
+            onClicked: Audio.toggleMic()
         }
     }
 }
