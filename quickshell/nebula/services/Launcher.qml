@@ -55,7 +55,7 @@ Singleton {
 
     readonly property var results: {
         if (wallpaperMode)
-            return rank(wallpapers, w => [w.name]).slice(0, appSlots);
+            return rank(wallpapers, w => [w.name]);
         if (themeMode)
             return rank(Scheme.schemes, s => [s.name]).slice(0, appSlots);
         if (commandMode)

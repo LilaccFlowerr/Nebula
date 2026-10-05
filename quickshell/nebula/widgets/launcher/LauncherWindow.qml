@@ -47,9 +47,14 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
     property int selected: 0
+    property int cursor: 0
     readonly property var results: Launcher.results
-    onResultsChanged: selected = Launcher.wallpaperMode ? Math.max(0, results.findIndex(w => w.path === Wallpaper.current))
-        : Launcher.themeMode ? Math.max(0, results.findIndex(s => s.scheme === Scheme.current)) : 0
+    readonly property bool infinite: Launcher.wallpaperMode && results.length > Launcher.slots
+    onResultsChanged: {
+        cursor = Launcher.wallpaperMode ? Math.max(0, results.findIndex(w => w.path === Wallpaper.current))
+            : Launcher.themeMode ? Math.max(0, results.findIndex(s => s.scheme === Scheme.current)) : 0;
+        selected = infinite ? 0 : cursor;
+    }
 
     Connections {
         target: Launcher
@@ -61,8 +66,9 @@ PanelWindow {
     function step(delta, repeat) {
         rushing = repeat;
         if (repeat) rushTimer.restart();
-        if (results.length > 0)
-            selected = (selected + delta + results.length) % results.length;
+        if (results.length === 0) return;
+        cursor = (cursor + delta + results.length) % results.length;
+        selected = infinite ? (selected + delta + Launcher.slots) % Launcher.slots : cursor;
     }
 
     Timer {
@@ -75,6 +81,7 @@ PanelWindow {
         if (open) {
             input.text = "";
             selected = 0;
+            cursor = 0;
             input.forceActiveFocus();
             closeAnim.stop();
             openAnim.restart();
@@ -99,6 +106,8 @@ PanelWindow {
         anchors.centerIn: parent
         intro: window.progress
         selected: window.selected
+        cursor: window.cursor
+        infinite: window.infinite
         rushing: window.rushing
     }
 
@@ -132,7 +141,7 @@ PanelWindow {
                 else if (event.key === Qt.Key_Backspace && input.text === "" && Launcher.picker !== "") Launcher.picker = "";
                 else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up || event.key === Qt.Key_Backtab) window.step(-1, event.isAutoRepeat);
                 else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down || event.key === Qt.Key_Tab) window.step(1, event.isAutoRepeat);
-                else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) Launcher.activate(window.results[window.selected]);
+                else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) Launcher.activate(window.results[window.cursor]);
                 else return;
                 event.accepted = true;
             }
