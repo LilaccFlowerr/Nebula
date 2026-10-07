@@ -33,13 +33,13 @@ Singleton {
         readonly property int shapeSize: 34
         readonly property int activeShapeSize: 40
         readonly property var shapes: [
-            MaterialShape.Circle, MaterialShape.Cookie4Sided, MaterialShape.Clover4Leaf, MaterialShape.Cookie6Sided,
-            MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Cookie7Sided, MaterialShape.Puffy,
-            MaterialShape.Clover8Leaf, MaterialShape.Cookie9Sided
+            MaterialShape.Circle, MaterialShape.Clover4Leaf, MaterialShape.Triangle, MaterialShape.Heart,
+            MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Arch, MaterialShape.Ghostish,
+            MaterialShape.Sunny, MaterialShape.Burst
         ]
         readonly property var activeShapes: [
-            MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Flower, MaterialShape.SoftBurst,
-            MaterialShape.Cookie12Sided, MaterialShape.Heart, MaterialShape.Ghostish, MaterialShape.Clover8Leaf
+            MaterialShape.VerySunny, MaterialShape.Flower, MaterialShape.SoftBurst, MaterialShape.Cookie12Sided,
+            MaterialShape.Cookie9Sided, MaterialShape.Clover8Leaf, MaterialShape.Puffy, MaterialShape.SoftBoom
         ]
     }
     readonly property Workspaces workspaces: Workspaces {}
