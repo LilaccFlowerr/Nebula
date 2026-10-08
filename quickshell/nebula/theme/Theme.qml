@@ -70,6 +70,15 @@ Singleton {
         readonly property int width: 320
         readonly property int cellSize: 36
         readonly property int titleSize: 26
+        readonly property int dayNumberSize: 40
+        readonly property int dayShapeSize: 76
+        readonly property int weatherShapeSize: 64
+        readonly property int weatherTempSize: 34
+        readonly property int weatherIconSize: 30
+        readonly property int forecastIconSize: 22
+        readonly property int detailIconSize: 16
+        readonly property int emptyShapeSize: 48
+        readonly property real slideDistance: 0.25
     }
     readonly property Calendar calendar: Calendar {}
 

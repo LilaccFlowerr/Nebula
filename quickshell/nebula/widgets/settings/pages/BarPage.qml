@@ -316,6 +316,24 @@ ColumnLayout {
             }
 
             SettingGroup {
+                title: "Weather"
+
+                SettingRow {
+                    icon: "location_on"
+                    title: "City"
+                    subtitle: Weather.error !== "" ? Weather.error
+                            : Weather.place !== "" ? "Showing " + Weather.place
+                            : "Shows the weather under the calendar"
+
+                    TextField {
+                        text: Settings.weather.city
+                        placeholder: "Amsterdam"
+                        onEdited: text => Settings.weather.city = text.trim()
+                    }
+                }
+            }
+
+            SettingGroup {
                 id: tilesGroup
 
                 property int picking: -1
