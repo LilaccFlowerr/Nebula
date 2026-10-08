@@ -7,7 +7,6 @@ import qs.widgets.popups.quicksettings
 import qs.widgets.popups.calendar
 import qs.services
 import qs.theme
-import "../../../components/Curves.js" as Curves
 
 Island {
     id: root
@@ -62,6 +61,7 @@ Island {
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
         anchors.right: parent.right
+        anchors.rightMargin: Theme.bar.padding
         width: calendar.width
         height: root.calendarOpen ? calendar.height : 0
 
@@ -73,19 +73,10 @@ Island {
         }
     }
 
-    Neck {
-        id: neck
-        anchors.top: parent.bottom
-        x: row.x + gearButton.x + gearButton.width / 2 - width / 2
-        neckWidth: Theme.quickSettings.neckWidth
-        curve: Theme.quickSettings.neckCurve
-        opacity: quickSettings.opacity * (1 - Curves.phase(quickSettings.expand, 0, 0.3))
-        visible: opacity > 0
-    }
-
     Item {
         id: settingsArea
-        anchors.top: neck.bottom
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
         anchors.right: parent.right
         anchors.rightMargin: Theme.bar.padding
         width: quickSettings.implicitWidth

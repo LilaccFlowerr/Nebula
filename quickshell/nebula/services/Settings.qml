@@ -21,6 +21,7 @@ Singleton {
     readonly property alias power: adapter.power
     readonly property alias quickSettings: adapter.quickSettings
     readonly property alias screenshot: adapter.screenshot
+    readonly property alias weather: adapter.weather
 
     component ClockGroup: JsonObject {
         property bool use24h: false
@@ -101,6 +102,10 @@ Singleton {
         property bool notify: true
     }
 
+    component WeatherGroup: JsonObject {
+        property string city: ""
+    }
+
     component ThemeGroup: JsonObject {
         property string scheme: "scheme-tonal-spot"
         property string mode: "dark"
@@ -127,6 +132,7 @@ Singleton {
         readonly property ThemeGroup theme: ThemeGroup {}
         readonly property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
         readonly property ScreenshotGroup screenshot: ScreenshotGroup {}
+        readonly property WeatherGroup weather: WeatherGroup {}
     }
 
     function keys(group) {
@@ -187,6 +193,7 @@ Singleton {
             property ThemeGroup theme: ThemeGroup {}
             property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
             property ScreenshotGroup screenshot: ScreenshotGroup {}
+            property WeatherGroup weather: WeatherGroup {}
         }
     }
 }
