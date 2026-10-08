@@ -2,9 +2,13 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Widgets
+import Quickshell.Services.SystemTray
+import M3Shapes
 import qs.components
 import qs.widgets.popups.quicksettings
 import qs.widgets.popups.calendar
+import qs.widgets.popups.tray
 import qs.services
 import qs.theme
 
@@ -16,6 +20,10 @@ Island {
     readonly property bool powerOpen: GlobalStates.powerMenuOpen && GlobalStates.isOn(screenName)
     readonly property bool settingsOpen: GlobalStates.quickSettingsOpen && GlobalStates.isOn(screenName)
     readonly property bool calendarOpen: GlobalStates.calendarOpen && GlobalStates.isOn(screenName)
+    readonly property bool trayOpen: GlobalStates.trayOpen && GlobalStates.isOn(screenName)
+    property SystemTrayItem trayMenuItem: null
+
+    onTrayOpenChanged: if (!trayOpen) trayMenuItem = null
     readonly property bool fullSettings: GlobalStates.settingsOpen && GlobalStates.isOn(screenName)
     readonly property real presence: quickSettings.presence
     property bool armed: false
@@ -28,14 +36,16 @@ Island {
     property alias powerArea: powerArea
     property alias settingsArea: settingsArea
     property alias calendarArea: calendarArea
+    property alias trayArea: trayArea
 
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
-        active: (root.powerOpen || root.settingsOpen || root.calendarOpen) && !GlobalStates.capturing
+        active: (root.powerOpen || root.settingsOpen || root.calendarOpen || root.trayOpen) && !GlobalStates.capturing
         onCleared: {
             GlobalStates.powerMenuOpen = false;
             GlobalStates.quickSettingsOpen = false;
             GlobalStates.calendarOpen = false;
+            GlobalStates.trayOpen = false;
         }
     }
 
@@ -56,6 +66,24 @@ Island {
             onRequestClose: GlobalStates.powerMenuOpen = false
         }
     }
+    Item {
+        id: trayArea
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
+        anchors.right: parent.right
+        anchors.rightMargin: Theme.bar.padding
+        width: trayMenu.width
+        height: trayMenu.open ? trayMenu.height : 0
+
+        TrayMenu {
+            id: trayMenu
+            anchors.top: parent.top
+            anchors.right: parent.right
+            item: root.trayOpen ? root.trayMenuItem : null
+            onRequestClose: GlobalStates.trayOpen = false
+        }
+    }
+
     Item {
         id: calendarArea
         anchors.top: parent.bottom
@@ -137,7 +165,124 @@ Island {
             }
         }
 
-        IconButton { visible: Settings.bar.trayButton; icon: "keyboard_arrow_up"; onClicked: console.info("tray") }
+        Rectangle {
+            id: trayButton
+
+            property real shown: root.trayOpen ? 1 : 0
+
+            Behavior on shown {
+                NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+            }
+
+            visible: Settings.bar.trayButton
+            implicitWidth: Theme.button.size + (trayIcons.implicitWidth + Theme.spacing.xs) * shown
+            implicitHeight: Theme.button.size
+            radius: height / 2
+            color: trayMouse.containsMouse && !root.trayOpen ? Colors.surfaceContainerHigh : Colors.surfaceContainer
+            clip: true
+
+            Behavior on color {
+                ColorAnimation { duration: Theme.anim.fast }
+            }
+
+            Row {
+                id: trayIcons
+                x: Theme.spacing.xs
+                anchors.verticalCenter: parent.verticalCenter
+                opacity: trayButton.shown
+                visible: opacity > 0
+
+                Text {
+                    visible: SystemTray.items.values.length === 0
+                    height: Theme.button.size
+                    leftPadding: Theme.spacing.sm
+                    rightPadding: Theme.spacing.xs
+                    verticalAlignment: Text.AlignVCenter
+                    text: "Empty"
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.small
+                    color: Colors.textOnSurfaceVariant
+                }
+
+            Repeater {
+                model: SystemTray.items.values
+
+                Item {
+                    id: trayItem
+
+                    required property SystemTrayItem modelData
+                    readonly property bool menuOpen: root.trayMenuItem === modelData
+
+                    width: Theme.button.size - Theme.spacing.xs * 2
+                    height: width
+
+                    MaterialShape {
+                        anchors.fill: parent
+                        implicitSize: parent.width
+                        shape: itemMouse.containsMouse || trayItem.menuOpen ? MaterialShape.Cookie9Sided : MaterialShape.Circle
+                        color: trayItem.menuOpen ? Colors.secondaryContainer : itemMouse.containsMouse ? Colors.surfaceContainerHighest : "transparent"
+                        animationDuration: Theme.anim.medium
+
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.anim.fast }
+                        }
+                    }
+
+                    IconImage {
+                        anchors.centerIn: parent
+                        implicitSize: Theme.tray.iconSize
+                        source: trayItem.modelData.icon
+                    }
+
+                    MouseArea {
+                        id: itemMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                        onClicked: mouse => {
+                            if (mouse.button === Qt.RightButton || trayItem.modelData.onlyMenu) {
+                                if (trayItem.modelData.hasMenu) root.trayMenuItem = trayItem.menuOpen ? null : trayItem.modelData;
+                            } else if (mouse.button === Qt.MiddleButton) {
+                                trayItem.modelData.secondaryActivate();
+                            } else {
+                                trayItem.modelData.activate();
+                                GlobalStates.trayOpen = false;
+                            }
+                        }
+                        onWheel: wheel => trayItem.modelData.scroll(wheel.angleDelta.y, false)
+                    }
+                }
+            }
+            }
+
+            Rectangle {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: Theme.spacing.xs * trayButton.shown
+                width: Theme.button.size - Theme.spacing.xs * 2 * trayButton.shown
+                height: width
+                radius: width / 2
+                color: Qt.alpha(trayMouse.containsMouse ? Colors.primary : Colors.primaryContainer, trayButton.shown)
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "chevron_left"
+                    rotation: trayButton.shown * 180
+                    font.family: Theme.font.icons
+                    font.pixelSize: Theme.button.iconSize
+                    color: root.trayOpen ? Colors.textOnPrimaryContainer : Colors.textOnSurface
+                }
+
+                MouseArea {
+                    id: trayMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: GlobalStates.toggleTray(root.screenName)
+                }
+            }
+        }
         IconButton { id: gearButton; icon: "settings"; onClicked: GlobalStates.toggleQuickSettings(root.screenName) }
         Item {
             implicitWidth: Theme.batteryRing.size
