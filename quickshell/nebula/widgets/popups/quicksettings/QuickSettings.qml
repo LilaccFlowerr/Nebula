@@ -54,7 +54,7 @@ Rectangle {
         target: root
         property: "expand"
         to: 1
-        duration: Theme.settings.expandDuration
+        duration: Math.round(Theme.settings.expandDuration * Theme.anim.scale)
         easing.type: Easing.BezierSpline
         easing.bezierCurve: Theme.anim.standard
     }

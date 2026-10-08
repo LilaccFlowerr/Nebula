@@ -309,4 +309,51 @@ ColumnLayout {
             }
         }
     }
+
+    SettingGroup {
+        title: "Motion"
+
+        SettingRow {
+            icon: "speed"
+            title: "Animation speed"
+            subtitle: "Higher is faster"
+            enabled: !Settings.theme.reduceMotion
+            opacity: enabled ? 1 : 0.4
+
+            Slider {
+                width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
+                anchors.verticalCenter: parent.verticalCenter
+                from: 0.5
+                to: 2
+                stepSize: 0.25
+                value: Settings.theme.animSpeed
+                onMoved: Settings.theme.animSpeed = Math.round(value * 4) / 4
+            }
+
+            NumberField {
+                anchors.verticalCenter: parent.verticalCenter
+                value: Settings.theme.animSpeed
+                from: 0.5
+                to: 2
+                step: 0.25
+                factor: 1
+                decimals: 2
+                suffix: "×"
+                onEdited: value => Settings.theme.animSpeed = value
+            }
+        }
+
+        SettingRow {
+            icon: "motion_photos_off"
+            title: "Reduce motion"
+            subtitle: "No animations, things just appear"
+            clickable: true
+            onClicked: Settings.theme.reduceMotion = !Settings.theme.reduceMotion
+
+            Switch {
+                checked: Settings.theme.reduceMotion
+                onToggled: Settings.theme.reduceMotion = !Settings.theme.reduceMotion
+            }
+        }
+    }
 }

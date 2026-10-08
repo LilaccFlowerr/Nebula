@@ -40,7 +40,7 @@ Item {
             target: root
             property: "wobble"
             to: 2
-            duration: 150
+            duration: Theme.anim.fast
             easing.type: Easing.OutQuad
         }
         PauseAnimation {

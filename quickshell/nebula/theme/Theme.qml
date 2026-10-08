@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import M3Shapes
+import qs.services
 
 Singleton {
     component Bar: QtObject {
@@ -64,6 +65,13 @@ Singleton {
         readonly property int neckCurve: 12
     }
     readonly property QuickSettings quickSettings: QuickSettings {}
+
+    component Calendar: QtObject {
+        readonly property int width: 320
+        readonly property int cellSize: 36
+        readonly property int titleSize: 26
+    }
+    readonly property Calendar calendar: Calendar {}
 
     component RecorderCorner: QtObject {
         readonly property int windowSize: 480
@@ -182,11 +190,12 @@ Singleton {
     readonly property Font font: Font {}
 
     component Anim: QtObject {
-        readonly property int fast: 150
-        readonly property int medium: 300
-        readonly property int slow: 500
-        readonly property int island: 550
-        readonly property real overshoot: 1.2
+        readonly property real scale: Settings.theme.reduceMotion ? 0 : 1 / Settings.theme.animSpeed
+        readonly property int fast: Math.round(150 * scale)
+        readonly property int medium: Math.round(300 * scale)
+        readonly property int slow: Math.round(500 * scale)
+        readonly property int island: Math.round(550 * scale)
+        readonly property real overshoot: Settings.theme.reduceMotion ? 0 : 1.2
 
         readonly property list<real> standard:        [0.2, 0, 0, 1, 1, 1]
         readonly property list<real> emphasizedDecel: [0.05, 0.7, 0.1, 1, 1, 1]
