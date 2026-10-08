@@ -13,9 +13,14 @@ Rectangle {
 
     signal clicked()
 
+    readonly property var corners: parent && parent.cornersFor ? parent.cornersFor(root) : null
+
     Layout.fillWidth: true
     implicitHeight: Theme.settings.rowHeight
-    radius: Theme.radius.large - Theme.spacing.xs
+    topLeftRadius: corners ? corners.top : Theme.radius.large
+    topRightRadius: topLeftRadius
+    bottomLeftRadius: corners ? corners.bottom : Theme.radius.large
+    bottomRightRadius: bottomLeftRadius
     color: root.clickable && hover.hovered ? Qt.alpha(Colors.textOnSurface, 0.06) : "transparent"
 
     Behavior on color {

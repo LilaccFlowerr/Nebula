@@ -38,55 +38,59 @@ ColumnLayout {
                 }
             }
 
-            SettingRow {
-                visible: !monitor.modelData.disabled
-                icon: "aspect_ratio"
-                title: "Resolution"
-            }
-
-            Flow {
+            ColumnLayout {
                 visible: !monitor.modelData.disabled
                 Layout.fillWidth: true
-                Layout.leftMargin: Theme.spacing.lg + Theme.spacing.xs
-                Layout.rightMargin: Theme.spacing.lg
-                Layout.bottomMargin: Theme.spacing.md
-                spacing: Theme.spacing.sm
+                spacing: 0
 
-                Repeater {
-                    model: monitor.modelData.modes
+                SettingRow {
+                    icon: "aspect_ratio"
+                    title: "Resolution"
+                }
 
-                    Rectangle {
-                        id: chip
-                        required property string modelData
-                        readonly property bool active: modelData === monitor.modelData.mode
+                Flow {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Theme.spacing.lg + Theme.spacing.xs
+                    Layout.rightMargin: Theme.spacing.lg
+                    Layout.bottomMargin: Theme.spacing.md
+                    spacing: Theme.spacing.sm
 
-                        implicitWidth: chipText.implicitWidth + Theme.spacing.lg * 2
-                        implicitHeight: Theme.button.size - Theme.spacing.sm
-                        radius: active ? height / 2 : Theme.radius.small
-                        color: active ? Colors.secondaryContainer : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.08) : "transparent"
-                        border.width: active ? 0 : 1
-                        border.color: Colors.outlineVariant
+                    Repeater {
+                        model: monitor.modelData.modes
 
-                        Behavior on radius {
-                            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
-                        }
+                        Rectangle {
+                            id: chip
+                            required property string modelData
+                            readonly property bool active: modelData === monitor.modelData.mode
 
-                        Text {
-                            id: chipText
-                            anchors.centerIn: parent
-                            text: chip.modelData.replace("@", " · ") + " Hz"
-                            font.family: Theme.font.family
-                            font.pixelSize: Theme.font.small
-                            font.weight: chip.active ? Font.DemiBold : Font.Normal
-                            color: chip.active ? Colors.textOnSecondaryContainer : Colors.textOnSurface
-                        }
+                            implicitWidth: chipText.implicitWidth + Theme.spacing.lg * 2
+                            implicitHeight: Theme.button.size - Theme.spacing.sm
+                            radius: active ? height / 2 : Theme.radius.small
+                            color: active ? Colors.secondaryContainer : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.08) : "transparent"
+                            border.width: active ? 0 : 1
+                            border.color: Colors.outlineVariant
 
-                        MouseArea {
-                            id: chipMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: HyprConfig.setMonitor(monitor.modelData.name, { mode: chip.modelData })
+                            Behavior on radius {
+                                NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                            }
+
+                            Text {
+                                id: chipText
+                                anchors.centerIn: parent
+                                text: chip.modelData.replace("@", " · ") + " Hz"
+                                font.family: Theme.font.family
+                                font.pixelSize: Theme.font.small
+                                font.weight: chip.active ? Font.DemiBold : Font.Normal
+                                color: chip.active ? Colors.textOnSecondaryContainer : Colors.textOnSurface
+                            }
+
+                            MouseArea {
+                                id: chipMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: HyprConfig.setMonitor(monitor.modelData.name, { mode: chip.modelData })
+                            }
                         }
                     }
                 }
