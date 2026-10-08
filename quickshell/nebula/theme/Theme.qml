@@ -82,6 +82,13 @@ Singleton {
     }
     readonly property Calendar calendar: Calendar {}
 
+    component Tray: QtObject {
+        readonly property int menuWidth: 260
+        readonly property int iconSize: 22
+        readonly property int menuRowHeight: 40
+    }
+    readonly property Tray tray: Tray {}
+
     component RecorderCorner: QtObject {
         readonly property int windowSize: 480
         readonly property int margin: 24
