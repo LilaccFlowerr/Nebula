@@ -86,7 +86,7 @@ Item {
             required property int index
             readonly property int position: (index - root.selected + root.slots) % root.slots
             angle: position * 360 / root.slots
-            delay: root.rushing ? 0 : Math.min(position, root.slots - position) * Theme.launcher.stagger
+            delay: root.rushing ? 0 : Math.min(position, root.slots - position) * Theme.launcher.stagger * Theme.anim.scale
             rushing: root.rushing
             entry: root.infinite ? root.entryAt(position) : root.results[index] ?? null
             shape: root.shapes[index]

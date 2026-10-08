@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Hyprland
 import qs.components
 import qs.widgets.popups.quicksettings
+import qs.widgets.popups.calendar
 import qs.services
 import qs.theme
 import "../../../components/Curves.js" as Curves
@@ -15,6 +16,7 @@ Island {
     readonly property string screenName: QsWindow.window?.screen?.name ?? ""
     readonly property bool powerOpen: GlobalStates.powerMenuOpen && GlobalStates.isOn(screenName)
     readonly property bool settingsOpen: GlobalStates.quickSettingsOpen && GlobalStates.isOn(screenName)
+    readonly property bool calendarOpen: GlobalStates.calendarOpen && GlobalStates.isOn(screenName)
     readonly property bool fullSettings: GlobalStates.settingsOpen && GlobalStates.isOn(screenName)
     readonly property real presence: quickSettings.presence
     property bool armed: false
@@ -26,13 +28,15 @@ Island {
     }
     property alias powerArea: powerArea
     property alias settingsArea: settingsArea
+    property alias calendarArea: calendarArea
 
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
-        active: (root.powerOpen || root.settingsOpen) && !GlobalStates.capturing
+        active: (root.powerOpen || root.settingsOpen || root.calendarOpen) && !GlobalStates.capturing
         onCleared: {
             GlobalStates.powerMenuOpen = false;
             GlobalStates.quickSettingsOpen = false;
+            GlobalStates.calendarOpen = false;
         }
     }
 
@@ -53,6 +57,22 @@ Island {
             onRequestClose: GlobalStates.powerMenuOpen = false
         }
     }
+    Item {
+        id: calendarArea
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
+        anchors.right: parent.right
+        width: calendar.width
+        height: root.calendarOpen ? calendar.height : 0
+
+        Calendar {
+            id: calendar
+            anchors.top: parent.top
+            anchors.right: parent.right
+            open: root.calendarOpen
+        }
+    }
+
     Neck {
         id: neck
         anchors.top: parent.bottom
@@ -100,7 +120,19 @@ Island {
             implicitWidth: clockText.implicitWidth + Theme.spacing.md * 2
             implicitHeight: Theme.button.size
             radius: Theme.radius.full
-            color: Colors.surfaceContainer
+            color: root.calendarOpen ? Colors.primaryContainer : clockMouse.containsMouse ? Colors.surfaceContainerHigh : Colors.surfaceContainer
+
+            Behavior on color {
+                ColorAnimation { duration: Theme.anim.fast }
+            }
+
+            MouseArea {
+                id: clockMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: GlobalStates.toggleCalendar(root.screenName)
+            }
 
             Text {
                 id: clockText
@@ -108,7 +140,7 @@ Island {
 
                 font.weight: Font.DemiBold
                 text: Time.time
-                color: Colors.textOnSurface
+                color: root.calendarOpen ? Colors.textOnPrimaryContainer : Colors.textOnSurface
                 font.family: Theme.font.family
                 font.pixelSize: Theme.font.clock
             }

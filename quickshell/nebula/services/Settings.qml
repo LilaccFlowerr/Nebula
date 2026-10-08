@@ -104,6 +104,8 @@ Singleton {
     component ThemeGroup: JsonObject {
         property string scheme: "scheme-tonal-spot"
         property string mode: "dark"
+        property real animSpeed: 1
+        property bool reduceMotion: false
     }
 
     signal groupReset(string group)

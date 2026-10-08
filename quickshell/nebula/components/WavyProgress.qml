@@ -12,7 +12,7 @@ Item {
 
     Behavior on shownProgress {
         enabled: root.smoothProgress
-        NumberAnimation { duration: 1000 }
+        NumberAnimation { duration: Math.round(1000 * Theme.anim.scale) }
     }
     property bool animated: true
     property color color: Colors.secondary
