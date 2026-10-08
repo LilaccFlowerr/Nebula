@@ -133,11 +133,20 @@ Singleton {
 
     component SettingsWindow: QtObject {
         readonly property int width: 940
-        readonly property int height: 640
+        readonly property int height: 680
         readonly property int padding: 24
-        readonly property int railWidth: 232
-        readonly property int railItemHeight: 52
-        readonly property int indicatorSize: 36
+        readonly property int railOpenWidth: 220
+        readonly property int railClosedWidth: 64
+        readonly property int railButtonSize: 44
+        readonly property int railRowHeight: 48
+        readonly property int railShapeSize: 34
+        readonly property int railLabelHeight: 26
+        readonly property int railGroupGap: 12
+        readonly property int railRowRadius: 5
+        readonly property int rowGap: 3
+        readonly property int rowRadius: 4
+        readonly property int headerShapeSize: 64
+        readonly property int headerIconSize: 30
         readonly property int iconSize: 22
         readonly property int rowHeight: 68
         readonly property int titleSize: 30
