@@ -9,6 +9,7 @@ import qs.components
 import qs.widgets.popups.quicksettings
 import qs.widgets.popups.calendar
 import qs.widgets.popups.tray
+import qs.widgets.popups.system
 import qs.services
 import qs.theme
 
@@ -21,6 +22,7 @@ Island {
     readonly property bool settingsOpen: GlobalStates.quickSettingsOpen && GlobalStates.isOn(screenName)
     readonly property bool calendarOpen: GlobalStates.calendarOpen && GlobalStates.isOn(screenName)
     readonly property bool trayOpen: GlobalStates.trayOpen && GlobalStates.isOn(screenName)
+    readonly property bool systemOpen: GlobalStates.systemOpen && GlobalStates.isOn(screenName)
     property SystemTrayItem trayMenuItem: null
 
     onTrayOpenChanged: if (!trayOpen) trayMenuItem = null
@@ -37,15 +39,17 @@ Island {
     property alias settingsArea: settingsArea
     property alias calendarArea: calendarArea
     property alias trayArea: trayArea
+    property alias systemArea: systemArea
 
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
-        active: (root.powerOpen || root.settingsOpen || root.calendarOpen || root.trayOpen) && !GlobalStates.capturing
+        active: (root.powerOpen || root.settingsOpen || root.calendarOpen || root.trayOpen || root.systemOpen) && !GlobalStates.capturing
         onCleared: {
             GlobalStates.powerMenuOpen = false;
             GlobalStates.quickSettingsOpen = false;
             GlobalStates.calendarOpen = false;
             GlobalStates.trayOpen = false;
+            GlobalStates.systemOpen = false;
         }
     }
 
@@ -102,6 +106,23 @@ Island {
     }
 
     Item {
+        id: systemArea
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
+        anchors.right: parent.right
+        anchors.rightMargin: Theme.bar.padding
+        width: systemCard.width
+        height: root.systemOpen ? systemCard.height : 0
+
+        SystemCard {
+            id: systemCard
+            anchors.top: parent.top
+            anchors.right: parent.right
+            open: root.systemOpen
+        }
+    }
+
+    Item {
         id: settingsArea
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
@@ -136,13 +157,73 @@ Island {
         Rectangle {
             id: clockPill
 
-            implicitWidth: clockText.implicitWidth + Theme.spacing.md * 2
+            readonly property var modes: [
+                { key: "clock" },
+                { key: "cpu", icon: "memory" },
+                { key: "mem", icon: "memory_alt" },
+                { key: "gpu", icon: "developer_board" }
+            ]
+            property int mode: 0
+            property int shownMode: 0
+            property int direction: 1
+            property real wheelDelta: 0
+            property real slide: 0
+            property real contentOpacity: 1
+            readonly property bool showsStats: mode > 0
+            readonly property bool shownStats: shownMode > 0
+            readonly property var current: modes[shownMode]
+            readonly property real value: shownMode === 1 ? SystemStats.cpu : shownMode === 2 ? SystemStats.mem : SystemStats.gpu
+            readonly property bool active: root.calendarOpen || root.systemOpen
+
+            function setMode(next, step) {
+                if (next === mode) return;
+                direction = step;
+                mode = next;
+                if (!swap.running) swap.restart();
+            }
+
+            onShowsStatsChanged: SystemStats.users += showsStats ? 1 : -1
+            Component.onDestruction: if (showsStats) SystemStats.users--
+
+            implicitWidth: (shownStats ? statRow.implicitWidth : clockText.implicitWidth) + Theme.spacing.md * 2
             implicitHeight: Theme.button.size
             radius: Theme.radius.full
-            color: root.calendarOpen ? Colors.primaryContainer : clockMouse.containsMouse ? Colors.surfaceContainerHigh : Colors.surfaceContainer
+            clip: true
+            color: active ? Colors.primaryContainer : clockMouse.containsMouse ? Colors.surfaceContainerHigh : Colors.surfaceContainer
+
+            Behavior on implicitWidth {
+                NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+            }
 
             Behavior on color {
                 ColorAnimation { duration: Theme.anim.fast }
+            }
+
+            SequentialAnimation {
+                id: swap
+
+                ParallelAnimation {
+                    NumberAnimation { target: clockPill; property: "slide"; to: -clockPill.direction * clockPill.height * 0.6; duration: Theme.anim.fast; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedAccel }
+                    NumberAnimation { target: clockPill; property: "contentOpacity"; to: 0; duration: Theme.anim.fast; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedAccel }
+                }
+                ScriptAction {
+                    script: {
+                        clockPill.shownMode = clockPill.mode;
+                        clockPill.slide = clockPill.direction * clockPill.height * 0.6;
+                    }
+                }
+                ParallelAnimation {
+                    NumberAnimation { target: clockPill; property: "slide"; to: 0; duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+                    NumberAnimation { target: clockPill; property: "contentOpacity"; to: 1; duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+                }
+
+                onFinished: if (clockPill.shownMode !== clockPill.mode) restart()
+            }
+
+            Timer {
+                interval: 3000
+                running: clockPill.showsStats && !clockMouse.containsMouse && !root.systemOpen
+                onTriggered: clockPill.setMode(0, -1)
             }
 
             MouseArea {
@@ -150,16 +231,59 @@ Island {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: GlobalStates.toggleCalendar(root.screenName)
+                onClicked: {
+                    if (clockPill.showsStats)
+                        GlobalStates.toggleSystem(root.screenName);
+                    else
+                        GlobalStates.toggleCalendar(root.screenName);
+                }
+                onWheel: wheel => {
+                    clockPill.wheelDelta += wheel.angleDelta.y;
+                    if (Math.abs(clockPill.wheelDelta) < 120)
+                        return;
+                    const step = clockPill.wheelDelta < 0 ? 1 : -1;
+                    const count = clockPill.modes.length;
+                    clockPill.wheelDelta = 0;
+                    clockPill.setMode((clockPill.mode + step + count) % count, step);
+                }
+            }
+
+            Row {
+                id: statRow
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: clockPill.slide
+                visible: clockPill.shownStats
+                opacity: clockPill.contentOpacity
+                spacing: Theme.spacing.xs
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: Theme.font.icons
+                    font.pixelSize: Theme.button.iconSize
+                    text: clockPill.current.icon ?? ""
+                    color: clockPill.active ? Colors.textOnPrimaryContainer : Colors.textOnSurface
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.weight: Font.DemiBold
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.clock
+                    text: Math.round(clockPill.value * 100) + "%"
+                    color: clockPill.active ? Colors.textOnPrimaryContainer : Colors.textOnSurface
+                }
             }
 
             Text {
                 id: clockText
                 anchors.centerIn: parent
+                anchors.verticalCenterOffset: clockPill.slide
+                visible: !clockPill.shownStats
+                opacity: clockPill.contentOpacity
 
                 font.weight: Font.DemiBold
                 text: Time.time
-                color: root.calendarOpen ? Colors.textOnPrimaryContainer : Colors.textOnSurface
+                color: clockPill.active ? Colors.textOnPrimaryContainer : Colors.textOnSurface
                 font.family: Theme.font.family
                 font.pixelSize: Theme.font.clock
             }

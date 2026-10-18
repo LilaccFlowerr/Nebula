@@ -15,6 +15,7 @@ Singleton {
     property bool quickSettingsOpen: false
     property bool calendarOpen: false
     property bool trayOpen: false
+    property bool systemOpen: false
     property bool mediaExpanded: false
     property bool settingsOpen: false
     property bool settingsFromQuick: false
@@ -91,6 +92,16 @@ Singleton {
         }
     }
 
+    function toggleSystem(screenName = focusedScreen()) {
+        if (systemOpen && screen === screenName) {
+            systemOpen = false;
+        } else {
+            closeAll();
+            screen = screenName;
+            systemOpen = true;
+        }
+    }
+
     function toggleMedia(screenName = focusedScreen()) {
         if (mediaExpanded && screen === screenName) {
             mediaExpanded = false;
@@ -125,6 +136,7 @@ Singleton {
         quickSettingsOpen = false;
         calendarOpen = false;
         trayOpen = false;
+        systemOpen = false;
         mediaExpanded = false;
         settingsOpen = false;
     }
@@ -154,6 +166,12 @@ Singleton {
         target: "calendar"
 
         function toggle(): void { root.toggleCalendar(); }
+    }
+
+    IpcHandler {
+        target: "system"
+
+        function toggle(): void { root.toggleSystem(); }
     }
 
     IpcHandler {
