@@ -9,6 +9,8 @@ Singleton {
     id: root
 
     property bool launcherOpen: false
+    property bool overviewOpen: false
+    signal overviewConfirmRequested()
     property bool powerMenuOpen: false
     property bool quickSettingsOpen: false
     property bool calendarOpen: false
@@ -36,6 +38,16 @@ Singleton {
             closeAll();
             screen = screenName;
             launcherOpen = true;
+        }
+    }
+
+    function toggleOverview(screenName = focusedScreen()) {
+        if (overviewOpen && screen === screenName) {
+            overviewOpen = false;
+        } else {
+            closeAll();
+            screen = screenName;
+            overviewOpen = true;
         }
     }
 
@@ -108,12 +120,22 @@ Singleton {
 
     function closeAll() {
         launcherOpen = false;
+        overviewOpen = false;
         powerMenuOpen = false;
         quickSettingsOpen = false;
         calendarOpen = false;
         trayOpen = false;
         mediaExpanded = false;
         settingsOpen = false;
+    }
+
+    IpcHandler {
+        target: "overview"
+
+        function toggle(): void { root.toggleOverview(); }
+        function open(): void { if (!root.overviewOpen) root.toggleOverview(); }
+        function close(): void { root.overviewOpen = false; }
+        function confirm(): void { if (root.overviewOpen) root.overviewConfirmRequested(); }
     }
 
     IpcHandler {

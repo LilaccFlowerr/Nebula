@@ -28,6 +28,9 @@ hl.bind(mainMod .. " + SHIFT + ALT + R", hl.dsp.exec_cmd("qs -c nebula ipc call 
 -- Now playing: expand/collapse the media card in the center island
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs -c nebula ipc call media toggle"))
 
+-- Overview: all workspaces of this screen
+hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("qs -c nebula ipc call overview toggle"))
+
 -- Screenshots (Quickshell screenshot service): saved to ~/Pictures/Screenshots and copied to the
 -- clipboard. Open popups stay open while selecting, so they end up in the shot.
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs -c nebula ipc call screenshot region"))
@@ -54,16 +57,16 @@ for i = 1, 10 do
 end
 
 -- Previous / next workspace
-hl.bind(mainMod .. " + left",  hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ workspace = "-1" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ workspace = "+1" }))
 
 -- Special workspace (scratchpad)
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
 hl.bind(mainMod .. " + ALT + S",   hl.dsp.window.move({ workspace = "special:magic" }))
 
--- Scroll through existing workspaces with mainMod + scroll
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+-- Scroll through workspaces with mainMod + scroll
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "+1" }))
+hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "-1" }))
 
 -- Move/resize windows with mainMod + LMB/RMB and dragging
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })

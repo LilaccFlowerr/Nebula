@@ -32,7 +32,7 @@ Item {
     property real wavelength: 16
     property real gap: 6
 
-    property real phase: 0
+    property real shift: 0
 
     implicitWidth: 100
     implicitHeight: 12
@@ -41,46 +41,73 @@ Item {
 
     readonly property var wavePoints: {
         const points = [];
-        for (let x = thickness / 2; x <= splitX; x += 1.5) {
-            const y = mid + shownAmplitude * Math.sin(x / wavelength * 2 * Math.PI + phase);
-            points.push(Qt.point(x, y));
-        }
-        const endY = mid + shownAmplitude * Math.sin(splitX / wavelength * 2 * Math.PI + phase);
-        points.push(Qt.point(splitX, endY));
+        const end = width + wavelength;
+        for (let x = 0; x <= end; x += 1.5)
+            points.push(Qt.point(x, mid + shownAmplitude * Math.sin(x / wavelength * 2 * Math.PI)));
         return points;
     }
 
-    Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
+    function waveY(x) {
+        return mid + shownAmplitude * Math.sin((x + shift) / wavelength * 2 * Math.PI);
+    }
 
-        ShapePath {
-            strokeColor: root.color
-            strokeWidth: root.thickness
-            capStyle: ShapePath.RoundCap
-            joinStyle: ShapePath.RoundJoin
-            fillColor: "transparent"
+    Item {
+        id: played
+        x: root.thickness / 2
+        width: root.splitX - x
+        height: root.height
+        clip: true
 
-            PathPolyline { path: root.wavePoints }
-        }
+        Shape {
+            x: -root.shift - played.x
+            width: root.width + root.wavelength
+            height: root.height
+            preferredRendererType: Shape.CurveRenderer
 
-        ShapePath {
-            strokeColor: Qt.alpha(root.color, Theme.batteryRing.trackOpacity)
-            strokeWidth: root.thickness
-            capStyle: ShapePath.RoundCap
-            fillColor: "transparent"
+            ShapePath {
+                strokeColor: root.color
+                strokeWidth: root.thickness
+                joinStyle: ShapePath.RoundJoin
+                fillColor: "transparent"
 
-            startX: Math.min(root.splitX + root.gap, root.width - root.thickness / 2)
-            startY: root.mid
-            PathLine { x: root.width - root.thickness / 2; y: root.mid }
+                PathPolyline { path: root.wavePoints }
+            }
         }
     }
 
-    NumberAnimation on phase {
+    Rectangle {
+        x: 0
+        y: root.waveY(root.thickness / 2) - height / 2
+        width: root.thickness
+        height: root.thickness
+        radius: width / 2
+        color: root.color
+    }
+
+    Rectangle {
+        x: root.splitX - width / 2
+        y: root.waveY(root.splitX) - height / 2
+        width: root.thickness
+        height: root.thickness
+        radius: width / 2
+        color: root.color
+    }
+
+    Rectangle {
+        x: Math.min(root.splitX + root.gap, root.width) - root.thickness / 2
+        y: root.mid - height / 2
+        width: Math.max(0, root.width - x)
+        height: root.thickness
+        radius: height / 2
+        color: Qt.alpha(root.color, Theme.batteryRing.trackOpacity)
+        visible: width > root.thickness
+    }
+
+    NumberAnimation on shift {
         from: 0
-        to: 2 * Math.PI
+        to: root.wavelength
         duration: 1500
         loops: Animation.Infinite
-        running: root.animated
+        running: root.animated && root.visible
     }
 }

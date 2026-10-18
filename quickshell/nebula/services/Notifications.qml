@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Services.Notifications
 
 Singleton {
@@ -45,9 +46,21 @@ Singleton {
         }
     }
 
+    function focusSource(n) {
+        const names = [n.desktopEntry, n.appName].filter(x => x).map(x => x.toLowerCase().replace(/\.desktop$/, ""));
+        const window = Hyprland.toplevels.values.find(t => {
+            const id = (t.wayland?.appId ?? "").toLowerCase();
+            return id !== "" && names.some(x => x === id || x.endsWith("." + id) || id.endsWith("." + x));
+        });
+        if (!window) return;
+        const address = String(window.address);
+        Hyprland.dispatch(`hl.dsp.focus({ window = "address:${address.startsWith("0x") ? address : "0x" + address}" })`);
+    }
+
     function activate() {
         if (!current) return;
         const n = current;
+        focusSource(n);
         const action = n.actions.find(a => a.identifier === "default") ?? n.actions[0];
         if (action) action.invoke();
         if (current === n) dismiss();

@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import qs.services
 import qs.theme
 
@@ -31,6 +32,8 @@ Variants {
 
         visible: Settings.nowPlaying.enabled
 
+        readonly property bool covered: modelData ? Hyprland.monitorFor(modelData)?.activeWorkspace?.hasFullscreen ?? false : false
+
         WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:nowplaying"
 
@@ -51,6 +54,7 @@ Variants {
 
         NowPlaying {
             id: widget
+            live: !window.covered
             x: Settings.nowPlaying.x < 0 ? Theme.nowPlaying.margin : Math.min(Settings.nowPlaying.x, window.maxX)
             y: Settings.nowPlaying.y < 0 ? window.maxY - Theme.nowPlaying.margin : Math.min(Settings.nowPlaying.y, window.maxY)
 

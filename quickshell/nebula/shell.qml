@@ -3,6 +3,7 @@ import Quickshell
 import qs.widgets.bar
 import qs.widgets.recorder
 import qs.widgets.launcher
+import qs.widgets.overview
 import qs.widgets.wallpaper
 import qs.widgets.desktop.nowplaying
 import qs.services
@@ -19,5 +20,7 @@ ShellRoot {
     RecorderCorner {}
 
     LauncherWindow {}
+
+    OverviewWindow {}
     
 }

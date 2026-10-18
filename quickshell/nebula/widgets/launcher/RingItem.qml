@@ -14,6 +14,7 @@ Item {
     property int shape: MaterialShape.Circle
     property int delay: 0
     property bool rushing: false
+    property bool selected: false
 
     Behavior on angle {
         SequentialAnimation {
@@ -63,10 +64,10 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         width: Theme.launcher.itemSize
         height: Theme.launcher.itemSize
-        shape: root.shape
+        shape: mouse.containsMouse && !root.empty ? MaterialShape.Cookie9Sided : root.shape
         source: root.isWallpaper ? Wallpaper.url(root.shownEntry.path) : ""
         sourceSize: Qt.size(Theme.launcher.itemSize * 2, Theme.launcher.itemSize * 2)
-        color: root.preview?.primary ?? Colors.surfaceContainerHigh
+        color: root.preview?.primary ?? (root.selected ? Colors.primaryContainer : mouse.containsMouse ? Colors.surfaceContainerHighest : Colors.surfaceContainerHigh)
         opacity: root.empty ? 0.25 : 1
 
         Behavior on color {
@@ -85,9 +86,18 @@ Item {
         anchors.centerIn: shape
         visible: root.isCommand
         text: root.shownEntry?.icon ?? ""
-        color: Colors.textOnSurface
+        color: root.selected ? Colors.textOnPrimaryContainer : Colors.textOnSurface
         font.family: Theme.font.icons
         font.pixelSize: Theme.launcher.iconSize
+    }
+
+    Rectangle {
+        anchors.centerIn: label
+        width: Math.min(root.width + Theme.spacing.sm, label.contentWidth + Theme.spacing.lg)
+        height: label.contentHeight + Theme.spacing.xs * 2
+        radius: height / 2
+        color: Colors.secondaryContainer
+        visible: root.selected && !root.empty
     }
 
     Text {
@@ -99,8 +109,18 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         text: root.shownEntry?.name ?? ""
-        color: Colors.textOnPrimaryContainer
+        color: root.selected ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
         font.family: Theme.font.family
-        font.pixelSize: Theme.font.small
+        font.pixelSize: Theme.launcher.labelSize
+        font.weight: root.selected ? Font.Medium : Font.Normal
+    }
+
+    MouseArea {
+        id: mouse
+        anchors.fill: parent
+        hoverEnabled: true
+        enabled: !root.empty
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Launcher.activate(root.shownEntry)
     }
 }

@@ -101,6 +101,18 @@ PanelWindow {
         }
     }
 
+    WheelHandler {
+        property real delta: 0
+
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => {
+            delta += event.angleDelta.y;
+            if (Math.abs(delta) < 120) return;
+            window.step(delta < 0 ? 1 : -1, false);
+            delta = 0;
+        }
+    }
+
     LauncherRing {
         id: ring
         anchors.centerIn: parent
@@ -119,15 +131,26 @@ PanelWindow {
         height: Theme.launcher.searchHeight
         scale: Math.min(1, window.pillT * 4)
         radius: Theme.radius.full
-        color: Colors.surfaceContainer
+        color: Colors.surfaceContainerLowest
+        border.width: 1
+        border.color: Colors.outlineVariant
+
+        Text {
+            x: Theme.spacing.md
+            anchors.verticalCenter: parent.verticalCenter
+            opacity: input.opacity
+            text: "search"
+            font.family: Theme.font.icons
+            font.pixelSize: Theme.launcher.searchIconSize
+            color: Colors.textOnSurfaceVariant
+        }
 
         TextInput {
             id: input
             anchors.fill: parent
-            anchors.leftMargin: Theme.spacing.lg
+            anchors.leftMargin: Theme.spacing.md + Theme.launcher.searchIconSize + Theme.spacing.sm
             anchors.rightMargin: Theme.spacing.lg
             verticalAlignment: TextInput.AlignVCenter
-            horizontalAlignment: TextInput.AlignHCenter
             clip: true
             opacity: Math.max(0, window.pillT * 3 - 2)
             color: text === ">" ? "transparent" : Colors.textOnSurface
@@ -148,11 +171,12 @@ PanelWindow {
         }
 
         Text {
-            anchors.centerIn: parent
+            x: input.x
+            anchors.verticalCenter: parent.verticalCenter
             visible: input.text === "" || input.text === ">"
             text: Launcher.wallpaperMode ? "Wallpapers" : Launcher.themeMode ? "Themes" : input.text === ">" ? "> Commands" : "Search"
             color: Colors.textOnSurfaceVariant
-            opacity: 0.6 * input.opacity
+            opacity: input.opacity
             font: input.font
         }
     }
