@@ -14,7 +14,7 @@ Variants {
         id: window
 
         required property ShellScreen modelData
-        readonly property bool fullSettings: GlobalStates.settingsOpen && GlobalStates.isOn(modelData.name)
+        readonly property bool fullSettings: GlobalStates.settingsOpen && GlobalStates.isOn(modelData?.name ?? "")
 
         screen: modelData
 
@@ -23,7 +23,7 @@ Variants {
             left: true
             right: true
         }
-        implicitHeight: modelData.height
+        implicitHeight: modelData?.height ?? Theme.bar.height
         exclusiveZone: Theme.bar.height
         color: "transparent"
 

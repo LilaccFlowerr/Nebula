@@ -12,6 +12,10 @@ import "SettingsIndex.js" as SettingsIndex
 Item {
     id: root
 
+    MouseArea {
+        anchors.fill: parent
+    }
+
     property int page: 0
     property int shownPage: 0
     property string sub: ""
@@ -213,7 +217,7 @@ Item {
             height: root.lerp(Theme.settings.railButtonSize * 2 + Theme.spacing.sm, Theme.settings.railButtonSize, root.railT)
 
             Rectangle {
-                x: rail.closedX
+                x: root.lerp(rail.closedX, 0, root.railT)
                 y: 0
                 width: root.lerp(Theme.settings.railButtonSize, rail.width - Theme.settings.railButtonSize - Theme.spacing.sm, root.railT)
                 height: Theme.settings.railButtonSize
@@ -276,8 +280,17 @@ Item {
             IconButton {
                 x: root.lerp(rail.closedX, rail.width - Theme.settings.railButtonSize, root.railT)
                 y: root.lerp(Theme.settings.railButtonSize + Theme.spacing.sm, 0, root.railT)
-                icon: Settings.settingsWindow.railOpen ? "left_panel_close" : "left_panel_open"
+                width: Theme.settings.railButtonSize
+                height: Theme.settings.railButtonSize
+                color: toggleHover.hovered ? Colors.surfaceContainerHigh : Colors.surfaceContainerLowest
+                border.width: 1
+                border.color: Colors.outlineVariant
+                icon: Settings.settingsWindow.railOpen ? "menu_open" : "menu"
                 onClicked: root.toggleRail()
+
+                HoverHandler {
+                    id: toggleHover
+                }
             }
         }
 

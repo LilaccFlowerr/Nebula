@@ -12,8 +12,9 @@ Item {
     readonly property bool playing: Media.playing
     readonly property bool empty: !Media.active
     property real size: empty ? Theme.nowPlaying.emptySize : Theme.nowPlaying.cookieSize
+    property bool live: true
     property real spin: 0
-    property real speed: playing && Settings.nowPlaying.spin && !Settings.theme.reduceMotion ? 360000 / Theme.nowPlaying.spinDuration : 0
+    property real speed: playing && live && Settings.nowPlaying.spin && !Settings.theme.reduceMotion ? 360000 / Theme.nowPlaying.spinDuration : 0
 
     implicitWidth: size
     implicitHeight: size
@@ -158,7 +159,7 @@ Item {
             implicitWidth: Theme.nowPlaying.progressWidth
             implicitHeight: Theme.spacing.lg
             progress: Media.progress
-            animated: root.playing
+            animated: root.playing && root.live
         }
     }
 }

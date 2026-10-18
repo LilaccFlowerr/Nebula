@@ -54,8 +54,9 @@ Item {
         customToShape: clover(Launcher.commandSlots)
         morphProgress: root.shownMorph
         rotation: root.shownMorph * 360 / Launcher.commandSlots - leafOffset - (1 - Curves.decel(root.cloverT)) * 120
-        color: Launcher.themeMode ? Scheme.previews[root.results[root.cursor]?.scheme]?.primaryContainer ?? Colors.primaryContainer
+        readonly property color accent: Launcher.themeMode ? Scheme.previews[root.results[root.cursor]?.scheme]?.primaryContainer ?? Colors.primaryContainer
              : Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
+        color: Qt.tint(Qt.alpha(Colors.surface, Theme.bar.opacity), Qt.alpha(accent, Theme.launcher.tint))
 
         Behavior on color {
             ColorAnimation { duration: Theme.anim.island; easing.type: Easing.OutCubic }
@@ -68,15 +69,11 @@ Item {
         font.pixelSize: Theme.font.small
     }
 
-    Rectangle {
-        x: root.width / 2 - width / 2
-        y: root.height / 2 - Theme.launcher.ringRadius - (Theme.launcher.labelGap + labelMetrics.height) / 2 - height / 2
-        width: Theme.launcher.selectionSize
-        height: Theme.launcher.selectionSize
-        radius: width / 2
-        color: Qt.alpha(Colors.textOnPrimaryContainer, 0.25)
-        visible: root.results.length > 0
-        scale: Curves.back(Curves.phase(root.intro, 0.3, 0.35), Theme.anim.overshoot)
+    MouseArea {
+        anchors.fill: parent
+        onClicked: mouse => {
+            if (Math.hypot(mouse.x - width / 2, mouse.y - height / 2) > width / 2) Launcher.close();
+        }
     }
 
     Repeater {
@@ -90,6 +87,7 @@ Item {
             rushing: root.rushing
             entry: root.infinite ? root.entryAt(position) : root.results[index] ?? null
             shape: root.shapes[index]
+            selected: position === 0
             readonly property real appear: Math.max(0, Curves.back(Curves.phase(root.intro, 0.3 + position * 0.04, 0.35), Theme.anim.overshoot))
             opacity: Math.min(1, appear * 2)
             transform: Scale {

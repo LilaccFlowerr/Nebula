@@ -12,3 +12,16 @@ hl.gesture({
     direction = "horizontal",
     action    = "workspace",
 })
+
+-- Three fingers up opens the overview (Quickshell), down goes to the selected workspace
+hl.gesture({
+    fingers   = 3,
+    direction = "up",
+    action    = function() hl.exec_cmd("qs -c nebula ipc call overview open") end,
+})
+
+hl.gesture({
+    fingers   = 3,
+    direction = "down",
+    action    = function() hl.exec_cmd("qs -c nebula ipc call overview confirm") end,
+})

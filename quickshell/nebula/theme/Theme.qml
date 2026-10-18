@@ -17,7 +17,6 @@ Singleton {
         readonly property int notificationIconSize: 36
         readonly property int notificationBadgeSize: 18
         readonly property int notificationMaxLines: 6
-        readonly property int windowHeight: 480
         readonly property real opacity: 0.85
     }
     readonly property Bar bar: Bar {}
@@ -118,6 +117,34 @@ Singleton {
     }
     readonly property NowPlaying nowPlaying: NowPlaying {}
 
+    component Overview: QtObject {
+        readonly property real dim: 0.45
+        readonly property int wallpaperBlur: 48
+        readonly property real stripRatio: 0.11
+        readonly property real bigRatio: 0.56
+        readonly property real sideRatio: 0.33
+        readonly property int stripTop: 40
+        readonly property int stripGap: 18
+        readonly property int labelGap: 8
+        readonly property int labelHeight: 36
+        readonly property int sideGap: 48
+        readonly property real sideOpacity: 0.5
+        readonly property real visibleRange: 2.6
+        readonly property int badgeSize: 20
+        readonly property real hoverScale: 1.05
+        readonly property int selectedBorder: 3
+        readonly property int hoverBorder: 2
+        readonly property real emptyShapeRatio: 0.42
+        readonly property real emptyShapeOpacity: 0.7
+        readonly property real draggedOpacity: 0.35
+        readonly property int dragThreshold: 8
+        readonly property int ghostWidth: 220
+        readonly property int duration: 550
+        readonly property int startDelay: 80
+        readonly property int cardRadius: 20
+    }
+    readonly property Overview overview: Overview {}
+
     component Launcher: QtObject {
         readonly property int size: 380
         readonly property int ringRadius: 136
@@ -132,8 +159,11 @@ Singleton {
         readonly property real leafRadius: 0.654
         readonly property real valleyRadius: 0.464
         readonly property real leafRounding: 0.209
-        readonly property int searchWidth: 150
+        readonly property int searchWidth: 170
         readonly property int searchHeight: 40
+        readonly property int searchIconSize: 20
+        readonly property int labelSize: 13
+        readonly property real tint: 0.28
         readonly property real dim: 0.4
     }
     readonly property Launcher launcher: Launcher {}

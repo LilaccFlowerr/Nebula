@@ -38,10 +38,10 @@ Singleton {
     }
 
     function next() {
-        Hyprland.dispatch(`hl.dsp.focus({ workspace = "e+1" })`);
+        Hyprland.dispatch(`hl.dsp.focus({ workspace = "+1" })`);
     }
 
     function previous() {
-        Hyprland.dispatch(`hl.dsp.focus({ workspace = "e-1" })`);
+        Hyprland.dispatch(`hl.dsp.focus({ workspace = "-1" })`);
     }
 }
