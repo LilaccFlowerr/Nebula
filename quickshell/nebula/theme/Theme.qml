@@ -81,6 +81,23 @@ Singleton {
     }
     readonly property Calendar calendar: Calendar {}
 
+    component System: QtObject {
+        readonly property int width: 320
+        readonly property int shapeSize: 76
+        readonly property int iconSize: 34
+        readonly property int valueSize: 40
+        readonly property int tileIconSize: 22
+        readonly property int labelSize: 11
+        readonly property int hardwareIconSize: 14
+        readonly property int barHeight: 4
+        readonly property int graphHeight: 36
+        readonly property int graphLine: 2
+        readonly property real graphFloor: 0.25
+        readonly property real busy: 0.5
+        readonly property real high: 0.8
+    }
+    readonly property System system: System {}
+
     component Tray: QtObject {
         readonly property int menuWidth: 260
         readonly property int iconSize: 22

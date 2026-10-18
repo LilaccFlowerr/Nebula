@@ -42,6 +42,7 @@ Variants {
                 Region { item: rightIsland.settingsArea },
                 Region { item: rightIsland.calendarArea },
                 Region { item: rightIsland.trayArea },
+                Region { item: rightIsland.systemArea },
                 Region {
                     width: window.fullSettings ? window.width : 0
                     height: window.fullSettings ? window.height : 0
