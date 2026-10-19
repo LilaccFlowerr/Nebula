@@ -132,12 +132,14 @@ Variants {
                     : (cfg.y ?? -1) < 0 ? maxY - Theme.nowPlaying.margin : Math.min(cfg.y, maxY)
 
                 readonly property bool isTop: window.topHover === modelData
+                readonly property real offX: ghost ? 0 : ((cfg.size ?? width) - width) / 2
+                readonly property real offY: ghost ? 0 : ((cfg.size ?? height) - height) / 2
 
                 z: cfg.z ?? 0
                 opacity: cfg.opacity ?? 1
                 active: cfg.enabled === true && Widgets.types[cfg.type] !== undefined && (ghost || !cfg.screen || cfg.screen === window.modelData.name)
-                x: restX + (drag.active ? drag.translation.x : 0)
-                y: restY + (drag.active ? drag.translation.y : 0)
+                x: restX + offX + (drag.active ? drag.translation.x : 0)
+                y: restY + offY + (drag.active ? drag.translation.y : 0)
                 width: item?.implicitWidth ?? 0
                 height: item?.implicitHeight ?? 0
 
@@ -161,6 +163,12 @@ Variants {
                     onPressedChanged: if (pressed) Widgets.raise(slot.modelData)
                 }
 
+                TapHandler {
+                    enabled: !slot.ghost && slot.isTop
+                    acceptedButtons: Qt.RightButton
+                    onTapped: Widgets.openMenu(slot.modelData, window.modelData.name, Qt.rect(window.modelData.x + slot.x, window.modelData.y + slot.y, slot.width, slot.height))
+                }
+
                 DragHandler {
                     id: drag
                     target: null
@@ -168,8 +176,8 @@ Variants {
                     cursorShape: Qt.ClosedHandCursor
 
                     function publish() {
-                        Widgets.dragX = window.modelData.x + slot.restX + translation.x;
-                        Widgets.dragY = window.modelData.y + slot.restY + translation.y;
+                        Widgets.dragX = window.modelData.x + slot.restX + slot.offX + translation.x;
+                        Widgets.dragY = window.modelData.y + slot.restY + slot.offY + translation.y;
                     }
 
                     onTranslationChanged: if (active) publish()
@@ -185,8 +193,8 @@ Variants {
                         const roam = !!slot.cfg.screen;
                         const target = roam ? Widgets.screenAt(Widgets.dragX + slot.width / 2, Widgets.dragY + slot.height / 2) : window.modelData;
                         const props = {
-                            x: Math.round(Math.max(0, Math.min(Widgets.dragX - target.x, target.width - slot.width))),
-                            y: Math.round(Math.max(0, Math.min(Widgets.dragY - target.y, target.height - slot.height)))
+                            x: Math.round(Math.max(0, Math.min(Widgets.dragX - target.x, target.width - slot.width)) - slot.offX),
+                            y: Math.round(Math.max(0, Math.min(Widgets.dragY - target.y, target.height - slot.height)) - slot.offY)
                         };
                         if (roam) props.screen = target.name;
                         Widgets.update(slot.modelData, props);
