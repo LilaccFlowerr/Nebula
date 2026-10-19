@@ -11,10 +11,15 @@ Item {
 
     readonly property bool playing: Media.playing
     readonly property bool empty: !Media.active
-    property real size: empty ? Theme.nowPlaying.emptySize : Theme.nowPlaying.cookieSize
+    property string shapeName: "Cookie12Sided"
+    property string colorRole: "secondary"
+    readonly property var palette: Widgets.palette(colorRole)
+    property real baseSize: Theme.nowPlaying.cookieSize
+    readonly property real ratio: baseSize / Theme.nowPlaying.cookieSize
+    property real size: empty ? baseSize * Theme.nowPlaying.emptySize / Theme.nowPlaying.cookieSize : baseSize
     property bool live: true
     property real spin: 0
-    property real speed: playing && live && Settings.nowPlaying.spin && !Settings.theme.reduceMotion ? 360000 / Theme.nowPlaying.spinDuration : 0
+    property real speed: playing && live && Settings.nowPlaying.spin && !Settings.theme.reduceMotion ? 360 / Settings.nowPlaying.spinSeconds : 0
 
     implicitWidth: size
     implicitHeight: size
@@ -40,10 +45,29 @@ Item {
         onTriggered: root.spin = (root.spin + root.speed * frameTime) % 360
     }
 
+    onPlayingChanged: {
+        if (playing) {
+            settle.stop();
+            return;
+        }
+        settle.to = spin >= 180 ? 360 : 0;
+        settle.restart();
+    }
+
+    NumberAnimation {
+        id: settle
+        target: root
+        property: "spin"
+        duration: Theme.anim.slow
+        easing.type: Easing.OutBack
+        easing.overshoot: Theme.anim.overshoot
+        onFinished: root.spin = 0
+    }
+
     MaterialShape {
         anchors.fill: parent
-        shape: root.empty ? MaterialShape.Sunny : root.playing ? MaterialShape.Cookie12Sided : MaterialShape.Pentagon
-        color: Colors.secondaryContainer
+        shape: root.empty ? MaterialShape.Sunny : root.playing ? (MaterialShape[root.shapeName] ?? MaterialShape.Cookie12Sided) : MaterialShape.Pentagon
+        color: root.palette.fill
         rotation: root.spin
         animationDuration: Theme.anim.slow
         animationEasing.type: Easing.OutBack
@@ -54,8 +78,8 @@ Item {
         anchors.centerIn: parent
         text: "music_note"
         font.family: Theme.font.icons
-        font.pixelSize: Theme.nowPlaying.emptyIconSize
-        color: Colors.textOnSecondaryContainer
+        font.pixelSize: Theme.nowPlaying.emptyIconSize * root.ratio
+        color: root.palette.text
         opacity: root.empty ? 1 : 0
         scale: root.empty ? 1 : 0.4
 
@@ -76,7 +100,7 @@ Item {
         anchors.centerIn: parent
         spacing: Theme.spacing.xs
         opacity: root.empty ? 0 : 1
-        scale: root.empty ? 0.6 : 1
+        scale: (root.empty ? 0.6 : 1) * root.ratio
         visible: opacity > 0
 
         Behavior on opacity {
@@ -120,7 +144,7 @@ Item {
             font.family: Theme.font.family
             font.pixelSize: Theme.font.normal
             font.weight: Font.DemiBold
-            color: Colors.textOnSecondaryContainer
+            color: root.palette.text
         }
 
         Text {
@@ -130,7 +154,7 @@ Item {
             text: Media.artist
             font.family: Theme.font.family
             font.pixelSize: Theme.font.small
-            color: Colors.textOnSecondaryContainer
+            color: root.palette.text
             opacity: 0.75
         }
 

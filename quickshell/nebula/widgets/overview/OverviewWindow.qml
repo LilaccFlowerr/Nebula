@@ -18,7 +18,7 @@ Variants {
         property bool main: false
 
         onFocusedHereChanged: if (open) main = focusedHere
-        onMainChanged: if (main && open) overview.forceActiveFocus()
+        onMainChanged: if (main && open) content.item?.forceActiveFocus()
         property bool ready: false
         property real shown: open && ready ? 1 : 0
 
@@ -50,7 +50,7 @@ Variants {
             ready = false;
             main = focusedHere;
             startDelay.restart();
-            if (main) overview.forceActiveFocus();
+            if (main) content.item?.forceActiveFocus();
         }
 
         Timer {
@@ -59,46 +59,51 @@ Variants {
             onTriggered: window.ready = true
         }
 
-        Item {
+        Loader {
+            id: content
             anchors.fill: parent
+            active: window.open || window.shown > 0
+            onLoaded: if (window.main) item.forceActiveFocus()
 
-            Image {
-                id: wallpaper
-                anchors.fill: parent
-                source: Wallpaper.url(Settings.wallpaper.path)
-                fillMode: Image.PreserveAspectCrop
-                sourceSize: Qt.size(width / 2, height / 2)
-                visible: false
-            }
+            sourceComponent: FocusScope {
+                Image {
+                    id: wallpaper
+                    anchors.fill: parent
+                    source: Wallpaper.url(Settings.wallpaper.path)
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize: Qt.size(width / 2, height / 2)
+                    visible: false
+                }
 
-            MultiEffect {
-                anchors.fill: wallpaper
-                opacity: window.ready || window.shown > 0 ? 1 : 0
-                source: wallpaper
-                blurEnabled: true
-                blur: 1
-                blurMax: Theme.overview.wallpaperBlur
-                autoPaddingEnabled: false
-            }
+                MultiEffect {
+                    anchors.fill: wallpaper
+                    opacity: window.ready || window.shown > 0 ? 1 : 0
+                    source: wallpaper
+                    blurEnabled: true
+                    blur: 1
+                    blurMax: Theme.overview.wallpaperBlur
+                    autoPaddingEnabled: false
+                }
 
-            Rectangle {
-                anchors.fill: parent
-                color: Qt.alpha(Colors.scrim, window.ready || window.shown > 0 ? Theme.overview.dim : 0)
-            }
+                Rectangle {
+                    anchors.fill: parent
+                    color: Qt.alpha(Colors.scrim, window.ready || window.shown > 0 ? Theme.overview.dim : 0)
+                }
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: GlobalStates.overviewOpen = false
-            }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: GlobalStates.overviewOpen = false
+                }
 
-            Overview {
-                id: overview
-                anchors.fill: parent
-                screenName: window.modelData?.name ?? ""
-                open: window.open
-                main: window.main
-                ready: window.ready
-                shown: window.shown
+                Overview {
+                    anchors.fill: parent
+                    focus: true
+                    screenName: window.modelData?.name ?? ""
+                    open: window.open
+                    main: window.main
+                    ready: window.ready
+                    shown: window.shown
+                }
             }
         }
     }

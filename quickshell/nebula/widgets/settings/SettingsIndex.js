@@ -10,6 +10,7 @@ var entries = [
 
     { title: "Now playing widget", page: "desktop", words: "music media spotify cookie" },
     { title: "Spin while playing", page: "desktop", words: "rotate now playing" },
+    { title: "Spin speed", page: "desktop", words: "rotate now playing slow fast seconds" },
     { title: "Widget position", page: "desktop", words: "now playing reset move" },
 
     { title: "Workspaces per group", page: "bar", tab: "left", words: "workspace count dots" },

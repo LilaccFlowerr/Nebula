@@ -103,62 +103,263 @@ ColumnLayout {
     }
 
     SettingGroup {
-        id: tilesGroup
-
-        property int picking: -1
-
         title: "Quick settings"
 
         SettingRow {
             icon: "grid_view"
             title: "Tiles"
-            subtitle: "Settings is always the last one"
-
-            SegmentedButton {
-                width: Theme.settings.controlWidth
-                anchors.verticalCenter: parent.verticalCenter
-                options: Tiles.counts.map(String)
-                currentIndex: Tiles.counts.indexOf(Tiles.count)
-                onSelected: index => {
-                    tilesGroup.picking = -1;
-                    Tiles.setCount(Tiles.counts[index]);
-                }
-            }
+            subtitle: "Drag tiles to add, reorder or remove them"
         }
 
-        GridLayout {
+        Item {
+            id: board
+
+            readonly property real pad: Theme.spacing.md
+            readonly property real gap: Theme.spacing.sm
+            readonly property real cellW: (width - pad * 2 - gap) / 2
+            readonly property real cellH: Theme.button.size + Theme.spacing.sm * 2
+            readonly property real labelH: Theme.font.normal + Theme.spacing.lg
+
+            property string dragKey: ""
+            property bool fromGrid: false
+            property point pointer: Qt.point(0, 0)
+
+            readonly property bool cancelled: pointer.x < -cellW / 2 || pointer.x > width + cellW / 2 || pointer.y < -cellH / 2
+            readonly property real gridEdge: pad + rowsHeight(Tiles.keys.length + 1) + (fromGrid ? gap : cellH / 2)
+            readonly property bool overGrid: !cancelled && pointer.y < gridEdge
+            readonly property bool toPool: dragKey !== "" && !preview.includes(dragKey)
+
+            readonly property var preview: {
+                const keys = Tiles.keys;
+                if (dragKey === "") return keys;
+                if (cancelled) return keys;
+                const base = keys.filter(k => k !== dragKey);
+                if (!overGrid) return base;
+                const col = Math.max(0, Math.min(1, Math.floor((pointer.x - pad) / (cellW + gap))));
+                const row = Math.max(0, Math.floor((pointer.y - pad) / (cellH + gap)));
+                base.splice(Math.min(row * 2 + col, base.length), 0, dragKey);
+                return base;
+            }
+            readonly property var pool: Tiles.all.map(t => t.key).filter(k => Tiles.available(k) && !preview.includes(k))
+
+            readonly property real labelY: pad + rowsHeight(preview.length + 1) + Theme.spacing.lg
+            readonly property real poolTop: labelY + labelH
+            readonly property real poolHeight: rowsHeight(Math.max(2, pool.length))
+
+            function rowsHeight(n) {
+                return Math.ceil(n / 2) * (cellH + gap) - gap;
+            }
+
+            function slot(index, top) {
+                return Qt.point(pad + (index % 2) * (cellW + gap), top + Math.floor(index / 2) * (cellH + gap));
+            }
+
+            function drop() {
+                Tiles.save(preview);
+                dragKey = "";
+            }
+
             Layout.fillWidth: true
-            Layout.margins: Theme.spacing.md
-            columns: 2
-            rowSpacing: Theme.spacing.sm
-            columnSpacing: Theme.spacing.sm
+            implicitHeight: poolTop + poolHeight + pad
+
+            Behavior on implicitHeight {
+                NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+            }
+
+            Row {
+                y: board.labelY
+                x: board.pad + Theme.spacing.xs
+                height: board.labelH
+                spacing: Theme.spacing.sm
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Available"
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.normal
+                    font.weight: Font.DemiBold
+                    color: Colors.textOnSurface
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: board.dragKey !== "" && board.fromGrid ? "drop here to remove" : "drag one up to add it"
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.small
+                    color: board.toPool && board.fromGrid ? Colors.primary : Colors.textOnSurfaceVariant
+
+                    Behavior on color {
+                        ColorAnimation { duration: Theme.anim.fast }
+                    }
+                }
+            }
+
+            Rectangle {
+                readonly property bool target: board.toPool && board.fromGrid
+
+                x: board.pad - board.gap
+                y: board.poolTop - board.gap
+                width: board.width - (board.pad - board.gap) * 2
+                height: board.poolHeight + board.gap * 2
+                radius: Theme.radius.large + board.gap
+                visible: target || board.pool.length === 0
+                color: target ? Qt.alpha(Colors.primary, 0.08) : "transparent"
+                border.width: target ? 2 : 1
+                border.color: target ? Colors.primary : Colors.outlineVariant
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.anim.fast }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: board.pool.length === 0
+                    text: "Every tile is in use"
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.normal
+                    color: Colors.textOnSurfaceVariant
+                }
+            }
+
+            Rectangle {
+                readonly property int gridIndex: board.preview.indexOf(board.dragKey)
+                readonly property point at: gridIndex >= 0 ? board.slot(gridIndex, board.pad)
+                                          : board.slot(Math.max(0, board.pool.indexOf(board.dragKey)), board.poolTop)
+
+                visible: board.dragKey !== ""
+                x: at.x
+                y: at.y
+                width: board.cellW
+                height: board.cellH
+                radius: Theme.radius.large
+                color: Qt.alpha(Colors.primary, 0.12)
+                border.width: 2
+                border.color: Colors.primary
+
+                Behavior on x {
+                    NumberAnimation { duration: Theme.anim.fast; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                }
+
+                Behavior on y {
+                    NumberAnimation { duration: Theme.anim.fast; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                }
+            }
+
+            Rectangle {
+                readonly property point at: board.slot(board.preview.length, board.pad)
+
+                x: at.x
+                y: at.y
+                width: board.cellW
+                height: board.cellH
+                radius: Theme.radius.large
+                color: Colors.surfaceContainerHighest
+                opacity: 0.6
+
+                Behavior on x {
+                    NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                }
+
+                Behavior on y {
+                    NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                }
+
+                Row {
+                    anchors.left: parent.left
+                    anchors.leftMargin: Theme.spacing.lg
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: Theme.spacing.md
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "settings"
+                        font.family: Theme.font.icons
+                        font.pixelSize: Theme.settings.iconSize
+                        color: Colors.textOnSurface
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Settings"
+                        font.family: Theme.font.family
+                        font.pixelSize: Theme.font.normal
+                        color: Colors.textOnSurface
+                    }
+                }
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.rightMargin: Theme.spacing.lg
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "lock"
+                    font.family: Theme.font.icons
+                    font.pixelSize: Theme.settings.iconSize
+                    color: Colors.textOnSurfaceVariant
+                }
+            }
 
             Repeater {
-                model: Tiles.keys.concat(["settings"])
+                model: Tiles.all
 
                 Rectangle {
-                    id: cell
+                    id: tile
 
-                    required property string modelData
-                    required property int index
-                    readonly property bool fixed: modelData === "settings"
-                    readonly property bool picked: tilesGroup.picking === index
-                    readonly property var info: fixed ? { title: "Settings", icon: "settings" } : Tiles.info(modelData)
+                    required property var modelData
+                    readonly property string key: modelData.key
+                    readonly property bool held: board.dragKey === key
+                    readonly property int gridIndex: board.preview.indexOf(key)
+                    readonly property int poolIndex: board.pool.indexOf(key)
+                    readonly property bool inGrid: gridIndex >= 0
+                    readonly property point home: inGrid ? board.slot(gridIndex, board.pad) : board.slot(Math.max(0, poolIndex), board.poolTop)
+                    readonly property bool hovered: dragArea.containsMouse && board.dragKey === ""
+                    readonly property color ink: held ? Colors.textOnPrimaryContainer
+                                               : inGrid ? Colors.textOnSecondaryContainer
+                                               : Colors.textOnSurface
+                    property real dragX: 0
+                    property real dragY: 0
 
-                    Layout.fillWidth: true
-                    implicitHeight: Theme.button.size + Theme.spacing.sm * 2
-                    radius: picked ? height / 2 : Theme.radius.large
-                    color: picked ? Colors.secondaryContainer
-                         : cellMouse.containsMouse && !fixed ? Colors.surfaceContainerHighest
+                    visible: inGrid || poolIndex >= 0 || held
+                    x: held ? dragX : home.x
+                    y: held ? dragY : home.y
+                    z: held ? 10 : 1
+                    width: board.cellW
+                    height: board.cellH
+                    radius: Theme.radius.large
+                    scale: held ? 1.05 : hovered ? 1.02 : 1
+                    rotation: held ? 2 : 0
+                    color: held ? Colors.primaryContainer
+                         : inGrid ? Colors.secondaryContainer
                          : Colors.surfaceContainer
-                    opacity: fixed ? 0.5 : 1
+                    border.width: inGrid || held ? 0 : 1
+                    border.color: Colors.outlineVariant
 
-                    Behavior on radius {
+                    Behavior on x {
+                        enabled: !tile.held
                         NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                    }
+
+                    Behavior on y {
+                        enabled: !tile.held
+                        NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                    }
+
+                    Behavior on scale {
+                        NumberAnimation { duration: Theme.anim.fast; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+                    }
+
+                    Behavior on rotation {
+                        NumberAnimation { duration: Theme.anim.fast }
                     }
 
                     Behavior on color {
                         ColorAnimation { duration: Theme.anim.fast }
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        color: tile.ink
+                        opacity: tile.hovered ? 0.08 : 0
                     }
 
                     Row {
@@ -169,92 +370,65 @@ ColumnLayout {
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: cell.info?.icon ?? ""
+                            text: tile.modelData.icon
                             font.family: Theme.font.icons
                             font.pixelSize: Theme.settings.iconSize
-                            color: cell.picked ? Colors.textOnSecondaryContainer : Colors.textOnSurface
+                            color: tile.inGrid || tile.held ? tile.ink : Colors.primary
                         }
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: cell.info?.title ?? ""
+                            text: tile.modelData.title
                             font.family: Theme.font.family
                             font.pixelSize: Theme.font.normal
-                            color: cell.picked ? Colors.textOnSecondaryContainer : Colors.textOnSurface
+                            color: tile.ink
+                        }
+                    }
+
+                    Text {
+                        anchors.right: parent.right
+                        anchors.rightMargin: Theme.spacing.md
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "drag_indicator"
+                        font.family: Theme.font.icons
+                        font.pixelSize: Theme.settings.iconSize
+                        color: tile.ink
+                        opacity: tile.held || tile.hovered ? 1 : 0.45
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: Theme.anim.fast }
                         }
                     }
 
                     MouseArea {
-                        id: cellMouse
-                        anchors.fill: parent
-                        enabled: !cell.fixed
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: tilesGroup.picking = cell.picked ? -1 : cell.index
-                    }
-                }
-            }
-        }
+                        id: dragArea
 
-        Flow {
-            Layout.fillWidth: true
-            Layout.leftMargin: Theme.spacing.md
-            Layout.rightMargin: Theme.spacing.md
-            Layout.bottomMargin: Theme.spacing.md
-            visible: tilesGroup.picking >= 0
-            spacing: Theme.spacing.sm
+                        property point grab: Qt.point(0, 0)
 
-            Repeater {
-                model: Tiles.all
-
-                Rectangle {
-                    id: chip
-
-                    required property var modelData
-                    readonly property bool current: Tiles.keys[tilesGroup.picking] === modelData.key
-                    readonly property bool used: Tiles.keys.includes(modelData.key)
-
-                    visible: Tiles.available(modelData.key)
-                    implicitWidth: chipRow.implicitWidth + Theme.spacing.lg * 2
-                    implicitHeight: Theme.button.size
-                    radius: current ? height / 2 : Theme.radius.medium
-                    color: current ? Colors.secondaryContainer
-                         : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.08) : "transparent"
-                    border.width: current ? 0 : 1
-                    border.color: Colors.outlineVariant
-                    opacity: used && !current ? 0.6 : 1
-
-                    Row {
-                        id: chipRow
-                        anchors.centerIn: parent
-                        spacing: Theme.spacing.sm
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: chip.modelData.icon
-                            font.family: Theme.font.icons
-                            font.pixelSize: Theme.settings.iconSize
-                            color: chip.current ? Colors.textOnSecondaryContainer : Colors.primary
-                        }
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: chip.modelData.title
-                            font.family: Theme.font.family
-                            font.pixelSize: Theme.font.normal
-                            color: chip.current ? Colors.textOnSecondaryContainer : Colors.textOnSurface
-                        }
-                    }
-
-                    MouseArea {
-                        id: chipMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            Tiles.setAt(tilesGroup.picking, chip.modelData.key);
-                            tilesGroup.picking = -1;
+                        preventStealing: true
+                        cursorShape: tile.held ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+
+                        onPressed: mouse => {
+                            grab = Qt.point(mouse.x, mouse.y);
+                            tile.dragX = tile.x;
+                            tile.dragY = tile.y;
+                            board.fromGrid = tile.inGrid;
+                            board.pointer = mapToItem(board, mouse.x, mouse.y);
+                            board.dragKey = tile.key;
                         }
+
+                        onPositionChanged: mouse => {
+                            if (!pressed) return;
+                            const p = mapToItem(board, mouse.x, mouse.y);
+                            tile.dragX = p.x - grab.x;
+                            tile.dragY = p.y - grab.y;
+                            board.pointer = p;
+                        }
+
+                        onReleased: board.drop()
+                        onCanceled: board.dragKey = ""
                     }
                 }
             }

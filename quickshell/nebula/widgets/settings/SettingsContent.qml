@@ -26,12 +26,15 @@ Item {
     property int direction: 0
 
     readonly property var subpages: ({
-        wallpapers: { title: "Wallpapers", subtitle: "Click one to use it", source: "pages/appearance/WallpapersPage.qml" }
+        wallpapers: { title: "Wallpapers", subtitle: "Click one to use it", source: "pages/appearance/WallpapersPage.qml" },
+        images: { title: "Choose an image", subtitle: "Click one to use it", source: "pages/ImagePickerPage.qml" },
+        newwidget: { title: "Add a widget", subtitle: "Pick a type", source: "pages/desktop/NewWidgetPage.qml" }
     })
     readonly property string subKey: shownSub.split(":")[0]
     readonly property string subArg: shownSub.split(":")[1] ?? ""
     readonly property var current: shownSub === "" ? pages?.[shownPage]
         : subKey === "section" ? pages?.[shownPage]?.sections?.find(x => x.key === subArg) ?? pages?.[shownPage]
+        : subKey === "widget" ? ({ title: Widgets.types[Widgets.get(subArg)?.type]?.title ?? "Widget", subtitle: "Shape, size and more", source: "pages/desktop/WidgetPage.qml" })
         : subKey === "app" ? ({ title: Apps.roles.find(r => r.key === subArg)?.title ?? "App", subtitle: "Pick one", source: "pages/apps/AppPickerPage.qml" })
         : subpages?.[subKey] ?? pages?.[shownPage]
 

@@ -23,6 +23,12 @@ Singleton {
     readonly property alias screenshot: adapter.screenshot
     readonly property alias weather: adapter.weather
     readonly property alias settingsWindow: adapter.settingsWindow
+    readonly property alias widgets: adapter.widgets
+    property bool ready: false
+
+    component WidgetsGroup: JsonObject {
+        property string items: ""
+    }
 
     component ClockGroup: JsonObject {
         property bool use24h: false
@@ -49,6 +55,7 @@ Singleton {
     component NowPlayingGroup: JsonObject {
         property bool enabled: true
         property bool spin: true
+        property int spinSeconds: 60
         property real x: -1
         property real y: -1
     }
@@ -139,6 +146,7 @@ Singleton {
         readonly property ScreenshotGroup screenshot: ScreenshotGroup {}
         readonly property WeatherGroup weather: WeatherGroup {}
         readonly property SettingsWindowGroup settingsWindow: SettingsWindowGroup {}
+        readonly property WidgetsGroup widgets: WidgetsGroup {}
     }
 
     function keys(group) {
@@ -178,8 +186,11 @@ Singleton {
         watchChanges: true
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
+        onLoaded: root.ready = true
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound) writeAdapter();
+            if (error !== FileViewError.FileNotFound) return;
+            root.ready = true;
+            writeAdapter();
         }
         onSaved: if (!loaded) reload()
 
@@ -201,6 +212,7 @@ Singleton {
             property ScreenshotGroup screenshot: ScreenshotGroup {}
             property WeatherGroup weather: WeatherGroup {}
             property SettingsWindowGroup settingsWindow: SettingsWindowGroup {}
+            property WidgetsGroup widgets: WidgetsGroup {}
         }
     }
 }

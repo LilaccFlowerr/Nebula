@@ -38,6 +38,8 @@ Item {
     property real shownSelected: selected
     property bool snap: false
     property int captureToken: 0
+    property var shots: ({})
+    readonly property int liveWs: ids[Math.round(shownSelected)] ?? -1
 
     Behavior on shownSelected {
         enabled: !root.snap
@@ -125,6 +127,10 @@ Item {
         function onOverviewConfirmRequested() { root.go(root.selected); }
     }
     onOpenChanged: if (open) reset()
+    Component.onCompleted: if (open) {
+        reset();
+        Qt.callLater(() => captureToken++);
+    }
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) GlobalStates.overviewOpen = false;
@@ -161,6 +167,52 @@ Item {
         RightIsland { anchors.right: parent.right }
     }
 
+    Repeater {
+        model: Hyprland.toplevels.values.filter(t => t.wayland && root.ids.includes(t.workspace?.id))
+
+        Item {
+            id: shot
+
+            required property var modelData
+            readonly property string key: root.address(modelData)
+            readonly property bool hasContent: view.hasContent
+            readonly property Item texture: tex
+            readonly property var size: modelData.lastIpcObject.size ?? [root.width, root.height]
+
+            ScreencopyView {
+                id: view
+                x: -width - root.width
+                width: shot.size[0]
+                height: shot.size[1]
+                captureSource: shot.modelData.wayland
+                live: root.open && shot.modelData.workspace?.id === root.liveWs
+
+                Connections {
+                    target: root
+                    function onCaptureTokenChanged() { view.captureFrame(); }
+                }
+            }
+
+            ShaderEffectSource {
+                id: tex
+                visible: false
+                sourceItem: view
+                hideSource: true
+                live: true
+            }
+
+            Component.onCompleted: {
+                root.shots[key] = shot;
+                root.shotsChanged();
+            }
+            Component.onDestruction: {
+                if (root.shots[key] !== shot) return;
+                delete root.shots[key];
+                root.shotsChanged();
+            }
+        }
+    }
+
     Item {
         anchors.fill: parent
 
@@ -178,7 +230,7 @@ Item {
                 ws: modelData
                 visible: Math.abs(d) < Theme.overview.visibleRange
                 monitor: root.monitor
-                live: root.open && Math.abs(d) < 0.5
+                shots: root.shots
                 interactive: root.open && index === root.selected
                 captureToken: root.captureToken
                 emptyShape: root.shapes[(ws - 1) % root.shapes.length]
@@ -231,6 +283,7 @@ Item {
                         height: root.stripHeight
                         ws: slot.ws
                         monitor: root.monitor
+                        shots: root.shots
                         selected: slot.index === root.selected || slot.dropTarget
                         captureToken: root.captureToken
                         emptyShape: root.shapes[(slot.ws - 1) % root.shapes.length]

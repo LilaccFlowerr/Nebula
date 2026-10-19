@@ -220,12 +220,6 @@ Island {
                 onFinished: if (clockPill.shownMode !== clockPill.mode) restart()
             }
 
-            Timer {
-                interval: 3000
-                running: clockPill.showsStats && !clockMouse.containsMouse && !root.systemOpen
-                onTriggered: clockPill.setMode(0, -1)
-            }
-
             MouseArea {
                 id: clockMouse
                 anchors.fill: parent
