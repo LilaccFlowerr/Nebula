@@ -15,10 +15,11 @@ Controls.Slider {
     implicitWidth: 160
     implicitHeight: 24
 
+    property bool animated: true
     property real shownPosition: visualPosition
 
     Behavior on shownPosition {
-        enabled: !root.pressed
+        enabled: root.animated && !root.pressed
         NumberAnimation {
             duration: Theme.anim.medium
             easing.type: Easing.BezierSpline

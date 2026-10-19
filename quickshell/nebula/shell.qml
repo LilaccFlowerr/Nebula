@@ -17,7 +17,29 @@ ShellRoot {
     
     Bar {}
 
-    RecorderCorner {}
+    Variants {
+        model: Quickshell.screens
+
+        RecorderCorner {
+            required property ShellScreen modelData
+            screen: modelData
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        WidgetMenu {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        WidgetsCorner {
+            required property ShellScreen modelData
+            screen: modelData
+        }
+    }
 
     LauncherWindow {}
 

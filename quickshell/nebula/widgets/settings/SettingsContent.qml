@@ -171,6 +171,9 @@ Item {
             if (GlobalStates.settingsTab !== "" && pages[index].sections) {
                 sub = "section:" + GlobalStates.settingsTab;
                 shownSub = sub;
+            } else if (GlobalStates.settingsTab === "images" || GlobalStates.settingsTab === "newwidget" || GlobalStates.settingsTab.startsWith("widget:")) {
+                sub = GlobalStates.settingsTab;
+                shownSub = sub;
             }
         }
         GlobalStates.settingsTab = "";

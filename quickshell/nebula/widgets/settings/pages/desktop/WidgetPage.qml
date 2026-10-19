@@ -13,7 +13,6 @@ ColumnLayout {
     property string arg: ""
     readonly property var cfg: Widgets.get(arg) ?? ({})
     readonly property var type: Widgets.types[cfg.type] ?? ({ title: "", icon: "widgets", size: 200, minSize: 80, maxSize: 600, color: "secondary" })
-    readonly property bool custom: cfg.type === "image" || cfg.type === "text"
 
     signal navigate(string target)
 
@@ -405,7 +404,6 @@ ColumnLayout {
             icon: "delete"
             title: "Remove widget"
             subtitle: "Gone for good"
-            visible: page.custom
 
             ActionButton {
                 icon: "delete"

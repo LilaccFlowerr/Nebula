@@ -8,9 +8,9 @@ Singleton {
     id: root
 
     readonly property var types: ({
-        nowplaying: { title: "Now playing", icon: "music_note", shape: "Cookie12Sided", size: 280, minSize: 120, maxSize: 480, color: "secondary" },
-        image: { title: "Image", icon: "image", shape: "Clover4Leaf", size: 200, minSize: 80, maxSize: 600, color: "secondary" },
-        text: { title: "Text", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
+        nowplaying: { title: "Now playing", description: "Album art and controls", single: true, icon: "music_note", shape: "Cookie12Sided", size: 280, minSize: 120, maxSize: 480, color: "secondary" },
+        image: { title: "Image", description: "Any picture, in a shape", picker: true, icon: "image", shape: "Clover4Leaf", size: 200, minSize: 80, maxSize: 600, color: "secondary" },
+        text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
     })
 
     readonly property var shapes: ["Circle", "Square", "Slanted", "Arch", "Oval", "Pill", "Diamond", "Pentagon", "Gem", "Sunny", "VerySunny", "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided", "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Boom", "SoftBoom", "Flower", "Puffy", "PuffyDiamond", "PixelCircle", "Bun"]
@@ -21,7 +21,7 @@ Singleton {
         if (!w) return "";
         if (w.type === "image") return (w.source ?? "").split("/").pop() || "Image";
         if (w.type === "text") return w.source !== "" ? w.source : "Note";
-        return types[w.type]?.title ?? w.type;
+        return types[w.type]?.title ?? w.type ?? "";
     }
 
     readonly property var colorRoles: ["primary", "secondary", "tertiary", "surface"]
@@ -33,6 +33,26 @@ Singleton {
         case "surface": return { fill: Colors.surfaceContainerHigh, text: Colors.textOnSurface };
         default: return { fill: Colors.secondaryContainer, text: Colors.textOnSecondaryContainer };
         }
+    }
+
+    property string menuId: ""
+    property string menuScreen: ""
+    property real menuX: 0
+    property real menuY: 0
+    property real menuW: 0
+    property real menuH: 0
+
+    function openMenu(id, screenName, rect) {
+        menuScreen = screenName;
+        menuX = rect.x;
+        menuY = rect.y;
+        menuW = rect.width;
+        menuH = rect.height;
+        menuId = id;
+    }
+
+    function closeMenu() {
+        menuId = "";
     }
 
     property string dragId: ""
@@ -57,6 +77,12 @@ Singleton {
 
     function screenNamed(name) {
         return Quickshell.screens.find(s => s.name === name) ?? Quickshell.screens[0];
+    }
+
+    function available() {
+        return Object.keys(types)
+            .filter(key => !types[key].single || first(key) === null)
+            .map(key => Object.assign({ key: key }, types[key]));
     }
 
     function spawn(size, screenName) {
@@ -85,9 +111,23 @@ Singleton {
         }
     }
 
+    property bool pending: false
+    property double holdUntil: 0
+
     function save(next) {
         list = next;
-        Settings.widgets.items = JSON.stringify(next);
+        pending = true;
+        saveTimer.restart();
+    }
+
+    Timer {
+        id: saveTimer
+        interval: 250
+        onTriggered: {
+            root.holdUntil = Date.now() + 1000;
+            Settings.widgets.items = JSON.stringify(root.list);
+            root.pending = false;
+        }
     }
 
     function get(id) {
@@ -119,7 +159,17 @@ Singleton {
     }
 
     function update(id, props) {
-        save(list.map(w => w.id === id ? Object.assign({}, w, props) : w));
+        save(list.map(w => {
+            if (w.id !== id) return w;
+            const next = Object.assign({}, w, props);
+            const grows = props.size !== undefined && w.size !== undefined && props.x === undefined && props.y === undefined;
+            if (grows && (w.x ?? -1) >= 0 && (w.y ?? -1) >= 0) {
+                const shift = (props.size - w.size) / 2;
+                next.x = Math.max(0, Math.round(w.x - shift));
+                next.y = Math.max(0, Math.round(w.y - shift));
+            }
+            return next;
+        }));
     }
 
     function raise(id) {
@@ -161,6 +211,7 @@ Singleton {
     Connections {
         target: Settings.widgets
         function onItemsChanged() {
+            if (root.pending || Date.now() < root.holdUntil) return;
             if (Settings.widgets.items !== JSON.stringify(root.list)) root.sync();
         }
     }
