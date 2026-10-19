@@ -32,6 +32,8 @@ Singleton {
         readonly property int innerShapeSize: 18
         readonly property int shapeSize: 34
         readonly property int activeShapeSize: 40
+        readonly property int urgentShape: MaterialShape.SoftBoom
+        readonly property int urgentSpinDuration: 10000
         readonly property var shapes: [
             MaterialShape.Circle, MaterialShape.Clover4Leaf, MaterialShape.Triangle, MaterialShape.Heart,
             MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Arch, MaterialShape.Ghostish,
@@ -127,7 +129,6 @@ Singleton {
         readonly property int artSize: 88
         readonly property int textWidth: 170
         readonly property int progressWidth: 140
-        readonly property int spinDuration: 30000
         readonly property int spinUpDuration: 1200
         readonly property int emptySize: 120
         readonly property int emptyIconSize: 48

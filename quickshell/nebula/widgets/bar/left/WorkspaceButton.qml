@@ -12,10 +12,12 @@ Item {
     readonly property bool active: Workspaces.activeId === root.wsId
     readonly property bool occupied: Workspaces.isOccupied(root.wsId)
     readonly property bool urgent: Workspaces.isUrgent(root.wsId)
+    readonly property bool attention: urgent && !active
+    property real spin: 0
 
     readonly property int ownShape: Theme.workspaces.shapes[(wsId - 1) % Theme.workspaces.shapes.length]
     property int activeShape: ownShape
-    readonly property int shownShape: active ? activeShape : ownShape
+    readonly property int shownShape: attention ? Theme.workspaces.urgentShape : active ? activeShape : ownShape
 
     function pickShape() {
         const pool = Theme.workspaces.activeShapes.filter(s => s !== ownShape && s !== activeShape);
@@ -41,10 +43,10 @@ Item {
         visible: root.style !== "shapes"
         radius: Theme.radius.full
 
-        color: root.urgent   ? Colors.errorColor
-             : root.active   ? Colors.primary
-             : root.occupied ? Colors.surfaceContainerLow
-             :                 Colors.surfaceContainer
+        color: root.attention ? Colors.tertiaryContainer
+             : root.active    ? Colors.primary
+             : root.occupied  ? Colors.surfaceContainerLow
+             :                  Colors.surfaceContainer
 
         Behavior on color {
             ColorAnimation {
@@ -60,8 +62,8 @@ Item {
             text: root.wsId
             font.family: Theme.font.family
             font.pixelSize: Theme.font.normal
-            color: root.active ? Colors.textOnPrimary : Colors.textOnSurface
-            opacity: root.active || root.occupied ? 1 : 0.4
+            color: root.attention ? Colors.textOnTertiaryContainer : root.active ? Colors.textOnPrimary : Colors.textOnSurface
+            opacity: root.active || root.occupied || root.attention ? 1 : 0.4
         }
 
         MaterialShape {
@@ -69,11 +71,12 @@ Item {
             visible: root.style === "pills"
             implicitSize: Theme.workspaces.innerShapeSize
             shape: root.shownShape
+            rotation: root.spin
             animationDuration: Theme.anim.slow
             animationEasing.type: Easing.BezierSpline
             animationEasing.bezierCurve: Theme.anim.emphasizedDecel
-            color: root.active ? Colors.textOnPrimary : Colors.textOnSurface
-            opacity: root.active || root.occupied ? 1 : 0.4
+            color: root.attention ? Colors.textOnTertiaryContainer : root.active ? Colors.textOnPrimary : Colors.textOnSurface
+            opacity: root.active || root.occupied || root.attention ? 1 : 0.4
         }
     }
 
@@ -82,14 +85,15 @@ Item {
         visible: root.style === "shapes"
         implicitSize: root.active ? Theme.workspaces.activeShapeSize : Theme.workspaces.shapeSize
         shape: root.shownShape
+        rotation: root.spin
         animationDuration: Theme.anim.slow
         animationEasing.type: Easing.BezierSpline
         animationEasing.bezierCurve: Theme.anim.emphasizedDecel
 
-        color: root.urgent   ? Colors.errorColor
-             : root.active   ? Colors.primary
-             : root.occupied ? Colors.surfaceContainerHighest
-             :                 Colors.surfaceContainerHigh
+        color: root.attention ? Colors.tertiaryContainer
+             : root.active    ? Colors.primary
+             : root.occupied  ? Colors.surfaceContainerHighest
+             :                  Colors.surfaceContainerHigh
 
         Behavior on implicitSize {
             NumberAnimation {
@@ -106,6 +110,15 @@ Item {
                 easing.bezierCurve: Theme.anim.standard
             }
         }
+    }
+
+    NumberAnimation on spin {
+        running: root.attention && Theme.anim.scale > 0
+        from: 0
+        to: 360
+        duration: Theme.workspaces.urgentSpinDuration
+        loops: Animation.Infinite
+        onStopped: root.spin = 0
     }
 
     MouseArea {

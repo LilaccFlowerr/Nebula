@@ -14,7 +14,7 @@ Item {
     property int ws: 1
     property var monitor: null
     property bool selected: false
-    property bool live: false
+    property var shots: ({})
     property bool interactive: false
     property bool decorated: false
     property Item barSource: null
@@ -46,7 +46,7 @@ Item {
             anchors.fill: parent
             source: Wallpaper.url(Settings.wallpaper.path)
             fillMode: Image.PreserveAspectCrop
-            sourceSize: Qt.size(card.screenWidth / 2, card.screenWidth * 9 / 32)
+            sourceSize: Qt.size(card.screenWidth / 2, card.screenHeight / 2)
             asynchronous: true
         }
 
@@ -75,7 +75,8 @@ Item {
         }
 
         Loader {
-            active: card.decorated && Settings.nowPlaying.enabled
+            readonly property var np: Widgets.first("nowplaying") ?? ({})
+            active: card.decorated && np.enabled === true
 
             sourceComponent: Item {
                 width: card.screenWidth
@@ -85,8 +86,10 @@ Item {
                 enabled: false
 
                 NowPlaying {
-                    x: Settings.nowPlaying.x < 0 ? Theme.nowPlaying.margin : Math.min(Settings.nowPlaying.x, parent.width - width)
-                    y: Settings.nowPlaying.y < 0 ? parent.height - height - Theme.nowPlaying.margin : Math.min(Settings.nowPlaying.y, parent.height - height)
+                    shapeName: np.shape ?? "Cookie12Sided"
+                    baseSize: np.size ?? Theme.nowPlaying.cookieSize
+                    x: (np.x ?? -1) < 0 ? Theme.nowPlaying.margin : Math.min(np.x, parent.width - width)
+                    y: (np.y ?? -1) < 0 ? parent.height - height - Theme.nowPlaying.margin : Math.min(np.y, parent.height - height)
                 }
             }
         }
@@ -98,6 +101,7 @@ Item {
                 id: win
 
                 required property var modelData
+                readonly property var shot: card.shots[modelData.address.startsWith("0x") ? modelData.address : "0x" + modelData.address] ?? null
                 readonly property var at: modelData.lastIpcObject.at ?? [0, 0]
                 readonly property var size: modelData.lastIpcObject.size ?? [card.screenWidth, card.screenWidth * 9 / 16]
 
@@ -109,20 +113,14 @@ Item {
                 color: Colors.surfaceContainerHigh
                 opacity: drag.dragging ? Theme.overview.draggedOpacity : 1
 
-                ScreencopyView {
-                    id: view
+                ShaderEffect {
                     anchors.fill: parent
-                    captureSource: win.modelData.wayland
-                    live: card.live
-
-                    Connections {
-                        target: card
-                        function onCaptureTokenChanged() { view.captureFrame(); }
-                    }
+                    visible: win.shot?.hasContent ?? false
+                    property var source: win.shot?.texture ?? null
                 }
 
                 IconImage {
-                    visible: !view.hasContent
+                    visible: !(win.shot?.hasContent ?? false)
                     anchors.centerIn: parent
                     implicitSize: Math.min(win.width, win.height) * 0.3
                     source: Quickshell.iconPath(DesktopEntries.heuristicLookup(win.modelData.lastIpcObject.class ?? "")?.icon ?? "", true)
@@ -155,12 +153,18 @@ Item {
         }
 
         ShaderEffectSource {
+            id: barView
             visible: card.barSource !== null
             width: card.width
             height: Theme.bar.height * card.k
             sourceItem: card.barSource
-            live: true
+            live: card.decorated
             smooth: true
+
+            Connections {
+                target: card
+                function onCaptureTokenChanged() { barView.scheduleUpdate(); }
+            }
         }
     }
 
