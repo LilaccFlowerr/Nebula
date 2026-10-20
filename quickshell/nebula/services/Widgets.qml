@@ -10,6 +10,8 @@ Singleton {
     readonly property var types: ({
         nowplaying: { title: "Now playing", description: "Album art and controls", single: true, icon: "music_note", shape: "Cookie12Sided", size: 280, minSize: 120, maxSize: 480, color: "secondary" },
         image: { title: "Image", description: "Any picture, in a shape", picker: true, icon: "image", shape: "Clover4Leaf", size: 200, minSize: 80, maxSize: 600, color: "secondary" },
+        clock: { title: "Clock", description: "An analog clock in a shape", icon: "schedule", shape: "Cookie12Sided", size: 220, minSize: 100, maxSize: 600, color: "primary" },
+        calendar: { title: "Calendar", description: "Today, tap to open the month", icon: "calendar_month", shape: "Cookie9Sided", size: 200, minSize: 140, maxSize: 420, color: "tertiary" },
         text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
     })
 
@@ -97,8 +99,25 @@ Singleton {
     property var list: []
     property var ids: []
 
+    ListModel {
+        id: idModel
+    }
+
+    readonly property alias idModel: idModel
+
+    function hasRow(id) {
+        for (let i = 0; i < idModel.count; i++) if (idModel.get(i).modelData === id) return true;
+        return false;
+    }
+
     onListChanged: {
         const next = list.map(w => w.id);
+        for (let i = idModel.count - 1; i >= 0; i--) {
+            if (!next.includes(idModel.get(i).modelData)) idModel.remove(i);
+        }
+        for (const id of next) {
+            if (!hasRow(id)) idModel.append({ modelData: id });
+        }
         if (next.join(",") !== ids.join(",")) ids = next;
     }
 

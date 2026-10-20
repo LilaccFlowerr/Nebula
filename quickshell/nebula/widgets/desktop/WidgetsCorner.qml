@@ -148,7 +148,7 @@ PanelWindow {
                     width: parent.width
 
                     Repeater {
-                        model: Widgets.ids
+                        model: Widgets.idModel
 
                         Item {
                             id: entry

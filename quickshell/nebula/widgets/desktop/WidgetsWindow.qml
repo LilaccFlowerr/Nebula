@@ -96,6 +96,9 @@ Variants {
                 colorRole: parent?.cfg?.color ?? "secondary"
                 baseSize: parent?.cfg?.size ?? 200
                 path: parent?.cfg?.source ?? ""
+                cropZoom: parent?.cfg?.zoom ?? 1
+                cropX: parent?.cfg?.panX ?? 0
+                cropY: parent?.cfg?.panY ?? 0
             }
         }
 
@@ -111,9 +114,34 @@ Variants {
             }
         }
 
+        Component {
+            id: calendarWidget
+
+            CalendarWidget {
+                shapeName: parent?.cfg?.shape ?? "Cookie9Sided"
+                colorRole: parent?.cfg?.color ?? "tertiary"
+                baseSize: parent?.cfg?.size ?? 200
+                openShapeName: parent?.cfg?.openShape ?? ""
+            }
+        }
+
+        Component {
+            id: clockWidget
+
+            ClockWidget {
+                live: !window.covered
+                shapeName: parent?.cfg?.shape ?? "Cookie12Sided"
+                colorRole: parent?.cfg?.color ?? "primary"
+                baseSize: parent?.cfg?.size ?? 220
+                showSeconds: parent?.cfg?.seconds ?? true
+                showDate: parent?.cfg?.date ?? true
+                showNumbers: parent?.cfg?.numbers ?? false
+            }
+        }
+
         Repeater {
             id: repeater
-            model: Widgets.ids
+            model: Widgets.idModel
             onItemAdded: window.updateBounds()
             onItemRemoved: window.updateBounds()
 
@@ -149,7 +177,7 @@ Variants {
                 onWidthChanged: window.updateBounds()
                 onHeightChanged: window.updateBounds()
 
-                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : nowPlayingWidget
+                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : nowPlayingWidget
 
                 HoverHandler {
                     enabled: !slot.ghost

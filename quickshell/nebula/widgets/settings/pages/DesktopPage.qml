@@ -27,7 +27,7 @@ ColumnLayout {
             spacing: Theme.spacing.md
 
             Repeater {
-                model: Widgets.ids
+                model: Widgets.idModel
 
                 Rectangle {
                     id: card
