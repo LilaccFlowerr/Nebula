@@ -72,6 +72,13 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
+    name         = "blur-quickshell-widgetcorner",
+    match        = { namespace = "^quickshell:widget(corner|menu)$" },
+    blur         = true,
+    ignore_alpha = 0.1,
+})
+
+hl.layer_rule({
     name         = "blur-quickshell-nowplaying",
     match        = { namespace = "^quickshell:nowplaying$" },
     blur         = true,

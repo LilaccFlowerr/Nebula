@@ -233,6 +233,201 @@ ColumnLayout {
                 }
             }
         }
+
+        Item {
+            Layout.fillWidth: true
+            implicitHeight: cropEditor.height + Theme.spacing.lg * 2
+
+            ShapedArt {
+                id: cropEditor
+
+                readonly property real zoomLevel: page.cfg.zoom ?? 1
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: Theme.spacing.lg
+                width: 220
+                height: 220
+                shape: MaterialShape[page.cfg.shape ?? "Clover4Leaf"] ?? MaterialShape.Clover4Leaf
+                color: Widgets.palette(page.cfg.color).fill
+                source: page.cfg.source ? Wallpaper.url(page.cfg.source) : ""
+                sourceSize: Qt.size(1200, 1200)
+                zoom: zoomLevel
+                panX: page.cfg.panX ?? 0
+                panY: page.cfg.panY ?? 0
+
+                MouseArea {
+                    id: cropMouse
+
+                    property real lastX: 0
+                    property real lastY: 0
+
+                    anchors.fill: parent
+                    preventStealing: true
+                    cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                    onPressed: mouse => {
+                        lastX = mouse.x;
+                        lastY = mouse.y;
+                    }
+                    onPositionChanged: mouse => {
+                        if (!pressed) return;
+                        const dx = mouse.x - lastX;
+                        const dy = mouse.y - lastY;
+                        lastX = mouse.x;
+                        lastY = mouse.y;
+                        const props = {};
+                        if (cropEditor.rangeX > 0) props.panX = Math.max(-1, Math.min(1, (page.cfg.panX ?? 0) - dx / cropEditor.rangeX));
+                        if (cropEditor.rangeY > 0) props.panY = Math.max(-1, Math.min(1, (page.cfg.panY ?? 0) - dy / cropEditor.rangeY));
+                        page.set(props);
+                    }
+                    onWheel: wheel => page.set({ zoom: Math.max(1, Math.min(4, Math.round((cropEditor.zoomLevel + wheel.angleDelta.y / 1200) * 100) / 100)) })
+                }
+            }
+        }
+
+        SettingRow {
+            icon: "zoom_in"
+            title: "Zoom"
+            subtitle: "Drag the picture above to move it"
+
+            Slider {
+                width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm - Theme.button.size
+                anchors.verticalCenter: parent.verticalCenter
+                from: 100
+                to: 400
+                stepSize: 5
+                value: (page.cfg.zoom ?? 1) * 100
+                onMoved: page.set({ zoom: Math.round(value / 5) * 5 / 100 })
+            }
+
+            NumberField {
+                anchors.verticalCenter: parent.verticalCenter
+                value: Math.round((page.cfg.zoom ?? 1) * 100)
+                from: 100
+                to: 400
+                step: 5
+                suffix: " %"
+                onEdited: value => page.set({ zoom: value / 100 })
+            }
+
+            IconButton {
+                icon: "restart_alt"
+                anchors.verticalCenter: parent.verticalCenter
+                onClicked: page.set({ zoom: 1, panX: 0, panY: 0 })
+            }
+        }
+    }
+
+    SettingGroup {
+        title: "Clock"
+        visible: page.cfg.type === "clock"
+
+        SettingRow {
+            icon: "timer"
+            title: "Seconds"
+            subtitle: "A dot that runs along the edge"
+            clickable: true
+            onClicked: page.set({ seconds: !(page.cfg.seconds ?? true) })
+
+            Switch {
+                checked: page.cfg.seconds ?? true
+                onToggled: page.set({ seconds: !(page.cfg.seconds ?? true) })
+            }
+        }
+
+        SettingRow {
+            icon: "calendar_today"
+            title: "Date"
+            subtitle: "Moves out of the way of the hands"
+            clickable: true
+            onClicked: page.set({ date: !(page.cfg.date ?? true) })
+
+            Switch {
+                checked: page.cfg.date ?? true
+                onToggled: page.set({ date: !(page.cfg.date ?? true) })
+            }
+        }
+
+        SettingRow {
+            icon: "pin"
+            title: "Hour numbers"
+            clickable: true
+            onClicked: page.set({ numbers: !(page.cfg.numbers ?? false) })
+
+            Switch {
+                checked: page.cfg.numbers ?? false
+                onToggled: page.set({ numbers: !(page.cfg.numbers ?? false) })
+            }
+        }
+    }
+
+    SettingGroup {
+        title: "Calendar"
+        visible: page.cfg.type === "calendar"
+
+        SettingRow {
+            icon: "open_in_full"
+            title: "Open shape"
+            subtitle: (page.cfg.openShape ?? "") === "" ? "Same shape" : page.cfg.openShape
+        }
+
+        Item {
+            Layout.fillWidth: true
+            implicitHeight: openFlow.implicitHeight + Theme.spacing.md * 2
+
+            Flow {
+                id: openFlow
+                x: Theme.spacing.md
+                y: Theme.spacing.md
+                width: parent.width - Theme.spacing.md * 2
+                spacing: Theme.spacing.xs
+
+                Repeater {
+                    model: [""].concat(Widgets.shapes)
+
+                    Rectangle {
+                        id: openChip
+
+                        required property string modelData
+                        readonly property bool active: modelData === (page.cfg.openShape ?? "")
+
+                        width: Theme.button.size
+                        height: Theme.button.size
+                        radius: active ? height / 2 : Theme.radius.medium
+                        color: active ? Colors.secondaryContainer : openMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.08) : "transparent"
+
+                        Behavior on radius {
+                            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                        }
+
+                        MaterialShape {
+                            anchors.centerIn: parent
+                            width: Theme.settings.iconSize
+                            height: width
+                            visible: openChip.modelData !== ""
+                            shape: MaterialShape[openChip.modelData] ?? MaterialShape.Circle
+                            color: openChip.active ? Colors.textOnSecondaryContainer : Colors.primary
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            visible: openChip.modelData === ""
+                            text: "filter_none"
+                            font.family: Theme.font.icons
+                            font.pixelSize: Theme.settings.iconSize
+                            color: openChip.active ? Colors.textOnSecondaryContainer : Colors.primary
+                        }
+
+                        MouseArea {
+                            id: openMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: page.set({ openShape: openChip.modelData })
+                        }
+                    }
+                }
+            }
+        }
     }
 
     SettingGroup {

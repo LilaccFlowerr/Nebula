@@ -51,7 +51,8 @@ Singleton {
         file = directory + "/recording_" + stamp + ".mp4";
         const monitor = Hyprland.focusedMonitor?.name ?? "screen";
         const args = region ? ["-w", "region", "-region", region] : ["-w", monitor];
-        args.push("-f", String(framerate), "-q", "ultra", "-tune", "quality");
+        const rate = framerate > 0 ? framerate : Math.max(30, Math.min(144, Math.round(Hyprland.focusedMonitor?.lastIpcObject?.refreshRate ?? 60)));
+        args.push("-f", String(rate), "-q", "ultra");
         if (sound) args.push("-a", "default_output");
         elapsed = 0;
         started = false;

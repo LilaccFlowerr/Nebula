@@ -61,6 +61,18 @@ PanelWindow {
         onCleared: Widgets.closeMenu()
     }
 
+    Connections {
+        target: Hyprland
+
+        function onFocusedWorkspaceChanged() {
+            if (window.open) Widgets.closeMenu();
+        }
+
+        function onFocusedMonitorChanged() {
+            if (window.open) Widgets.closeMenu();
+        }
+    }
+
     Rectangle {
         id: card
 

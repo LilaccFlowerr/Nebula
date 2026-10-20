@@ -12,6 +12,7 @@ var entries = [
     { title: "Spin while playing", page: "desktop", words: "rotate now playing" },
     { title: "Spin speed", page: "desktop", words: "rotate now playing slow fast seconds" },
     { title: "Widget position", page: "desktop", words: "now playing reset move" },
+    { title: "Clock widget", page: "desktop", words: "analog time hands seconds date" },
 
     { title: "Workspaces per group", page: "bar", tab: "left", words: "workspace count dots" },
     { title: "Workspace style", page: "bar", tab: "left", words: "numbers pills shapes" },

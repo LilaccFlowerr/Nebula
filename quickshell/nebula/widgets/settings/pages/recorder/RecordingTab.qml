@@ -9,7 +9,7 @@ import qs.widgets.settings.components
 ColumnLayout {
     id: page
 
-    readonly property var framerates: ["30", "60", "120"]
+    readonly property var framerates: ["Auto", "30", "60", "120"]
 
     spacing: Theme.spacing.xl
 
@@ -45,12 +45,13 @@ ColumnLayout {
         SettingRow {
             icon: "speed"
             title: "Framerate"
+            subtitle: Recorder.framerate === 0 ? "Matches the screen you record" : ""
 
             SegmentedButton {
                 width: Theme.settings.controlWidth
                 options: page.framerates
-                currentIndex: page.framerates.indexOf(String(Recorder.framerate))
-                onSelected: index => Settings.recorder.framerate = Number(page.framerates[index])
+                currentIndex: Recorder.framerate === 0 ? 0 : page.framerates.indexOf(String(Recorder.framerate))
+                onSelected: index => Settings.recorder.framerate = index === 0 ? 0 : Number(page.framerates[index])
             }
         }
     }

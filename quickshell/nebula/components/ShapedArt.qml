@@ -11,6 +11,15 @@ Item {
     property alias color: fill.color
     property alias animationDuration: fill.animationDuration
     property alias animationEasing: fill.animationEasing
+    property real zoom: 1
+    property real panX: 0
+    property real panY: 0
+
+    readonly property real aspect: image.implicitHeight > 0 ? image.implicitWidth / image.implicitHeight : 1
+    readonly property real coverWidth: width * zoom * Math.max(1, aspect)
+    readonly property real coverHeight: height * zoom * Math.max(1, 1 / aspect)
+    readonly property real rangeX: Math.max(0, (coverWidth - width) / 2)
+    readonly property real rangeY: Math.max(0, (coverHeight - height) / 2)
 
     readonly property bool hasImage: image.status === Image.Ready
 
@@ -35,15 +44,24 @@ Item {
         visible: false
     }
 
-    Image {
-        id: image
+    Item {
+        id: cropBox
         anchors.fill: parent
-        source: root.source
-        sourceSize: root.sourceSize
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        cache: false
+        clip: true
         visible: false
+
+        Image {
+            id: image
+            width: root.coverWidth
+            height: root.coverHeight
+            x: -root.rangeX * (1 + root.panX)
+            y: -root.rangeY * (1 + root.panY)
+            source: root.source
+            sourceSize: root.sourceSize
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            cache: false
+        }
     }
 
     LoadingIndicator {
@@ -56,7 +74,7 @@ Item {
 
     MultiEffect {
         anchors.fill: parent
-        source: image
+        source: cropBox
         visible: root.hasImage
         maskEnabled: true
         maskSource: mask
