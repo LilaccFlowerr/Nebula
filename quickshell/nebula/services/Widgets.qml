@@ -12,6 +12,7 @@ Singleton {
         image: { title: "Image", description: "Any picture, in a shape", picker: true, icon: "image", shape: "Clover4Leaf", size: 200, minSize: 80, maxSize: 600, color: "secondary" },
         clock: { title: "Clock", description: "An analog clock in a shape", icon: "schedule", shape: "Cookie12Sided", size: 220, minSize: 100, maxSize: 600, color: "primary" },
         calendar: { title: "Calendar", description: "Today, tap to open the month", icon: "calendar_month", shape: "Cookie9Sided", size: 200, minSize: 140, maxSize: 420, color: "tertiary" },
+        battery: { title: "Battery", description: "Fills like water as you charge", icon: "battery_full", shape: "Cookie12Sided", size: 200, minSize: 120, maxSize: 480, color: "secondary" },
         text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
     })
 

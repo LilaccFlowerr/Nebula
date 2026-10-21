@@ -115,6 +115,16 @@ Variants {
         }
 
         Component {
+            id: batteryWidget
+
+            BatteryWidget {
+                shapeName: parent?.cfg?.shape ?? "Cookie12Sided"
+                colorRole: parent?.cfg?.color ?? "secondary"
+                baseSize: parent?.cfg?.size ?? 200
+            }
+        }
+
+        Component {
             id: calendarWidget
 
             CalendarWidget {
@@ -136,6 +146,7 @@ Variants {
                 showSeconds: parent?.cfg?.seconds ?? true
                 showDate: parent?.cfg?.date ?? true
                 showNumbers: parent?.cfg?.numbers ?? false
+                tickStyle: parent?.cfg?.tickStyle ?? "hours"
             }
         }
 
@@ -177,7 +188,7 @@ Variants {
                 onWidthChanged: window.updateBounds()
                 onHeightChanged: window.updateBounds()
 
-                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : nowPlayingWidget
+                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : nowPlayingWidget
 
                 HoverHandler {
                     enabled: !slot.ghost
