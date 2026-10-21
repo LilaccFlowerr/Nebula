@@ -70,8 +70,8 @@ Singleton {
 
     function startRegion() {
         if (recording) return;
-        Quickshell.execDetached(["sh", "-c",
-            "r=$(slurp -b '#00000066' -c '#ffffffff' -w 2 -f '%wx%h+%x+%y') && qs -c nebula ipc call recorder startRegion \"$r\""]);
+        Quickshell.execDetached(["sh", "-c", Screenshot.select +
+            "\nr=$(select_region -f '%wx%h+%x+%y') && qs -c nebula ipc call recorder startRegion \"$r\""]);
     }
 
     function stop() {

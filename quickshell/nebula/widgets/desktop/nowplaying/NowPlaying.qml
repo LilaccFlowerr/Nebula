@@ -45,13 +45,34 @@ Item {
         onTriggered: root.spin = (root.spin + root.speed * frameTime) % 360
     }
 
+    property real designInner: 0.4
+    property real innerTarget: 0.4
+    property real innerRatio: innerTarget
+    readonly property real fit: Math.max(0.45, Math.min(1.1, innerRatio / designInner))
+
+    function leastDistance(item) {
+        let least = item.width / 2;
+        for (let a = 0; a < 360; a += 4) least = Math.min(least, item.distanceAtAngle(a));
+        return least / item.width;
+    }
+
+    function remeasure() {
+        if (probe.width <= 0 || design.width <= 0) return;
+        designInner = Math.max(0.2, leastDistance(design));
+        innerTarget = Math.max(0.15, leastDistance(probe));
+    }
+
+    function upright() {
+        settle.to = spin >= 180 ? 360 : 0;
+        settle.restart();
+    }
+
     onPlayingChanged: {
         if (playing) {
             settle.stop();
             return;
         }
-        settle.to = spin >= 180 ? 360 : 0;
-        settle.restart();
+        upright();
     }
 
     NumberAnimation {
@@ -65,6 +86,7 @@ Item {
     }
 
     MaterialShape {
+        id: body
         anchors.fill: parent
         shape: root.empty ? MaterialShape.Sunny : root.playing ? (MaterialShape[root.shapeName] ?? MaterialShape.Cookie12Sided) : MaterialShape.Pentagon
         color: root.palette.fill
@@ -96,11 +118,34 @@ Item {
         }
     }
 
+    MaterialShape {
+        id: probe
+        width: 200
+        height: 200
+        visible: false
+        shape: body.shape
+        animationDuration: 0
+
+        onShapeChanged: Qt.callLater(root.remeasure)
+        Component.onCompleted: Qt.callLater(root.remeasure)
+    }
+
+    MaterialShape {
+        id: design
+        width: 200
+        height: 200
+        visible: false
+        shape: MaterialShape.Cookie12Sided
+        animationDuration: 0
+
+        Component.onCompleted: Qt.callLater(root.remeasure)
+    }
+
     ColumnLayout {
         anchors.centerIn: parent
         spacing: Theme.spacing.xs
         opacity: root.empty ? 0 : 1
-        scale: (root.empty ? 0.6 : 1) * root.ratio
+        scale: (root.empty ? 0.6 : 1) * root.ratio * root.fit
         visible: opacity > 0
 
         Behavior on opacity {

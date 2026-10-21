@@ -13,6 +13,8 @@ Item {
     property bool showSeconds: true
     property bool showDate: true
     property bool showNumbers: false
+    property string tickStyle: "hours"
+    readonly property bool showTicks: tickStyle !== "off"
     property bool live: true
     readonly property var colors: Widgets.palette(colorRole)
 
@@ -98,20 +100,7 @@ Item {
     readonly property real handWidth: Math.max(4, size * 0.06)
     readonly property real dotSize: Math.max(6, size * 0.06)
     readonly property real numberSize: Math.max(8, size * 0.075)
-
-    readonly property string datePosition: {
-        const h = hourAngle * Math.PI / 180;
-        const m = minuteAngle * Math.PI / 180;
-        const top = Math.max(0, Math.cos(h)) + Math.max(0, Math.cos(m));
-        const bottom = Math.max(0, -Math.cos(h)) + Math.max(0, -Math.cos(m));
-        const right = Math.max(0, Math.sin(h)) + Math.max(0, Math.sin(m));
-        const left = Math.max(0, -Math.sin(h)) + Math.max(0, -Math.sin(m));
-        const least = Math.min(top, bottom, left, right);
-        if (least === bottom) return "bottom";
-        if (least === top) return "top";
-        if (least === right) return "right";
-        return "left";
-    }
+    readonly property real tickInset: showTicks ? size * 0.075 : 0
 
     SystemClock {
         id: clock
@@ -143,13 +132,44 @@ Item {
     }
 
     Repeater {
+        model: root.tickStyle === "all" ? 60 : root.tickStyle === "hours" ? 12 : 0
+
+        Rectangle {
+            required property int index
+            readonly property real angle: index * (root.tickStyle === "all" ? 6 : 30)
+            readonly property bool major: root.tickStyle === "hours" || index % 5 === 0
+            property real ratio: (root.version, root.edgeRatio(angle))
+            readonly property real length: root.size * (major ? 0.07 : 0.035)
+            readonly property real reach: ratio * root.size - root.size * 0.03 - length / 2
+
+            Behavior on ratio {
+                enabled: root.ready
+                NumberAnimation {
+                    duration: Theme.anim.slow
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.anim.emphasizedDecel
+                }
+            }
+
+            x: root.width / 2 + reach * Math.sin(angle * Math.PI / 180) - width / 2
+            y: root.height / 2 - reach * Math.cos(angle * Math.PI / 180) - height / 2
+            width: Math.max(major ? 2.5 : 1.5, root.size * (major ? 0.014 : 0.008))
+            height: length
+            radius: width / 2
+            rotation: angle
+            antialiasing: true
+            color: Qt.alpha(root.colors.text, major ? 0.9 : 0.4)
+        }
+    }
+
+    Repeater {
         model: root.showNumbers ? 12 : 0
 
         Text {
             required property int index
             readonly property real angle: (index + 1) * 30
             property real ratio: (root.version, root.edgeRatio(angle))
-            readonly property real distance: ratio * root.size - root.numberSize * 1.1
+            readonly property real distance: ratio * root.size - root.numberSize * 1.1 - root.tickInset
 
             Behavior on ratio {
                 enabled: root.ready
@@ -173,25 +193,23 @@ Item {
     Text {
         id: dateText
 
-        readonly property real reach: root.inner * 0.5
-        property real dirX: root.datePosition === "left" ? -1 : root.datePosition === "right" ? 1 : 0
-        property real dirY: root.datePosition === "top" ? -1 : root.datePosition === "bottom" ? 1 : 0
+        property real sideRatio: (root.version, root.edgeRatio(180))
+        readonly property real room: sideRatio * root.size - root.tickInset - (root.showNumbers ? root.numberSize * 2.2 : root.size * 0.05)
+        readonly property real reach: Math.max(0, Math.min(root.inner * 0.5, room - height / 2))
+
+        Behavior on sideRatio {
+            enabled: root.ready
+            NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        }
 
         visible: root.showDate
-        x: root.width / 2 - width / 2 + dirX * reach
-        y: root.height / 2 - height / 2 + dirY * reach
+        x: root.width / 2 - width / 2
+        y: root.height / 2 - height / 2 + reach
         text: root.now.toLocaleString(Qt.locale("en_US"), "ddd d")
         font.family: Theme.font.family
         font.pixelSize: root.numberSize
         font.weight: Font.DemiBold
         color: root.colors.text
-
-        Behavior on dirX {
-            NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
-        }
-        Behavior on dirY {
-            NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
-        }
     }
 
     Rectangle {
@@ -237,7 +255,7 @@ Item {
     Rectangle {
         id: secondDot
 
-        readonly property real distance: Math.max(root.inner * 0.5, (face.width > 0 ? face.distanceAtAngle(root.secondAngle) : root.inner) - root.dotSize * 1.4)
+        readonly property real distance: Math.max(root.inner * 0.5, (face.width > 0 ? face.distanceAtAngle(root.secondAngle) : root.inner) - root.dotSize * 1.4 - root.tickInset)
 
         visible: root.showSeconds
         x: root.width / 2 + distance * Math.sin(root.secondAngle * Math.PI / 180) - width / 2

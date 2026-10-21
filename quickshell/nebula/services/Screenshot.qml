@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import qs.theme
 
 Singleton {
     id: root
@@ -13,7 +14,18 @@ Singleton {
     readonly property bool copy: Settings.screenshot.copy
     readonly property bool notify: Settings.screenshot.notify
 
+    readonly property string select: `select_region() {
+        ws=$(hyprctl monitors -j | jq -c '[.[].activeWorkspace.id]')
+        hyprctl clients -j | jq -r --argjson ws "$ws" '.[] | select(.mapped and (.hidden | not) and (.workspace.id as $w | $ws | index($w))) | "\\(.at[0]),\\(.at[1]) \\(.size[0])x\\(.size[1])"' |
+            slurp -d -F "${Theme.font.family}" -w 3 -b "${hex(Colors.scrim, 0.45)}" -c "${hex(Colors.primary, 1)}" -s "${hex(Colors.primary, 0.12)}" -B "${hex(Colors.primary, 0.06)}" "$@"
+    }`
+
     signal saved(string path)
+
+    function hex(color, alpha) {
+        const part = v => Math.round(v * 255).toString(16).padStart(2, "0");
+        return "#" + part(color.r) + part(color.g) + part(color.b) + part(alpha);
+    }
 
     function region() {
         take(true);
@@ -30,12 +42,12 @@ Singleton {
     function take(useRegion) {
         if (proc.running) return;
         GlobalStates.capturing = true;
-        proc.command = ["sh", "-c", `
+        proc.command = ["sh", "-c", select + `
             dir=$1; region=$2; monitor=$3; copy=$4; notify=$5
             mkdir -p "$dir"
             file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
             if [ "$region" = 1 ]; then
-                geometry=$(slurp < /dev/null) || exit 1
+                geometry=$(select_region) || exit 1
                 grim -g "$geometry" "$file"
             else
                 grim -o "$monitor" "$file"

@@ -348,6 +348,21 @@ ColumnLayout {
         }
 
         SettingRow {
+            icon: "more_horiz"
+            title: "Tick marks"
+
+            SegmentedButton {
+                readonly property var styles: ["off", "hours", "all"]
+
+                width: Theme.settings.controlWidth
+                anchors.verticalCenter: parent.verticalCenter
+                options: ["Off", "Hours", "All"]
+                currentIndex: Math.max(0, styles.indexOf(page.cfg.tickStyle ?? "hours"))
+                onSelected: index => page.set({ tickStyle: styles[index] })
+            }
+        }
+
+        SettingRow {
             icon: "pin"
             title: "Hour numbers"
             clickable: true
