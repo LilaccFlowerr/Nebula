@@ -12,8 +12,8 @@ hl.config({
     general = {
         layout      = "dwindle",
 
-        gaps_in     = vars.gapsIn,
-        gaps_out    = vars.gapsOut,
+        gaps_in     = 5,
+        gaps_out    = 10,
         border_size = vars.borderSize,
 
         col = {

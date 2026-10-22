@@ -4,17 +4,17 @@ local vars = require("variables")
 
 hl.config({
     decoration = {
-        rounding       = vars.rounding,
+        rounding       = 15,
         rounding_power = vars.roundingPower,
 
         -- Change transparency of focused and unfocused windows
-        active_opacity   = vars.windowOpacity,
-        inactive_opacity = vars.windowOpacity,
+        active_opacity   = 0.95,
+        inactive_opacity = 0.95,
 
         blur = {
-            enabled        = vars.blurEnabled,
-            size           = vars.blurSize,
-            passes         = vars.blurPasses,
+            enabled        = true,
+            size           = 4,
+            passes         = 1,
             ignore_opacity = true, -- needed to blur through transparent windows
             popups         = true,
         },

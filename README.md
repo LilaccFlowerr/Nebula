@@ -94,7 +94,7 @@ Don't edit the files in `hypr/` to change things, they're in git. On first start
 files are made in `~/.config/nebula/`:
 
 - `hypr-vars.lua` returns a table that overrides the defaults in `hypr/variables.lua`:
-  apps, gaps, rounding, opacity, blur, keyboard layout and every keybind (`kbTerminal` and
+  apps, border, shadow, keyboard layout and every keybind (`kbTerminal` and
   so on, a string or a list of keys).
 - `hypr-user.lua` is loaded last, for your own binds, window rules, monitors and autostart.
 

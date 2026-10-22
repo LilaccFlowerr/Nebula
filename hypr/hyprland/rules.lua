@@ -1,6 +1,13 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Window-Rules/
 -- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 
+-- Handles for rules the shell switches on and off at runtime (Settings > Bar > Layout and Windows)
+NEBULA = { shellBlur = {} }
+
+local function shell_blur(rule)
+    table.insert(NEBULA.shellBlur, hl.layer_rule(rule))
+end
+
 -- Ignore maximize requests from all apps
 hl.window_rule({
     name  = "suppress-maximize-events",
@@ -57,28 +64,28 @@ hl.layer_rule({
 
 -- Quickshell bar: blur behind the islands. ignore_alpha skips fully transparent pixels,
 -- so only the islands get blurred and not the empty space between them.
-hl.layer_rule({
+shell_blur({
     name         = "blur-quickshell-bar",
     match        = { namespace = "^quickshell:bar$" },
     blur         = true,
     ignore_alpha = 0.1,
 })
 
-hl.layer_rule({
+shell_blur({
     name         = "blur-quickshell-recorder",
     match        = { namespace = "^quickshell:recorder$" },
     blur         = true,
     ignore_alpha = 0.1,
 })
 
-hl.layer_rule({
+shell_blur({
     name         = "blur-quickshell-widgetcorner",
     match        = { namespace = "^quickshell:widget(corner|menu)$" },
     blur         = true,
     ignore_alpha = 0.1,
 })
 
-hl.layer_rule({
+shell_blur({
     name         = "blur-quickshell-nowplaying",
     match        = { namespace = "^quickshell:nowplaying$" },
     blur         = true,
@@ -90,7 +97,12 @@ hl.layer_rule({
     name    = "quickshell-launcher",
     match   = { namespace = "^quickshell:launcher$" },
     no_anim = true,
-    blur    = true,
+})
+
+shell_blur({
+    name  = "blur-quickshell-launcher",
+    match = { namespace = "^quickshell:launcher$" },
+    blur  = true,
 })
 
 -- Quickshell overview: no slide-in/out (it zooms in QML)
@@ -106,3 +118,11 @@ hl.layer_rule({
 --     match = { namespace = "^my-overlay$" },
 --     no_anim = true,
 -- })
+
+-- Window blur off switch: disabled here, so windows blur unless the shell enables it
+NEBULA.windowNoBlur = hl.window_rule({
+    name    = "nebula-no-window-blur",
+    match   = { class = ".*" },
+    no_blur = true,
+})
+NEBULA.windowNoBlur:set_enabled(false)

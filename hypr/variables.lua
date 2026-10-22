@@ -17,19 +17,12 @@ local vars = {
     -- Keybinds
     mainMod              = mainMod,
 
-    -- Windows
-    gapsIn               = 5,
-    gapsOut              = 10,
+    -- Windows (gaps, rounding and opacity are in the shell: Settings > Windows)
     borderSize           = 1,
-    rounding             = 15,
     roundingPower        = 2,
-    windowOpacity        = 0.95,
     resizeOnBorder       = false,
 
-    -- Blur and shadow
-    blurEnabled          = true,
-    blurSize             = 4,
-    blurPasses           = 1,
+    -- Shadow (blur is in the shell: Settings > Bar > Layout)
     shadowEnabled        = true,
     shadowRange          = 15,
 
