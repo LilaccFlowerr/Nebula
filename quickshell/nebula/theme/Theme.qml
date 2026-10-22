@@ -120,6 +120,7 @@ Singleton {
         readonly property int buttonSize: 72
         readonly property int timerSize: 32
         readonly property int rowHeight: 40
+        readonly property int slideDistance: 48
     }
     readonly property RecorderCorner recorder: RecorderCorner {}
 

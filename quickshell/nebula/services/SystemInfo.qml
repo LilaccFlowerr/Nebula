@@ -39,6 +39,7 @@ Singleton {
     readonly property string osLogo: ({
         "fedora": "",
         "arch": "",
+        "endeavouros": "\uf322",
         "ubuntu": "",
         "debian": "",
         "nixos": "",

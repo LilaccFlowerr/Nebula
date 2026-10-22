@@ -296,10 +296,26 @@ PanelWindow {
                         required property int index
                         readonly property bool isNew: window.showSaved && modelData.path === Recorder.lastFile
 
+                        property real reveal: isNew ? 0 : 1
+
                         Layout.fillWidth: true
                         implicitHeight: Theme.recorder.rowHeight
+                        opacity: reveal
+                        transform: Translate { x: (1 - item.reveal) * Theme.recorder.slideDistance }
                         radius: Theme.radius.medium
                         color: itemHover.hovered ? Colors.surfaceContainerHigh : isNew ? Qt.alpha(Colors.primaryContainer, 0.5) : "transparent"
+
+                        Component.onCompleted: if (isNew) revealAnim.start()
+
+                        NumberAnimation {
+                            id: revealAnim
+                            target: item
+                            property: "reveal"
+                            to: 1
+                            duration: Theme.anim.slow
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Theme.anim.emphasizedDecel
+                        }
 
                         Behavior on color {
                             ColorAnimation { duration: Theme.anim.fast }
@@ -327,26 +343,31 @@ PanelWindow {
                                 color: item.isNew ? Colors.primary : Colors.textOnSurfaceVariant
                             }
 
-                            ColumnLayout {
+                            Text {
                                 Layout.fillWidth: true
-                                spacing: 0
+                                text: item.modelData.date
+                                elide: Text.ElideRight
+                                color: Colors.textOnSurface
+                                font.family: Theme.font.family
+                                font.pixelSize: Theme.font.small
+                                font.weight: Font.DemiBold
+                            }
+
+                            Rectangle {
+                                visible: item.isNew && !itemHover.hovered
+                                implicitWidth: newLabel.implicitWidth + Theme.spacing.sm * 2
+                                implicitHeight: newLabel.implicitHeight + 2
+                                radius: height / 2
+                                color: Colors.primary
 
                                 Text {
-                                    Layout.fillWidth: true
-                                    text: item.modelData.date
-                                    elide: Text.ElideRight
-                                    color: Colors.textOnSurface
+                                    id: newLabel
+                                    anchors.centerIn: parent
+                                    text: "New"
+                                    color: Colors.textOnPrimary
                                     font.family: Theme.font.family
                                     font.pixelSize: Theme.font.small
                                     font.weight: Font.DemiBold
-                                }
-
-                                Text {
-                                    visible: item.isNew
-                                    text: "New"
-                                    color: Colors.primary
-                                    font.family: Theme.font.family
-                                    font.pixelSize: Theme.font.small
                                 }
                             }
 
