@@ -40,8 +40,10 @@ Item {
 
     readonly property var pages: [
         { key: "appearance", title: "Appearance", subtitle: "Wallpaper and colors", icon: "palette", shape: MaterialShape.Flower, source: "pages/appearance/AppearancePage.qml", reset: ["theme", "wallpaper.transition"] },
+        { key: "windows", title: "Windows", subtitle: "Blur, corners and gaps", icon: "web_asset", shape: MaterialShape.Arch, source: "pages/WindowsPage.qml", reset: ["windows"] },
         { key: "desktop", title: "Desktop", subtitle: "Stuff on your wallpaper", icon: "desktop_windows", shape: MaterialShape.Cookie6Sided, source: "pages/DesktopPage.qml", reset: ["nowPlaying"] },
-        { key: "bar", title: "Bar", subtitle: "Tweak each island", icon: "toolbar", shape: MaterialShape.Pill, source: "pages/SectionsPage.qml", reset: ["bar", "clock", "weather", "quickSettings"], sections: [
+        { key: "bar", title: "Bar", subtitle: "Style and each island", icon: "toolbar", shape: MaterialShape.Pill, source: "pages/SectionsPage.qml", reset: ["bar", "blur", "clock", "weather", "quickSettings"], sections: [
+            { key: "style", title: "Layout", subtitle: "Style, gap, corners and opacity", icon: "dock_to_bottom", source: "pages/bar/StyleTab.qml" },
             { key: "left", title: "Left island", subtitle: "Workspaces", icon: "view_week", source: "pages/bar/LeftTab.qml" },
             { key: "middle", title: "Middle island", subtitle: "Visualizer, lyrics and popups", icon: "graphic_eq", source: "pages/bar/MiddleTab.qml" },
             { key: "right", title: "Right island", subtitle: "Clock, buttons, weather and tiles", icon: "schedule", source: "pages/bar/RightTab.qml" }
@@ -66,7 +68,7 @@ Item {
     ]
 
     readonly property var groups: [
-        { label: "Look", keys: ["appearance", "desktop", "bar"] },
+        { label: "Look", keys: ["appearance", "windows", "desktop", "bar"] },
         { label: "Connect", keys: ["connections"] },
         { label: "System", keys: ["system", "apps", "notifications", "recorder", "about"] }
     ]

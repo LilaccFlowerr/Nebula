@@ -15,6 +15,9 @@ import qs.theme
 
 Island {
     id: root
+    detach: Theme.bar.rightT
+    hookLeft: true
+    edgeRight: true
     roundLeft: true
 
     readonly property string screenName: QsWindow.window?.screen?.name ?? ""

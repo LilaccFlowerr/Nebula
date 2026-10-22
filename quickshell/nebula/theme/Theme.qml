@@ -10,14 +10,27 @@ Singleton {
         readonly property int height: 55
         readonly property int padding: 16
         readonly property int gap: 14
-        readonly property int radius: 16
+        readonly property int radius: Settings.bar.radius
+        readonly property int floatMargin: Settings.bar.gap
+        readonly property string style: Settings.bar.style
+        readonly property real zone: height + floatMargin
+
+        readonly property real motion: Settings.theme.reduceMotion ? 0 : 1 / Settings.theme.animSpeed
+        property real leftT: style !== "attached" ? 1 : 0
+        property real centerT: style === "floating" ? 1 : 0
+        property real rightT: style !== "attached" ? 1 : 0
+
+        Behavior on leftT { NumberAnimation { duration: Math.round(380 * motion); easing.type: Easing.Linear } }
+        Behavior on centerT { NumberAnimation { duration: Math.round(380 * motion); easing.type: Easing.Linear } }
+        Behavior on rightT { NumberAnimation { duration: Math.round(380 * motion); easing.type: Easing.Linear } }
         readonly property int centerMinWidth: 336
         readonly property int eventArtSize: 22
         readonly property int notificationWidth: 400
         readonly property int notificationIconSize: 36
         readonly property int notificationBadgeSize: 18
         readonly property int notificationMaxLines: 6
-        readonly property real opacity: 0.85
+        readonly property real opacity: Settings.bar.opacity / 100
+        readonly property real pillOpacity: Settings.bar.pillOpacity / 100
     }
     readonly property Bar bar: Bar {}
 
