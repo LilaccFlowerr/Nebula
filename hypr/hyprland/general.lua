@@ -1,5 +1,7 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/
 
+local vars = require("variables")
+
 -- Colors from matugen (hypr/colors.lua), with a fallback when it hasn't run yet
 local ok, colors = pcall(require, "colors")
 if not ok then
@@ -10,9 +12,9 @@ hl.config({
     general = {
         layout      = "dwindle",
 
-        gaps_in     = 5,
-        gaps_out    = 10,
-        border_size = 1,
+        gaps_in     = vars.gapsIn,
+        gaps_out    = vars.gapsOut,
+        border_size = vars.borderSize,
 
         col = {
             active_border   = { colors = {"rgba(" .. colors.primary .. "ee)", "rgba(" .. colors.tertiary .. "ee)"}, angle = 45 },
@@ -20,7 +22,7 @@ hl.config({
         },
 
         -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
-        resize_on_border = false,
+        resize_on_border = vars.resizeOnBorder,
 
         -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
         allow_tearing = false,

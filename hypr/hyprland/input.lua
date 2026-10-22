@@ -1,8 +1,10 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/#input
 
+local vars = require("variables")
+
 hl.config({
     input = {
-        kb_layout  = "us",
+        kb_layout  = vars.kbLayout,
         kb_variant = "",
         kb_model   = "",
         kb_options = "",
@@ -13,7 +15,7 @@ hl.config({
         sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
 
         touchpad = {
-            natural_scroll = false,
+            natural_scroll = vars.naturalScroll,
         },
     },
 })
