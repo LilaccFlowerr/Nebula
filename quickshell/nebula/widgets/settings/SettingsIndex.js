@@ -19,7 +19,7 @@ var entries = [
     { title: "Visualizer", page: "bar", tab: "middle", words: "cava bars music island" },
     { title: "Synced lyrics", page: "bar", tab: "middle", words: "music media card" },
     { title: "Volume and brightness popup", page: "bar", tab: "middle", words: "osd duration island" },
-    { title: "Logo when idle", page: "bar", tab: "middle", words: "os logo fedora island" },
+    { title: "Logo when idle", page: "bar", tab: "middle", words: "os logo distro island" },
     { title: "Island popups", page: "bar", tab: "middle", words: "volume brightness charger low battery events" },
     { title: "24-hour clock", page: "bar", tab: "right", words: "time clock am pm" },
     { title: "Tray button", page: "bar", tab: "right", words: "system tray" },

@@ -1,46 +1,53 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Binds/
+-- The keys are variables (kb*), change them in ~/.config/nebula/hypr-vars.lua, see variables.lua
 
 local vars    = require("variables")
 local mainMod = vars.mainMod
 
--- Apps (defaults can be changed in Settings > Apps, see variables.lua)
-hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(vars.terminal))
-hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(vars.browser))
-hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(vars.editor))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(vars.files))
-hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(vars.claude))
-hl.bind(mainMod .. " + SUPER_L", hl.dsp.exec_cmd(vars.launcher), { release = true })
+local function bind(keys, dispatcher, opts)
+    if type(keys) ~= "table" then keys = { keys } end
+    for _, key in ipairs(keys) do
+        hl.bind(key, dispatcher, opts)
+    end
+end
+
+-- Apps (defaults can be changed in Settings > Apps)
+bind(vars.kbTerminal, hl.dsp.exec_cmd(vars.terminal))
+bind(vars.kbBrowser,  hl.dsp.exec_cmd(vars.browser))
+bind(vars.kbEditor,   hl.dsp.exec_cmd(vars.editor))
+bind(vars.kbFiles,    hl.dsp.exec_cmd(vars.files))
+bind(vars.kbLauncher, hl.dsp.exec_cmd(vars.launcher), { release = true })
 
 -- Windows
-hl.bind(mainMod .. " + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
-hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle only
+bind(vars.kbClose,       hl.dsp.window.close())
+bind(vars.kbFloat,       hl.dsp.window.float({ action = "toggle" }))
+bind(vars.kbFullscreen,  hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+bind(vars.kbPseudo,      hl.dsp.window.pseudo())
+bind(vars.kbToggleSplit, hl.dsp.layout("togglesplit")) -- dwindle only
 
 -- Lock (goes through hypridle's lock_cmd, so it keeps working when hyprlock is replaced)
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
+bind(vars.kbLock, hl.dsp.exec_cmd("loginctl lock-session"))
 
 -- Screen recording (Quickshell recorder): full screen / region
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder toggle"))
-hl.bind(mainMod .. " + SHIFT + ALT + R", hl.dsp.exec_cmd("qs -c nebula ipc call recorder region"))
+bind(vars.kbRecord,       hl.dsp.exec_cmd("qs -c nebula ipc call recorder toggle"))
+bind(vars.kbRecordRegion, hl.dsp.exec_cmd("qs -c nebula ipc call recorder region"))
 
 -- Now playing: expand/collapse the media card in the center island
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs -c nebula ipc call media toggle"))
+bind(vars.kbMedia, hl.dsp.exec_cmd("qs -c nebula ipc call media toggle"))
 
 -- Overview: all workspaces of this screen
-hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("qs -c nebula ipc call overview toggle"))
+bind(vars.kbOverview, hl.dsp.exec_cmd("qs -c nebula ipc call overview toggle"))
 
 -- Screenshots (Quickshell screenshot service): saved to ~/Pictures/Screenshots and copied to the
 -- clipboard. Open popups stay open while selecting, so they end up in the shot.
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs -c nebula ipc call screenshot region"))
-hl.bind("Print", hl.dsp.exec_cmd("qs -c nebula ipc call screenshot screen"))
+bind(vars.kbScreenshotRegion, hl.dsp.exec_cmd("qs -c nebula ipc call screenshot region"))
+bind(vars.kbScreenshotScreen, hl.dsp.exec_cmd("qs -c nebula ipc call screenshot screen"))
 
 -- Clipboard history: pick an entry with fuzzel
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"))
+bind(vars.kbClipboard, hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"))
 
 -- Exit Hyprland
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
+bind(vars.kbExit, hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 
 -- Move focus with mainMod + CTRL + arrow keys
 hl.bind(mainMod .. " + CTRL + left",  hl.dsp.focus({ direction = "left" }))
@@ -61,8 +68,8 @@ hl.bind(mainMod .. " + left",  hl.dsp.focus({ workspace = "-1" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ workspace = "+1" }))
 
 -- Special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + ALT + S",   hl.dsp.window.move({ workspace = "special:magic" }))
+bind(vars.kbSpecial,       hl.dsp.workspace.toggle_special("magic"))
+bind(vars.kbMoveToSpecial, hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Scroll through workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "+1" }))
