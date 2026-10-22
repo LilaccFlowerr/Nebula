@@ -232,6 +232,10 @@ Island {
                         GlobalStates.toggleCalendar(root.screenName);
                 }
                 onWheel: wheel => {
+                    if (wheelCooldown.running) {
+                        clockPill.wheelDelta = 0;
+                        return;
+                    }
                     clockPill.wheelDelta += wheel.angleDelta.y;
                     if (Math.abs(clockPill.wheelDelta) < 120)
                         return;
@@ -239,7 +243,13 @@ Island {
                     const count = clockPill.modes.length;
                     clockPill.wheelDelta = 0;
                     clockPill.setMode((clockPill.mode + step + count) % count, step);
+                    wheelCooldown.restart();
                 }
+            }
+
+            Timer {
+                id: wheelCooldown
+                interval: Math.max(250, Theme.anim.fast + Theme.anim.medium)
             }
 
             Row {
