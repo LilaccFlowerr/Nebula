@@ -12,6 +12,9 @@ Island {
     id: root
     roundLeft: true
     roundRight: true
+    detach: Theme.bar.centerT
+    hookLeft: true
+    hookRight: true
     implicitWidth: Math.max(Theme.bar.centerMinWidth, pill.implicitWidth + pillMargin * 2)
 
     readonly property real pillMargin: (Theme.bar.height - Theme.button.size) / 2
@@ -133,7 +136,7 @@ Island {
                       : root.showNotification ? notif.implicitHeight + Theme.spacing.md * 2
                       : Theme.button.size
         radius: root.isExpanded || root.showNotification ? Theme.radius.large : Theme.radius.full
-        color: Colors.surfaceContainer
+        color: Qt.alpha(Colors.surfaceContainer, Theme.bar.pillOpacity)
         border.width: root.showNotification && Notifications.urgent ? 2 : 0
         border.color: Colors.errorColor
         clip: true

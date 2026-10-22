@@ -5,6 +5,9 @@ import qs.services
 import qs.theme
 
 Island {
+    detach: Theme.bar.leftT
+    hookRight: true
+    edgeLeft: true
     roundRight: true
     implicitWidth: row.implicitWidth + Theme.bar.padding * 2
 

@@ -156,7 +156,7 @@ Item {
             id: barView
             visible: card.barSource !== null
             width: card.width
-            height: Theme.bar.height * card.k
+            height: Theme.bar.zone * card.k
             sourceItem: card.barSource
             live: card.decorated
             smooth: true

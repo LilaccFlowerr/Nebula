@@ -158,13 +158,13 @@ Item {
         id: barCopy
         x: -width - root.width
         width: root.width
-        height: Theme.bar.height
+        height: Theme.bar.zone
         enabled: false
         visible: root.open || root.shown > 0
 
-        LeftIsland { anchors.left: parent.left }
-        CenterIsland { anchors.horizontalCenter: parent.horizontalCenter }
-        RightIsland { anchors.right: parent.right }
+        LeftIsland { anchors.left: parent.left; anchors.leftMargin: Theme.bar.floatMargin; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
+        CenterIsland { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
+        RightIsland { anchors.right: parent.right; anchors.rightMargin: Theme.bar.floatMargin; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
     }
 
     Repeater {

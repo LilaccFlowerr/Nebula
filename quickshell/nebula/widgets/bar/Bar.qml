@@ -24,7 +24,7 @@ Variants {
             right: true
         }
         implicitHeight: modelData?.height ?? Theme.bar.height
-        exclusiveZone: Theme.bar.height
+        exclusiveZone: Theme.bar.zone
         color: "transparent"
 
         IdleInhibitor {
@@ -66,8 +66,8 @@ Variants {
             }
         }
 
-        LeftIsland   { id: leftIsland;   anchors.left: parent.left }
-        CenterIsland { id: centerIsland; anchors.horizontalCenter: parent.horizontalCenter }
-        RightIsland  { id: rightIsland;  anchors.right: parent.right }
+        LeftIsland   { id: leftIsland;   anchors.left: parent.left; anchors.leftMargin: Theme.bar.floatMargin; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
+        CenterIsland { id: centerIsland; anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
+        RightIsland  { id: rightIsland;  anchors.right: parent.right; anchors.rightMargin: Theme.bar.floatMargin; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
     }
 }

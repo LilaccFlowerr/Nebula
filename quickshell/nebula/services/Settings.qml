@@ -15,6 +15,8 @@ Singleton {
     readonly property alias nowPlaying: adapter.nowPlaying
     readonly property alias theme: adapter.theme
     readonly property alias bar: adapter.bar
+    readonly property alias blur: adapter.blur
+    readonly property alias windows: adapter.windows
     readonly property alias apps: adapter.apps
     readonly property alias input: adapter.input
     readonly property alias displays: adapter.displays
@@ -89,6 +91,11 @@ Singleton {
     component BarGroup: JsonObject {
         property int workspaces: 5
         property string workspaceStyle: "numbers"
+        property string style: "mixed"
+        property int gap: 6
+        property int radius: 16
+        property int opacity: 85
+        property int pillOpacity: 100
         property bool visualizer: true
         property bool lyrics: true
         property int osdDuration: 1500
@@ -99,6 +106,20 @@ Singleton {
         property bool eventBrightness: true
         property bool eventCharger: true
         property bool eventLowBattery: true
+    }
+
+    component BlurGroup: JsonObject {
+        property bool shell: true
+        property int size: 4
+        property int passes: 1
+    }
+
+    component WindowsGroup: JsonObject {
+        property bool blurOn: true
+        property int opacity: 95
+        property int rounding: 15
+        property int gapsIn: 5
+        property int gapsOut: 10
     }
 
     component QuickSettingsGroup: JsonObject {
@@ -141,6 +162,8 @@ Singleton {
         readonly property DisplaysGroup displays: DisplaysGroup {}
         readonly property PowerGroup power: PowerGroup {}
         readonly property BarGroup bar: BarGroup {}
+        readonly property BlurGroup blur: BlurGroup {}
+        readonly property WindowsGroup windows: WindowsGroup {}
         readonly property ThemeGroup theme: ThemeGroup {}
         readonly property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
         readonly property ScreenshotGroup screenshot: ScreenshotGroup {}
@@ -172,7 +195,7 @@ Singleton {
     }
 
     function resetAll() {
-        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "bar", "theme", "quickSettings", "screenshot"]);
+        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "bar", "blur", "windows", "theme", "quickSettings", "screenshot"]);
     }
 
     Process {
@@ -207,6 +230,8 @@ Singleton {
             property DisplaysGroup displays: DisplaysGroup {}
             property PowerGroup power: PowerGroup {}
             property BarGroup bar: BarGroup {}
+            property BlurGroup blur: BlurGroup {}
+            property WindowsGroup windows: WindowsGroup {}
             property ThemeGroup theme: ThemeGroup {}
             property QuickSettingsGroup quickSettings: QuickSettingsGroup {}
             property ScreenshotGroup screenshot: ScreenshotGroup {}

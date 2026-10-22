@@ -33,6 +33,19 @@ Singleton {
             + `touchpad = { natural_scroll = ${i.naturalScroll}, tap_to_click = ${i.tapToClick}, disable_while_typing = ${i.disableWhileTyping} } } })`);
     }
 
+    function applyBlur() {
+        const b = Settings.blur;
+        const windows = Settings.windows.blurOn;
+        run(`hl.config({ decoration = { blur = { enabled = ${b.shell || windows}, size = ${b.size}, passes = ${b.passes} } } })`);
+        run(`for _, rule in ipairs(NEBULA.shellBlur) do rule:set_enabled(${b.shell}) end NEBULA.windowNoBlur:set_enabled(${!windows})`);
+    }
+
+    function applyWindows() {
+        const w = Settings.windows;
+        run(`hl.config({ general = { gaps_in = ${w.gapsIn}, gaps_out = ${w.gapsOut} }, decoration = { rounding = ${w.rounding}, `
+            + `active_opacity = ${w.opacity / 100}, inactive_opacity = ${w.opacity / 100} } })`);
+    }
+
     function monitorRule(name) {
         const m = saved[name];
         if (!m) return null;
@@ -60,6 +73,8 @@ Singleton {
 
     function applyAll() {
         applyInput();
+        applyBlur();
+        applyWindows();
         applyDisplays();
     }
 
@@ -101,6 +116,34 @@ Singleton {
         id: inputTimer
         interval: 200
         onTriggered: root.applyInput()
+    }
+
+    Timer {
+        id: blurTimer
+        interval: 150
+        onTriggered: root.applyBlur()
+    }
+
+    Timer {
+        id: windowsTimer
+        interval: 150
+        onTriggered: root.applyWindows()
+    }
+
+    Connections {
+        target: Settings.blur
+        function onShellChanged() { blurTimer.restart(); }
+        function onSizeChanged() { blurTimer.restart(); }
+        function onPassesChanged() { blurTimer.restart(); }
+    }
+
+    Connections {
+        target: Settings.windows
+        function onBlurOnChanged() { blurTimer.restart(); }
+        function onOpacityChanged() { windowsTimer.restart(); }
+        function onRoundingChanged() { windowsTimer.restart(); }
+        function onGapsInChanged() { windowsTimer.restart(); }
+        function onGapsOutChanged() { windowsTimer.restart(); }
     }
 
     Connections {
