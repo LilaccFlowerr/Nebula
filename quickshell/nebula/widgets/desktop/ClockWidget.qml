@@ -92,6 +92,26 @@ Item {
         ready = true;
     }
 
+    function edgeFrame(angle) {
+        if (ref.width <= 0) {
+            const a = angle * Math.PI / 180;
+            return { x: size / 2 + 0.4 * size * Math.sin(a), y: size / 2 - 0.4 * size * Math.cos(a), nx: Math.sin(a), ny: -Math.cos(a) };
+        }
+        const k = size / ref.width;
+        const before = ref.pointAtAngle(angle - 1.5);
+        const after = ref.pointAtAngle(angle + 1.5);
+        const edge = ref.pointAtAngle(angle);
+        const tx = after.x - before.x;
+        const ty = after.y - before.y;
+        const length = Math.hypot(tx, ty) || 1;
+        return {
+            x: size / 2 + (edge.x - ref.width / 2) * k,
+            y: size / 2 + (edge.y - ref.height / 2) * k,
+            nx: ty / length,
+            ny: -tx / length
+        };
+    }
+
     function edgeRatio(angle) {
         if (ref.width <= 0) return 0.4;
         return Math.min(ref.distanceAtAngle(angle) / ref.width, innerTarget * 1.25);
@@ -138,25 +158,26 @@ Item {
             required property int index
             readonly property real angle: index * (root.tickStyle === "all" ? 6 : 30)
             readonly property bool major: root.tickStyle === "hours" || index % 5 === 0
-            property real ratio: (root.version, root.edgeRatio(angle))
+            readonly property var frame: (root.version, root.edgeFrame(angle))
             readonly property real length: root.size * (major ? 0.07 : 0.035)
-            readonly property real reach: ratio * root.size - root.size * 0.03 - length / 2
+            readonly property real reach: root.size * 0.03 + length / 2
 
-            Behavior on ratio {
-                enabled: root.ready
-                NumberAnimation {
-                    duration: Theme.anim.slow
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Theme.anim.emphasizedDecel
-                }
-            }
+            property real ex: frame.x
+            property real ey: frame.y
+            property real nx: frame.nx
+            property real ny: frame.ny
 
-            x: root.width / 2 + reach * Math.sin(angle * Math.PI / 180) - width / 2
-            y: root.height / 2 - reach * Math.cos(angle * Math.PI / 180) - height / 2
+            Behavior on ex { enabled: root.ready; NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel } }
+            Behavior on ey { enabled: root.ready; NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel } }
+            Behavior on nx { enabled: root.ready; NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel } }
+            Behavior on ny { enabled: root.ready; NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel } }
+
+            x: ex - nx * reach - width / 2
+            y: ey - ny * reach - height / 2
             width: Math.max(major ? 2.5 : 1.5, root.size * (major ? 0.014 : 0.008))
             height: length
             radius: width / 2
-            rotation: angle
+            rotation: Math.atan2(nx, -ny) * 180 / Math.PI
             antialiasing: true
             color: Qt.alpha(root.colors.text, major ? 0.9 : 0.4)
         }
@@ -168,17 +189,7 @@ Item {
         Text {
             required property int index
             readonly property real angle: (index + 1) * 30
-            property real ratio: (root.version, root.edgeRatio(angle))
-            readonly property real distance: ratio * root.size - root.numberSize * 1.1 - root.tickInset
-
-            Behavior on ratio {
-                enabled: root.ready
-                NumberAnimation {
-                    duration: Theme.anim.slow
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Theme.anim.emphasizedDecel
-                }
-            }
+            readonly property real distance: root.inner - root.numberSize * 1.1 - root.tickInset
 
             x: root.width / 2 + distance * Math.sin(angle * Math.PI / 180) - width / 2
             y: root.height / 2 - distance * Math.cos(angle * Math.PI / 180) - height / 2
