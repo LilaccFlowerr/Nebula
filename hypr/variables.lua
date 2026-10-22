@@ -7,7 +7,7 @@ local vars = {
     browser      = "firefox",
     files        = "nautilus",
     editor       = "code",
-    claude       = "claude-desktop-unofficial",
+    claude       = "claude-desktop",
     launcher     = "qs -c nebula ipc call launcher toggle",
 
     -- Keybinds

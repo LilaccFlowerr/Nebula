@@ -3,7 +3,7 @@
 
 hl.on("hyprland.start", function ()
     -- Auth: password prompt when apps ask for admin rights
-    hl.exec_cmd("/usr/libexec/polkit-mate-authentication-agent-1")
+    hl.exec_cmd("/usr/lib/mate-polkit/polkit-mate-authentication-agent-1")
 
     -- Clipboard history
     hl.exec_cmd("wl-paste --type text --watch cliphist store")

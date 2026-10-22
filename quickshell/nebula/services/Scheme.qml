@@ -25,7 +25,7 @@ Singleton {
     property string previewKey: ""
 
     function apply() {
-        matugen.command = ["sh", "-c", "matugen image \"$1\" -t \"$2\" -m \"$3\" < /dev/null", "sh", Wallpaper.current, current, Settings.theme.mode];
+        matugen.command = ["sh", "-c", "matugen image \"$1\" --source-color-index 0 -t \"$2\" -m \"$3\" < /dev/null", "sh", Wallpaper.current, current, Settings.theme.mode];
         matugen.running = false;
         matugen.running = true;
     }
@@ -49,7 +49,7 @@ Singleton {
         pending = {};
         preview.command = ["sh", "-c", `
             for s in ${schemes.map(s => s.scheme).join(" ")}; do
-                matugen image "$1" -t "$s" -m "$2" --dry-run --json hex < /dev/null 2>/dev/null \\
+                matugen image "$1" --source-color-index 0 -t "$s" -m "$2" --dry-run --json hex < /dev/null 2>/dev/null \\
                     | jq -r --arg s "$s" --arg m "$2" '[$s, .colors.primary[$m], .colors.secondary[$m], .colors.tertiary[$m], .colors.primary_container[$m], .colors.surface_container_high[$m]] | join(" ")' &
             done
             wait`, "sh", Wallpaper.current, Settings.theme.mode];
