@@ -39,10 +39,10 @@ sudo dnf install hyprland hypridle hyprlock quickshell matugen fuzzel cliphist w
 
 fuzzel is only there for the clipboard history (Super+Shift+V), until I make my own.
 
-The screen recorder uses gpu-screen-recorder from Flathub:
+The screen recorder uses gpu-screen-recorder from the AUR:
 
 ```bash
-flatpak install flathub com.dec05eba.gpu_screen_recorder
+yay -S gpu-screen-recorder
 ```
 
 All the shapes (the cookies, the launcher flower and the morphing between them) come from
@@ -60,8 +60,11 @@ sudo ninja -C ~/others/m3shapes/build install
 If the bar doesn't show up after a Qt update, rebuild it (`git pull`, then the last two lines again).
 
 Ghostty comes from the `scottames/ghostty` COPR. For icons I use Material Symbols Rounded
-and Symbols Nerd Font (both from GitHub, dropped in `~/.local/share/fonts`). App icons come
-from Papirus, because the default GNOME ones show up as black squares in Quickshell.
+and Symbols Nerd Font (both from GitHub, dropped in `~/.local/share/fonts`).
+
+App icons come from Papirus, and it's part of the look: Quickshell uses it on its own, and
+the default GNOME ones show up as black squares there. For your file manager and other GTK
+apps you pick it yourself, so they match too.
 
 ```bash
 git clone git@github.com:LilaccFlowerr/Nebula.git ~/setup/dotfiles

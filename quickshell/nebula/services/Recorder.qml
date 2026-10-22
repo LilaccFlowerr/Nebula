@@ -58,13 +58,10 @@ Singleton {
         started = false;
         paused = false;
         proc.command = ["sh", "-c", `
-            dir=$1; out=$2; mon=$3; shift 3
-            drv=$(basename "$(readlink -f /sys/class/drm/card*-"$mon"/device/device/driver)" 2>/dev/null)
-            env=""
-            [ -n "$drv" ] && [ "$drv" != nvidia ] && env="--env=__EGL_VENDOR_LIBRARY_FILENAMES=/usr/lib/x86_64-linux-gnu/GL/default/share/glvnd/egl_vendor.d/50_mesa.json"
-            mkdir -p "$dir" && flatpak run $env --command=gpu-screen-recorder com.dec05eba.gpu_screen_recorder "$@" -o "$out"
+            dir=$1; out=$2; shift 2
+            mkdir -p "$dir" && gpu-screen-recorder "$@" -o "$out"
             test -s "$out"`,
-            "sh", directory, file, monitor, ...args];
+            "sh", directory, file, ...args];
         proc.running = true;
     }
 
@@ -122,15 +119,16 @@ Singleton {
         onExited: code => {
             root.paused = false;
             root.started = false;
+            const done = root.file;
+            root.file = "";
             if (code === 0) {
-                root.lastFile = root.file;
-                Quickshell.execDetached(["sh", "-c", "printf 'file://%s\\n' \"$1\" | wl-copy --type text/uri-list", "sh", root.file]);
-                root.saved(root.file);
+                root.lastFile = done;
+                Quickshell.execDetached(["sh", "-c", "printf 'file://%s\\n' \"$1\" | wl-copy --type text/uri-list", "sh", done]);
+                root.saved(done);
                 root.refreshRecent();
             } else {
                 root.failed();
             }
-            root.file = "";
         }
     }
 
