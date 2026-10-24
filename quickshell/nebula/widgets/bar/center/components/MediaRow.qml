@@ -9,6 +9,10 @@ RowLayout {
 
     property int maxTextWidth: 220
     property int waveWidth: 200
+    property string trackTitle: ""
+    property string trackArtist: ""
+    property real slide: 0
+    property real fade: 1
     readonly property alias artSlot: artSlot
     readonly property bool resizing: textWidthAnim.running
 
@@ -35,12 +39,14 @@ RowLayout {
     ColumnLayout {
         Layout.preferredWidth: root.textWidth
         spacing: 0
+        opacity: root.fade
+        transform: Translate { x: root.slide }
 
         Text {
             id: title
             Layout.maximumWidth: root.textWidth
             elide: Text.ElideRight
-            text: Media.title
+            text: root.trackTitle
             color: Colors.textOnSurface
             font.family: Theme.font.family
             font.pixelSize: Theme.font.normal
@@ -50,7 +56,7 @@ RowLayout {
             id: artist
             Layout.maximumWidth: root.textWidth
             elide: Text.ElideRight
-            text: Media.artist
+            text: root.trackArtist
             color: Colors.textOnSurfaceVariant
             font.family: Theme.font.family
             font.pixelSize: Theme.font.small

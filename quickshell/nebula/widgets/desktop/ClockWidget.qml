@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import M3Shapes
+import qs.components
 import qs.services
 import qs.theme
 
@@ -93,7 +94,7 @@ Item {
     }
 
     function edgeFrame(angle) {
-        if (ref.width <= 0) {
+        if (!ready) {
             const a = angle * Math.PI / 180;
             return { x: size / 2 + 0.4 * size * Math.sin(a), y: size / 2 - 0.4 * size * Math.cos(a), nx: Math.sin(a), ny: -Math.cos(a) };
         }
@@ -113,7 +114,7 @@ Item {
     }
 
     function edgeRatio(angle) {
-        if (ref.width <= 0) return 0.4;
+        if (!ready) return 0.4;
         return Math.min(ref.distanceAtAngle(angle) / ref.width, innerTarget * 1.25);
     }
 
@@ -121,6 +122,7 @@ Item {
     readonly property real dotSize: Math.max(6, size * 0.06)
     readonly property real numberSize: Math.max(8, size * 0.075)
     readonly property real tickInset: showTicks ? size * 0.075 : 0
+    readonly property real numberDistance: inner - numberSize * 1.1 - tickInset
 
     SystemClock {
         id: clock
@@ -128,11 +130,11 @@ Item {
         precision: root.showSeconds ? SystemClock.Seconds : SystemClock.Minutes
     }
 
-    MaterialShape {
+    GlassShape {
         id: face
         anchors.fill: parent
         shape: MaterialShape[root.shapeName] ?? MaterialShape.Cookie12Sided
-        color: root.colors.fill
+        fill: root.colors.fill
         animationDuration: Theme.anim.slow
         animationEasing.type: Easing.OutBack
         animationEasing.overshoot: Theme.anim.overshoot
@@ -189,7 +191,7 @@ Item {
         Text {
             required property int index
             readonly property real angle: (index + 1) * 30
-            readonly property real distance: root.inner - root.numberSize * 1.1 - root.tickInset
+            readonly property real distance: root.numberDistance
 
             x: root.width / 2 + distance * Math.sin(angle * Math.PI / 180) - width / 2
             y: root.height / 2 - distance * Math.cos(angle * Math.PI / 180) - height / 2
@@ -205,8 +207,8 @@ Item {
         id: dateText
 
         property real sideRatio: (root.version, root.edgeRatio(180))
-        readonly property real room: sideRatio * root.size - root.tickInset - (root.showNumbers ? root.numberSize * 2.2 : root.size * 0.05)
-        readonly property real reach: Math.max(0, Math.min(root.inner * 0.5, room - height / 2))
+        readonly property real free: root.showNumbers ? root.numberDistance - root.numberSize * 0.9 : sideRatio * root.size - root.tickInset - root.size * 0.05
+        readonly property real reach: Math.max(0, Math.min(root.inner * 0.5, Math.sqrt(Math.max(0, free * free - width * width / 4)) - height / 2))
 
         Behavior on sideRatio {
             enabled: root.ready
@@ -266,7 +268,7 @@ Item {
     Rectangle {
         id: secondDot
 
-        readonly property real distance: Math.max(root.inner * 0.5, (face.width > 0 ? face.distanceAtAngle(root.secondAngle) : root.inner) - root.dotSize * 1.4 - root.tickInset)
+        readonly property real distance: Math.max(root.inner * 0.5, (root.ready && face.width > 0 ? face.distanceAtAngle(root.secondAngle) : root.inner) - root.dotSize * 1.4 - root.tickInset)
 
         visible: root.showSeconds
         x: root.width / 2 + distance * Math.sin(root.secondAngle * Math.PI / 180) - width / 2

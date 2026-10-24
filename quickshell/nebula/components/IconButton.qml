@@ -6,6 +6,7 @@ Rectangle {
 
 
     property string icon: ""
+    property real iconOffset: 0
 
 
     signal clicked()
@@ -19,6 +20,7 @@ Rectangle {
 
     Text {
         anchors.centerIn: parent
+        anchors.horizontalCenterOffset: root.iconOffset
         text: root.icon
         font.family: Theme.font.icons
         font.pixelSize: Theme.button.iconSize

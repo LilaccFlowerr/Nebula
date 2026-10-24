@@ -10,6 +10,7 @@ Singleton {
         readonly property int height: 55
         readonly property int padding: 16
         readonly property int gap: 14
+        readonly property int popupLeaveDelay: 400
         readonly property int radius: Settings.bar.radius
         readonly property int floatMargin: Settings.bar.gap
         readonly property string style: Settings.bar.style
@@ -25,6 +26,8 @@ Singleton {
         Behavior on rightT { NumberAnimation { duration: Math.round(380 * motion); easing.type: Easing.Linear } }
         readonly property int centerMinWidth: 336
         readonly property int eventArtSize: 22
+        readonly property int skipSlide: 24
+        readonly property int skipNudge: 6
         readonly property int notificationWidth: 400
         readonly property int notificationIconSize: 36
         readonly property int notificationBadgeSize: 18
@@ -34,9 +37,19 @@ Singleton {
     }
     readonly property Bar bar: Bar {}
 
+    component Glass: QtObject {
+        readonly property real tint: 0.72
+        readonly property real topLight: 0.08
+    }
+    readonly property Glass glass: Glass {}
+
     component Button: QtObject {
         readonly property int size: 40
         readonly property int iconSize: 20
+        readonly property int playSize: 56
+        readonly property int playIconSize: 28
+        readonly property int playSizeSmall: 46
+        readonly property int playIconSizeSmall: 24
     }
     readonly property Button button: Button {}
 
@@ -149,34 +162,6 @@ Singleton {
     }
     readonly property NowPlaying nowPlaying: NowPlaying {}
 
-    component Overview: QtObject {
-        readonly property real dim: 0.45
-        readonly property int wallpaperBlur: 48
-        readonly property real stripRatio: 0.11
-        readonly property real bigRatio: 0.56
-        readonly property real sideRatio: 0.33
-        readonly property int stripTop: 40
-        readonly property int stripGap: 18
-        readonly property int labelGap: 8
-        readonly property int labelHeight: 36
-        readonly property int sideGap: 48
-        readonly property real sideOpacity: 0.5
-        readonly property real visibleRange: 2.6
-        readonly property int badgeSize: 20
-        readonly property real hoverScale: 1.05
-        readonly property int selectedBorder: 3
-        readonly property int hoverBorder: 2
-        readonly property real emptyShapeRatio: 0.42
-        readonly property real emptyShapeOpacity: 0.7
-        readonly property real draggedOpacity: 0.35
-        readonly property int dragThreshold: 8
-        readonly property int ghostWidth: 220
-        readonly property int duration: 550
-        readonly property int startDelay: 80
-        readonly property int cardRadius: 20
-    }
-    readonly property Overview overview: Overview {}
-
     component Launcher: QtObject {
         readonly property int size: 380
         readonly property int ringRadius: 136
@@ -197,6 +182,10 @@ Singleton {
         readonly property int labelSize: 13
         readonly property real tint: 0.28
         readonly property real dim: 0.4
+        readonly property real backdropDim: 0.12
+        readonly property real glassTint: 0.45
+        readonly property real glassLight: 0.14
+        readonly property real glassPad: 0.25
     }
     readonly property Launcher launcher: Launcher {}
 
@@ -236,8 +225,14 @@ Singleton {
     readonly property SettingsWindow settings: SettingsWindow {}
 
     component Lyrics: QtObject {
-        readonly property int lineHeight: 20
+        readonly property int lineHeight: 26
+        readonly property int anchorLine: 1
+        readonly property int fontSize: 16
         readonly property int titleWidth: 120
+        readonly property real nearScale: 0.75
+        readonly property real farScale: 0.7
+        readonly property real nearOpacity: 0.55
+        readonly property real farOpacity: 0.22
     }
     readonly property Lyrics lyrics: Lyrics {}
 

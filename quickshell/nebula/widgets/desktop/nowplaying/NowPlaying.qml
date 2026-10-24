@@ -85,11 +85,11 @@ Item {
         onFinished: root.spin = 0
     }
 
-    MaterialShape {
+    GlassShape {
         id: body
         anchors.fill: parent
         shape: root.empty ? MaterialShape.Sunny : root.playing ? (MaterialShape[root.shapeName] ?? MaterialShape.Cookie12Sided) : MaterialShape.Pentagon
-        color: root.palette.fill
+        fill: root.palette.fill
         rotation: root.spin
         animationDuration: Theme.anim.slow
         animationEasing.type: Easing.OutBack
@@ -212,8 +212,15 @@ Item {
                 onClicked: Media.previous()
             }
 
-            IconButton {
-                icon: root.playing ? "pause" : "play_arrow"
+            PlayButton {
+                Layout.alignment: Qt.AlignVCenter
+                playing: root.playing
+                size: Theme.button.playSizeSmall * root.ratio
+                iconSize: Theme.button.playIconSizeSmall * root.ratio
+                color: root.palette.text
+                hoverColor: root.palette.text
+                iconColor: root.palette.fill
+                hoverIconColor: root.palette.fill
                 onClicked: Media.togglePlaying()
             }
 

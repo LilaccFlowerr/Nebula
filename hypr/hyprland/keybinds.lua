@@ -35,9 +35,6 @@ bind(vars.kbRecordRegion, hl.dsp.exec_cmd("qs -c nebula ipc call recorder region
 -- Now playing: expand/collapse the media card in the center island
 bind(vars.kbMedia, hl.dsp.exec_cmd("qs -c nebula ipc call media toggle"))
 
--- Overview: all workspaces of this screen
-bind(vars.kbOverview, hl.dsp.exec_cmd("qs -c nebula ipc call overview toggle"))
-
 -- Screenshots (Quickshell screenshot service): saved to ~/Pictures/Screenshots and copied to the
 -- clipboard. Open popups stay open while selecting, so they end up in the shot.
 bind(vars.kbScreenshotRegion, hl.dsp.exec_cmd("qs -c nebula ipc call screenshot region"))

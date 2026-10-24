@@ -5,53 +5,69 @@ import qs.theme
 Item {
     id: root
 
-    ListView {
-        id: lyricsView
-        anchors.fill: parent
+    clip: true
+
+    Column {
+        id: lines
+
         visible: Lyrics.synced
-        clip: true
-        interactive: false
+        width: parent.width
+        y: (Theme.lyrics.anchorLine - Math.max(0, Lyrics.currentIndex)) * Theme.lyrics.lineHeight
 
-        model: Lyrics.lines
-        currentIndex: Math.max(0, Lyrics.currentIndex)
-        highlightRangeMode: ListView.StrictlyEnforceRange
-        preferredHighlightBegin: Theme.lyrics.lineHeight
-        preferredHighlightEnd: Theme.lyrics.lineHeight * 2
-        highlightMoveDuration: Theme.anim.medium
+        Behavior on y {
+            NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+        }
 
-        delegate: Text {
-            required property var modelData
-            required property int index
-            readonly property bool current: index === Lyrics.currentIndex
+        Repeater {
+            model: Lyrics.lines
 
-            width: lyricsView.width
-            height: Theme.lyrics.lineHeight
-            verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
-            text: modelData.text || "♪"
-            color: current ? Colors.primary : Colors.textOnSurfaceVariant
-            opacity: current ? 1 : 0.6
-            font.family: Theme.font.family
-            font.pixelSize: Theme.font.small
-            font.weight: current ? Font.DemiBold : Font.Normal
+            Item {
+                id: line
 
-            Behavior on color {
-                ColorAnimation { duration: Theme.anim.medium }
-            }
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.anim.medium }
-            }
+                required property var modelData
+                required property int index
+                readonly property int distance: Math.abs(index - Lyrics.currentIndex)
+                readonly property bool current: distance === 0
+                readonly property real lineScale: current ? 1 : distance === 1 ? Theme.lyrics.nearScale : Theme.lyrics.farScale
 
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: Lyrics.seekToLine(index)
+                width: lines.width
+                height: Theme.lyrics.lineHeight
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width / scale
+                    transformOrigin: Item.Left
+                    scale: line.lineScale
+                    elide: Text.ElideRight
+                    text: line.modelData.text || "♪"
+                    color: line.current ? Colors.primary : Colors.textOnSurface
+                    opacity: line.current ? 1 : line.distance === 1 ? Theme.lyrics.nearOpacity : Theme.lyrics.farOpacity
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.lyrics.fontSize
+                    font.weight: Font.Bold
+
+                    Behavior on scale {
+                        NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot * 2 }
+                    }
+                    Behavior on opacity {
+                        NumberAnimation { duration: Theme.anim.medium }
+                    }
+                    Behavior on color {
+                        ColorAnimation { duration: Theme.anim.medium }
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: Lyrics.seekToLine(line.index)
+                }
             }
         }
     }
 
     Row {
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.centerIn: parent
         visible: Lyrics.status === "loading"
         spacing: Theme.spacing.xs
 
@@ -60,9 +76,9 @@ Item {
 
             Rectangle {
                 required property int index
-                width: 6
-                height: 6
-                radius: 3
+                width: 8
+                height: 8
+                radius: 4
                 color: Colors.textOnSurfaceVariant
 
                 SequentialAnimation on opacity {
@@ -78,12 +94,13 @@ Item {
     }
 
     Text {
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.centerIn: parent
         visible: Lyrics.status === "instrumental"
         text: "Instrumental"
         color: Colors.textOnSurfaceVariant
         font.family: Theme.font.family
-        font.pixelSize: Theme.font.small
-        font.italic: true
+        font.pixelSize: Theme.lyrics.fontSize
+        font.weight: Font.Bold
+        opacity: Theme.lyrics.nearOpacity
     }
 }
