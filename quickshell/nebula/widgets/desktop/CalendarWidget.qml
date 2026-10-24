@@ -1,5 +1,6 @@
 import QtQuick
 import M3Shapes
+import qs.components
 import qs.services
 import qs.theme
 
@@ -108,10 +109,10 @@ Item {
     implicitWidth: size
     implicitHeight: size
 
-    MaterialShape {
+    GlassShape {
         anchors.fill: parent
         shape: MaterialShape[root.expanded && root.openShapeName !== "" ? root.openShapeName : root.shapeName] ?? MaterialShape.Cookie9Sided
-        color: root.colors.fill
+        fill: root.colors.fill
         animationDuration: Theme.anim.slow
         animationEasing.type: Easing.OutBack
         animationEasing.overshoot: Theme.anim.overshoot

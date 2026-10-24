@@ -1,5 +1,6 @@
 import QtQuick
 import M3Shapes
+import qs.components
 import qs.services
 import qs.theme
 
@@ -26,10 +27,10 @@ Item {
     implicitWidth: size
     implicitHeight: size
 
-    MaterialShape {
+    GlassShape {
         anchors.fill: parent
         shape: MaterialShape[root.shapeName] ?? MaterialShape.Sunny
-        color: root.palette.fill
+        fill: root.palette.fill
         animationDuration: Theme.anim.slow
         animationEasing.type: Easing.OutBack
         animationEasing.overshoot: Theme.anim.overshoot

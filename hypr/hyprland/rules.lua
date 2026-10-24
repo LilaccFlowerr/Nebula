@@ -86,8 +86,8 @@ shell_blur({
 })
 
 shell_blur({
-    name         = "blur-quickshell-nowplaying",
-    match        = { namespace = "^quickshell:nowplaying$" },
+    name         = "blur-quickshell-widgets",
+    match        = { namespace = "^quickshell:widgets$" },
     blur         = true,
     ignore_alpha = 0.1,
 })
@@ -103,13 +103,6 @@ shell_blur({
     name  = "blur-quickshell-launcher",
     match = { namespace = "^quickshell:launcher$" },
     blur  = true,
-})
-
--- Quickshell overview: no slide-in/out (it zooms in QML)
-hl.layer_rule({
-    name    = "quickshell-overview",
-    match   = { namespace = "^quickshell:overview$" },
-    no_anim = true,
 })
 
 -- Layer rules (later: more Quickshell widgets)

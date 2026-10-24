@@ -21,6 +21,39 @@ Singleton {
 
     readonly property string track: title + " — " + artist
 
+    property int direction: 1
+    property string lastTrack: ""
+    property string lastTitle: ""
+    property string lastArtist: ""
+    property string lastArtUrl: ""
+    readonly property bool settling: skipTimer.running
+
+    signal skipped(int direction)
+
+    onTitleChanged: skipTimer.restart()
+    onArtistChanged: skipTimer.restart()
+    onArtUrlChanged: skipTimer.restart()
+
+    Timer {
+        id: skipTimer
+        interval: 150
+        onTriggered: {
+            if (!root.active) return;
+            if (root.lastTrack !== "" && root.track !== root.lastTrack) root.skipped(root.direction);
+            root.lastTrack = root.track;
+            root.lastTitle = root.title;
+            root.lastArtist = root.artist;
+            root.lastArtUrl = root.artUrl;
+            root.direction = 1;
+        }
+    }
+
+    Timer {
+        id: directionReset
+        interval: 3000
+        onTriggered: root.direction = 1
+    }
+
     readonly property real position: player?.position ?? 0
     readonly property real length: player?.length ?? 0
     readonly property real progress: length > 0 ? position / length : 0
@@ -33,8 +66,8 @@ Singleton {
     }
 
     function togglePlaying() { if (player?.canTogglePlaying) player.togglePlaying(); }
-    function next()          { if (player?.canGoNext) player.next(); }
-    function previous()      { if (player?.canGoPrevious) player.previous(); }
+    function next()          { if (player?.canGoNext) { direction = 1; directionReset.restart(); player.next(); } }
+    function previous()      { if (player?.canGoPrevious) { direction = -1; directionReset.restart(); player.previous(); } }
     readonly property var windows: Hyprland.toplevels.values
 
     function raise() {

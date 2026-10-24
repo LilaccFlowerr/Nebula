@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Effects
+import M3Shapes
 import Quickshell
 import Quickshell.Wayland
 import qs.services
@@ -93,7 +95,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(Colors.scrim, Theme.launcher.dim * window.progress)
+        color: Qt.alpha(Colors.scrim, Theme.launcher.backdropDim * window.progress)
 
         MouseArea {
             anchors.fill: parent
@@ -110,6 +112,55 @@ PanelWindow {
             if (Math.abs(delta) < 120) return;
             window.step(delta < 0 ? 1 : -1, false);
             delta = 0;
+        }
+    }
+
+    Item {
+        id: cloverGlow
+
+        readonly property real pad: ring.width * Theme.launcher.glassPad
+
+        x: ring.x - pad
+        y: ring.y - pad
+        width: ring.width + pad * 2
+        height: ring.height + pad * 2
+
+        Rectangle {
+            id: cloverLight
+            anchors.fill: parent
+            visible: false
+            layer.enabled: true
+            gradient: Gradient {
+                GradientStop { position: cloverGlow.pad / cloverGlow.height; color: Qt.rgba(1, 1, 1, Theme.launcher.glassLight) }
+                GradientStop { position: (cloverGlow.pad + ring.height * 0.55) / cloverGlow.height; color: Qt.rgba(1, 1, 1, 0) }
+            }
+        }
+
+        Item {
+            id: cloverLightMask
+            anchors.fill: parent
+            visible: false
+            layer.enabled: true
+
+            MaterialShape {
+                x: cloverGlow.pad
+                y: cloverGlow.pad
+                width: ring.width
+                height: ring.height
+                scale: ring.clover.scale
+                rotation: ring.clover.rotation
+                fromShape: MaterialShape.Clover8Leaf
+                customToShape: ring.clover.customToShape
+                morphProgress: ring.clover.morphProgress
+                color: "black"
+            }
+        }
+
+        MultiEffect {
+            anchors.fill: parent
+            source: cloverLight
+            maskEnabled: true
+            maskSource: cloverLightMask
         }
     }
 

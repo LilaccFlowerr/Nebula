@@ -15,6 +15,7 @@ Variants {
 
         required property ShellScreen modelData
         readonly property bool fullSettings: GlobalStates.settingsOpen && GlobalStates.isOn(modelData?.name ?? "")
+        readonly property bool popupHere: GlobalStates.popupOpen && GlobalStates.isOn(modelData?.name ?? "")
 
         screen: modelData
 
@@ -51,7 +52,13 @@ Variants {
         }
 
         WlrLayershell.namespace: "quickshell:bar"
-        WlrLayershell.keyboardFocus: fullSettings ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: fullSettings ? WlrKeyboardFocus.Exclusive : popupHere ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+        Shortcut {
+            sequence: "Escape"
+            enabled: window.popupHere && !window.fullSettings
+            onActivated: GlobalStates.closePopups()
+        }
 
         Rectangle {
             anchors.fill: parent

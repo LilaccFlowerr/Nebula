@@ -23,7 +23,7 @@ Island {
     readonly property int maxTitleWidth: 360
     readonly property int mediaTextWidth: 220
     readonly property int waveWidth: 200
-    readonly property int cardWidth: 440
+    readonly property int cardWidth: 500
 
     readonly property string screenName: QsWindow.window?.screen?.name ?? ""
     readonly property bool isExpanded: GlobalStates.mediaExpanded && GlobalStates.isOn(screenName) && Media.active
@@ -48,16 +48,16 @@ Island {
     readonly property bool showWindow: ActiveWindow.hasWindow && !showMedia && !showEvent
     readonly property bool empty: !showWindow && !showMedia && !showEvent
 
-    Timer {
-        interval: 1000
-        running: true
-        onTriggered: root.armed = true
-    }
-
     HyprlandFocusGrab {
         windows: [root.QsWindow.window]
         active: root.isExpanded && !GlobalStates.capturing
         onCleared: GlobalStates.mediaExpanded = false
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        onTriggered: root.armed = true
     }
 
     Timer {
@@ -102,6 +102,59 @@ Island {
                 root.event = "";
             }
         }
+    }
+
+    property bool holding: false
+    property string heldTitle: ""
+    property string heldArtist: ""
+    property string heldArt: ""
+    readonly property string shownTitle: Media.settling ? Media.lastTitle : holding ? heldTitle : Media.title
+    readonly property string shownArtist: Media.settling ? Media.lastArtist : holding ? heldArtist : Media.artist
+    readonly property string shownArt: Media.settling ? Media.lastArtUrl : holding ? heldArt : Media.artUrl
+
+    property int skipDirection: 1
+    property real skipSlide: 0
+    property real skipFade: 1
+
+    function swapTrack() {
+        holding = false;
+    }
+
+    Connections {
+        target: Media
+        function onSkipped(direction) {
+            root.heldTitle = Media.lastTitle;
+            root.heldArtist = Media.lastArtist;
+            root.heldArt = Media.lastArtUrl;
+            root.holding = true;
+            root.skipDirection = direction;
+            skipAnim.restart();
+        }
+    }
+
+    SequentialAnimation {
+        id: skipAnim
+
+        ParallelAnimation {
+            NumberAnimation { target: root; property: "skipSlide"; to: -root.skipDirection * Theme.bar.skipSlide; duration: Theme.anim.fast; easing.type: Easing.InCubic }
+            NumberAnimation { target: root; property: "skipFade"; to: 0; duration: Theme.anim.fast; easing.type: Easing.InCubic }
+        }
+        ScriptAction {
+            script: {
+                root.swapTrack();
+                root.skipSlide = root.skipDirection * Theme.bar.skipSlide;
+            }
+        }
+        ParallelAnimation {
+            NumberAnimation { target: root; property: "skipSlide"; to: 0; duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+            NumberAnimation { target: root; property: "skipFade"; to: 1; duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        }
+    }
+
+    Image {
+        visible: false
+        source: Media.artUrl
+        asynchronous: true
     }
 
     Connections {
@@ -216,6 +269,10 @@ Island {
             opacity: root.isExpanded ? 0 : 1
             maxTextWidth: root.mediaTextWidth
             waveWidth: root.waveWidth
+            trackTitle: root.shownTitle
+            trackArtist: root.shownArtist
+            slide: root.skipSlide
+            fade: root.skipFade
 
             Behavior on opacity {
                 NumberAnimation { duration: Theme.anim.fast }
@@ -251,6 +308,10 @@ Island {
             id: card
             visible: root.showMedia
             expanded: root.isExpanded
+            trackTitle: root.shownTitle
+            trackArtist: root.shownArtist
+            slide: root.skipSlide
+            fade: root.skipFade
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: Theme.spacing.lg
@@ -305,15 +366,21 @@ Island {
             radius: baseRadius + (eventRadius - baseRadius) * e
             color: Colors.surfaceContainerHigh
 
-            Image {
+            Item {
                 anchors.fill: parent
-                source: Media.artUrl
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                opacity: Media.playing ? 1 : 0.5
+                opacity: root.skipFade
+                transform: Translate { x: root.skipSlide / Theme.bar.skipSlide * art.width / 2 }
 
-                Behavior on opacity {
-                    NumberAnimation { duration: Theme.anim.medium }
+                Image {
+                    anchors.fill: parent
+                    source: root.shownArt
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    opacity: Media.playing ? 1 : 0.5
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: Theme.anim.medium }
+                    }
                 }
             }
 

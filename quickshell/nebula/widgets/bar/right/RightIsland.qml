@@ -44,20 +44,18 @@ Island {
     property alias trayArea: trayArea
     property alias systemArea: systemArea
 
-    HyprlandFocusGrab {
-        windows: [root.QsWindow.window]
-        active: (root.powerOpen || root.settingsOpen || root.calendarOpen || root.trayOpen || root.systemOpen) && !GlobalStates.capturing
-        onCleared: {
-            GlobalStates.powerMenuOpen = false;
-            GlobalStates.quickSettingsOpen = false;
-            GlobalStates.calendarOpen = false;
-            GlobalStates.trayOpen = false;
-            GlobalStates.systemOpen = false;
-        }
+    HoverHandler { id: islandHover }
+
+    HoverDismiss {
+        active: (root.powerOpen || root.settingsOpen || root.calendarOpen || root.trayOpen || root.systemOpen) && !root.fullSettings && !GlobalStates.capturing
+        hovered: islandHover.hovered || powerHover.hovered || trayHover.hovered || calendarHover.hovered || systemHover.hovered || settingsHover.hovered
+        onDismissed: GlobalStates.closePopups()
     }
 
     Item {
         id: powerArea
+
+        HoverHandler { id: powerHover }
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
         anchors.right: parent.right
@@ -75,6 +73,8 @@ Island {
     }
     Item {
         id: trayArea
+
+        HoverHandler { id: trayHover }
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
         anchors.right: parent.right
@@ -93,6 +93,8 @@ Island {
 
     Item {
         id: calendarArea
+
+        HoverHandler { id: calendarHover }
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
         anchors.right: parent.right
@@ -110,6 +112,8 @@ Island {
 
     Item {
         id: systemArea
+
+        HoverHandler { id: systemHover }
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
         anchors.right: parent.right
@@ -127,6 +131,8 @@ Island {
 
     Item {
         id: settingsArea
+
+        HoverHandler { id: settingsHover }
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
         anchors.right: parent.right

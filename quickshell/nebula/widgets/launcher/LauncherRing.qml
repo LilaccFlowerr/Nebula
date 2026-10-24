@@ -34,10 +34,14 @@ Item {
         return root.results[((root.cursor + offset) % n + n) % n] ?? null;
     }
 
+    property alias clover: cloverShape
+
     width: Theme.launcher.size
     height: Theme.launcher.size
 
     MaterialShape {
+        id: cloverShape
+
         function clover(leaves) {
             const tip = (-90 + 180 / leaves) * Math.PI / 180;
             return polygon([
@@ -56,7 +60,7 @@ Item {
         rotation: root.shownMorph * 360 / Launcher.commandSlots - leafOffset - (1 - Curves.decel(root.cloverT)) * 120
         readonly property color accent: Launcher.themeMode ? Scheme.previews[root.results[root.cursor]?.scheme]?.primaryContainer ?? Colors.primaryContainer
              : Launcher.wallpaperMode ? Colors.secondaryContainer : Launcher.commandMode ? Colors.tertiaryContainer : Colors.primaryContainer
-        color: Qt.tint(Qt.alpha(Colors.surface, Theme.bar.opacity), Qt.alpha(accent, Theme.launcher.tint))
+        color: Qt.alpha(accent, Theme.launcher.glassTint)
 
         Behavior on color {
             ColorAnimation { duration: Theme.anim.island; easing.type: Easing.OutCubic }

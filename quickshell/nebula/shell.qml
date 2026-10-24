@@ -3,7 +3,6 @@ import Quickshell
 import qs.widgets.bar
 import qs.widgets.recorder
 import qs.widgets.launcher
-import qs.widgets.overview
 import qs.widgets.wallpaper
 import qs.widgets.desktop
 import qs.services
@@ -43,6 +42,5 @@ ShellRoot {
 
     LauncherWindow {}
 
-    OverviewWindow {}
     
 }

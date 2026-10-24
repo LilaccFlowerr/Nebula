@@ -8,6 +8,10 @@ ColumnLayout {
     id: root
 
     property bool expanded: false
+    property string trackTitle: ""
+    property string trackArtist: ""
+    property real slide: 0
+    property real fade: 1
     readonly property real artX: cardTop.x + artSlot.x
     readonly property real artY: cardTop.y + artSlot.y
     readonly property alias artSlot: artSlot
@@ -38,11 +42,13 @@ ColumnLayout {
             Layout.preferredWidth: Theme.lyrics.titleWidth
             Layout.fillWidth: false
             spacing: 2
+            opacity: root.fade
+            transform: Translate { x: root.slide }
 
             Text {
                 Layout.fillWidth: true
                 elide: Text.ElideRight
-                text: Media.title
+                text: root.trackTitle
                 color: Colors.textOnSurface
                 font.family: Theme.font.family
                 font.pixelSize: Theme.font.normal
@@ -52,7 +58,7 @@ ColumnLayout {
             Text {
                 Layout.fillWidth: true
                 elide: Text.ElideRight
-                text: Media.artist
+                text: root.trackArtist
                 color: Colors.textOnSurfaceVariant
                 font.family: Theme.font.family
                 font.pixelSize: Theme.font.normal
@@ -63,7 +69,7 @@ ColumnLayout {
         LyricsView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            visible: Settings.bar.lyrics
+            visible: Settings.bar.lyrics && Lyrics.status !== "none"
         }
     }
 
@@ -117,8 +123,43 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         spacing: Theme.bar.gap
 
-        IconButton { icon: "skip_previous"; onClicked: Media.previous() }
-        IconButton { icon: Media.playing ? "pause" : "play_arrow"; onClicked: Media.togglePlaying() }
-        IconButton { icon: "skip_next"; onClicked: Media.next() }
+        IconButton {
+            id: previousButton
+            icon: "skip_previous"
+            onClicked: {
+                root.nudge(previousButton, -1);
+                Media.previous();
+            }
+        }
+        PlayButton {
+            playing: Media.playing
+            onClicked: Media.togglePlaying()
+        }
+        IconButton {
+            id: nextButton
+            icon: "skip_next"
+            onClicked: {
+                root.nudge(nextButton, 1);
+                Media.next();
+            }
+        }
+    }
+
+    function nudge(button, direction) {
+        nudgeAnim.stop();
+        if (nudgeAnim.button) nudgeAnim.button.iconOffset = 0;
+        nudgeAnim.button = button;
+        nudgeAnim.direction = direction;
+        nudgeAnim.start();
+    }
+
+    SequentialAnimation {
+        id: nudgeAnim
+
+        property Item button
+        property int direction: 1
+
+        NumberAnimation { target: nudgeAnim.button; property: "iconOffset"; to: nudgeAnim.direction * Theme.bar.skipNudge; duration: Theme.anim.fast; easing.type: Easing.OutCubic }
+        NumberAnimation { target: nudgeAnim.button; property: "iconOffset"; to: 0; duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
     }
 }

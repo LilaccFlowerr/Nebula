@@ -9,8 +9,6 @@ Singleton {
     id: root
 
     property bool launcherOpen: false
-    property bool overviewOpen: false
-    signal overviewConfirmRequested()
     property bool powerMenuOpen: false
     property bool quickSettingsOpen: false
     property bool calendarOpen: false
@@ -23,6 +21,7 @@ Singleton {
     property string settingsTab: ""
     property string screen: ""
     property bool capturing: false
+    readonly property bool popupOpen: powerMenuOpen || quickSettingsOpen || calendarOpen || trayOpen || systemOpen || mediaExpanded
 
     function isOn(screenName) {
         return screen === screenName;
@@ -39,16 +38,6 @@ Singleton {
             closeAll();
             screen = screenName;
             launcherOpen = true;
-        }
-    }
-
-    function toggleOverview(screenName = focusedScreen()) {
-        if (overviewOpen && screen === screenName) {
-            overviewOpen = false;
-        } else {
-            closeAll();
-            screen = screenName;
-            overviewOpen = true;
         }
     }
 
@@ -129,9 +118,27 @@ Singleton {
         if (!settingsOpen) toggleSettings(focusedScreen(), fromQuick);
     }
 
+    function closePopups(keepMedia = false) {
+        if (!keepMedia) mediaExpanded = false;
+        powerMenuOpen = false;
+        quickSettingsOpen = false;
+        calendarOpen = false;
+        trayOpen = false;
+        systemOpen = false;
+    }
+
+    Connections {
+        target: Hyprland
+
+        function onRawEvent(event) {
+            if (!root.popupOpen || root.capturing) return;
+            if (event.name === "workspacev2" || event.name === "focusedmonv2" || (event.name === "activewindowv2" && event.data !== ""))
+                root.closePopups(true);
+        }
+    }
+
     function closeAll() {
         launcherOpen = false;
-        overviewOpen = false;
         powerMenuOpen = false;
         quickSettingsOpen = false;
         calendarOpen = false;
@@ -139,15 +146,6 @@ Singleton {
         systemOpen = false;
         mediaExpanded = false;
         settingsOpen = false;
-    }
-
-    IpcHandler {
-        target: "overview"
-
-        function toggle(): void { root.toggleOverview(); }
-        function open(): void { if (!root.overviewOpen) root.toggleOverview(); }
-        function close(): void { root.overviewOpen = false; }
-        function confirm(): void { if (root.overviewOpen) root.overviewConfirmRequested(); }
     }
 
     IpcHandler {
