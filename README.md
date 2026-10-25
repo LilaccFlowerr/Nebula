@@ -12,7 +12,7 @@
 </p>
 
 <!-- Drag the showcase video into a GitHub comment box, copy the user-attachments link it gives you and put it here: -->
-https://github.com/user-attachments/assets/REPLACE-ME
+https://github.com/user-attachments/assets/b3be7c33-a358-43e6-9ec0-5404f7068d17
 
 Nebula is my own desktop. Not a fork of someone else's dots, I built it piece by piece
 because I wanted something that feels alive: shapes that morph into each other, a bar that
