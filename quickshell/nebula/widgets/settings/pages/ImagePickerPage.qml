@@ -10,6 +10,12 @@ ColumnLayout {
     signal navigate(string target)
 
     function choose(path) {
+        if (GlobalStates.pickFor === "logo") {
+            GlobalStates.pickFor = "";
+            Settings.bar.logoImage = path;
+            navigate("section:left");
+            return;
+        }
         if (Widgets.replacing !== "") {
             const id = Widgets.replacing;
             Widgets.replacing = "";

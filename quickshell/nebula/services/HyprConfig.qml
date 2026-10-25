@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import qs.theme
 
 Singleton {
     id: root
@@ -46,6 +47,15 @@ Singleton {
             + `active_opacity = ${w.opacity / 100}, inactive_opacity = ${w.opacity / 100} } })`);
     }
 
+    function rgba(color, alpha) {
+        return lua(`rgba(${String(color).slice(1, 7)}${alpha})`);
+    }
+
+    function applyBorders() {
+        run(`hl.config({ general = { col = { active_border = { colors = { ${rgba(Colors.primary, "ee")}, ${rgba(Colors.tertiary, "ee")} }, angle = 45 }, `
+            + `inactive_border = ${rgba(Colors.outlineVariant, "aa")} } } })`);
+    }
+
     function monitorRule(name) {
         const m = saved[name];
         if (!m) return null;
@@ -76,6 +86,7 @@ Singleton {
         applyInput();
         applyBlur();
         applyWindows();
+        applyBorders();
         applyDisplays();
     }
 
@@ -129,6 +140,19 @@ Singleton {
         id: windowsTimer
         interval: 150
         onTriggered: root.applyWindows()
+    }
+
+    Timer {
+        id: bordersTimer
+        interval: 150
+        onTriggered: root.applyBorders()
+    }
+
+    Connections {
+        target: Colors
+        function onPrimaryChanged() { bordersTimer.restart(); }
+        function onTertiaryChanged() { bordersTimer.restart(); }
+        function onOutlineVariantChanged() { bordersTimer.restart(); }
     }
 
     Connections {

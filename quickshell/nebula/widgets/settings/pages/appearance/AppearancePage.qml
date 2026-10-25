@@ -162,7 +162,7 @@ ColumnLayout {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             visible: chip.modelData.shape < 0 && !chip.special
-                            text: chip.modelData.key === "random" ? "shuffle" : chip.modelData.key === "fade" ? "gradient" : "block"
+                            text: chip.modelData.key === "random" ? "shuffle" : chip.modelData.key === "fade" ? "gradient" : chip.modelData.key === "glitch" ? "broken_image" : "block"
                             font.family: Theme.font.icons
                             font.pixelSize: Theme.settings.iconSize
                             color: chip.active ? Colors.textOnSecondaryContainer : Colors.primary

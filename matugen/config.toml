@@ -14,11 +14,6 @@ blue    = "#61afef"
 magenta = "#c678dd"
 cyan    = "#56b6c2"
 
-[templates.hyprland]
-input_path  = "~/.config/matugen/templates/hyprland-colors.lua"
-output_path = "~/.config/hypr/colors.lua"
-post_hook   = "hyprctl reload"
-
 [templates.ghostty]
 input_path  = "~/.config/matugen/templates/ghostty-colors"
 output_path = "~/.config/ghostty/themes/matugen"

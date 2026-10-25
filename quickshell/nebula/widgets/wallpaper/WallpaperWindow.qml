@@ -78,8 +78,8 @@ Variants {
             target: window
             property: "reveal"
             to: 1
-            duration: window.style === "fade" ? Theme.anim.slow : Theme.anim.slow * 2 * window.stretch
-            easing.type: Easing.BezierSpline
+            duration: window.style === "fade" ? Theme.anim.slow : window.style === "glitch" ? Theme.anim.slow * 6 : Theme.anim.slow * 2 * window.stretch
+            easing.type: window.style === "glitch" ? Easing.Linear : Easing.BezierSpline
             easing.bezierCurve: window.style === "fade" ? Theme.anim.standard : Theme.anim.emphasizedDecel
             onFinished: {
                 if (String(base.source) === String(window.target)) incoming.visible = false;
@@ -107,12 +107,25 @@ Variants {
             visible: false
             opacity: window.style === "fade" ? window.reveal : 1
             onStatusChanged: if (status === Image.Ready && String(source) === String(window.target) && window.reveal === 0) revealAnim.restart()
-            layer.enabled: visible && window.style !== "fade"
+            layer.enabled: visible && window.style !== "fade" && window.style !== "glitch"
             layer.effect: MultiEffect {
                 maskEnabled: true
                 maskSource: revealMask
                 maskThresholdMin: 0.5
                 maskSpreadAtMin: 0.02
+            }
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: window.style === "glitch" && incoming.visible
+
+            sourceComponent: ShaderEffect {
+                property variant from: ShaderEffectSource { sourceItem: base }
+                property variant to: ShaderEffectSource { sourceItem: incoming }
+                property real progress: window.reveal
+                property color glow: Colors.primary
+                fragmentShader: "file://" + Quickshell.shellPath("shaders/glitch.frag.qsb")
             }
         }
 

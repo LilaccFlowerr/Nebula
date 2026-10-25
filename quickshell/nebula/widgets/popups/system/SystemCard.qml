@@ -196,7 +196,7 @@ Rectangle {
 
                 Hardware {
                     icon: "developer_board"
-                    name: SystemStats.gpuName
+                    name: SystemStats.activeGpuName
                 }
             }
         }
@@ -266,7 +266,7 @@ Rectangle {
                 Stat {
                     icon: "developer_board"
                     label: "GPU"
-                    value: SystemStats.gpu
+                    value: SystemStats.gpuLoad
                 }
 
                 Stat {
