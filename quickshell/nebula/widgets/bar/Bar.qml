@@ -37,13 +37,13 @@ Variants {
             regions: [
                 Region { item: leftIsland },
                 Region { item: centerIsland },
-                Region { item: centerIsland.bubble },
                 Region { item: rightIsland },
                 Region { item: rightIsland.powerArea },
                 Region { item: rightIsland.settingsArea },
                 Region { item: rightIsland.calendarArea },
                 Region { item: rightIsland.trayArea },
                 Region { item: rightIsland.systemArea },
+                Region { item: rightIsland.alertArea },
                 Region {
                     width: window.fullSettings ? window.width : 0
                     height: window.fullSettings ? window.height : 0

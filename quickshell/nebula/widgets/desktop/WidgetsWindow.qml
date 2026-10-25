@@ -54,7 +54,7 @@ Variants {
             let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
             for (let i = 0; i < repeater.count; i++) {
                 const item = repeater.itemAt(i);
-                if (!item || !item.active) continue;
+                if (!item || !item.active || item.leaving) continue;
                 left = Math.min(left, item.x);
                 top = Math.min(top, item.y);
                 right = Math.max(right, item.x + item.width);
@@ -136,6 +136,17 @@ Variants {
         }
 
         Component {
+            id: weatherWidget
+
+            WeatherWidget {
+                shapeName: parent?.cfg?.shape ?? "Cookie9Sided"
+                colorRole: parent?.cfg?.color ?? "primary"
+                baseSize: parent?.cfg?.size ?? 220
+                followWeather: parent?.cfg?.follow ?? true
+            }
+        }
+
+        Component {
             id: clockWidget
 
             ClockWidget {
@@ -174,8 +185,49 @@ Variants {
                 readonly property real offX: ghost ? 0 : ((cfg.size ?? width) - width) / 2
                 readonly property real offY: ghost ? 0 : ((cfg.size ?? height) - height) / 2
 
+                property real shown: 1
+                readonly property bool leaving: Widgets.leaving.includes(modelData)
+
+                Connections {
+                    target: Widgets
+                    function onAdded(id) {
+                        if (id !== slot.modelData) return;
+                        slot.shown = 0;
+                        popIn.start();
+                    }
+                }
+
+                onLeavingChanged: {
+                    window.updateBounds();
+                    if (!leaving) return;
+                    popIn.stop();
+                    popOut.start();
+                }
+
+                NumberAnimation {
+                    id: popIn
+                    target: slot
+                    property: "shown"
+                    to: 1
+                    duration: Theme.anim.slow
+                    easing.type: Easing.OutBack
+                    easing.overshoot: Theme.anim.overshoot
+                }
+
+                NumberAnimation {
+                    id: popOut
+                    target: slot
+                    property: "shown"
+                    to: 0
+                    duration: Theme.anim.medium
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.anim.emphasizedAccel
+                }
+
+                enabled: !leaving
+                scale: 0.5 + 0.5 * shown
                 z: cfg.z ?? 0
-                opacity: cfg.opacity ?? 1
+                opacity: (cfg.opacity ?? 1) * Math.min(shown, 1)
                 active: cfg.enabled === true && Widgets.types[cfg.type] !== undefined && (ghost || !cfg.screen || cfg.screen === window.modelData.name)
                 x: restX + offX + (drag.active ? drag.translation.x : 0)
                 y: restY + offY + (drag.active ? drag.translation.y : 0)
@@ -188,7 +240,7 @@ Variants {
                 onWidthChanged: window.updateBounds()
                 onHeightChanged: window.updateBounds()
 
-                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : nowPlayingWidget
+                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : nowPlayingWidget
 
                 HoverHandler {
                     enabled: !slot.ghost

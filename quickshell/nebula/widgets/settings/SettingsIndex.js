@@ -18,6 +18,7 @@ var entries = [
 
     { title: "Now playing widget", page: "desktop", words: "music media spotify cookie" },
     { title: "Spin while playing", page: "desktop", words: "rotate now playing" },
+    { title: "Shape follows weather", page: "desktop", words: "weather widget shape" },
     { title: "Spin speed", page: "desktop", words: "rotate now playing slow fast seconds" },
     { title: "Widget position", page: "desktop", words: "now playing reset move" },
     { title: "Clock widget", page: "desktop", words: "analog time hands seconds date" },

@@ -13,6 +13,7 @@ Singleton {
         clock: { title: "Clock", description: "An analog clock in a shape", icon: "schedule", shape: "Cookie12Sided", size: 220, minSize: 100, maxSize: 600, color: "primary" },
         calendar: { title: "Calendar", description: "Today, tap to open the month", icon: "calendar_month", shape: "Cookie9Sided", size: 200, minSize: 140, maxSize: 420, color: "tertiary" },
         battery: { title: "Battery", description: "Fills like water as you charge", icon: "battery_full", shape: "Cookie12Sided", size: 200, minSize: 120, maxSize: 480, color: "secondary" },
+        weather: { title: "Weather", description: "Today's weather, in its own shape", icon: "partly_cloudy_day", shape: "Cookie9Sided", size: 220, minSize: 140, maxSize: 480, color: "primary" },
         text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
     })
 
@@ -44,8 +45,10 @@ Singleton {
     property real menuY: 0
     property real menuW: 0
     property real menuH: 0
+    property bool menuExpanded: false
 
-    function openMenu(id, screenName, rect) {
+    function openMenu(id, screenName, rect, expanded) {
+        menuExpanded = expanded === true;
         menuScreen = screenName;
         menuX = rect.x;
         menuY = rect.y;
@@ -56,6 +59,44 @@ Singleton {
 
     function closeMenu() {
         menuId = "";
+        menuExpanded = false;
+    }
+
+    function rectOf(id) {
+        const w = get(id);
+        if (!w) return Qt.rect(0, 0, 0, 0);
+        const s = screenNamed(w.screen ?? "");
+        const size = w.size ?? types[w.type]?.size ?? 200;
+        const x = (w.x ?? -1) < 0 ? Theme.nowPlaying.margin : w.x;
+        const y = (w.y ?? -1) < 0 ? s.height - size - Theme.nowPlaying.margin : w.y;
+        return Qt.rect(s.x + x, s.y + y, size, size);
+    }
+
+    function edit(id) {
+        const w = get(id);
+        if (!w) return;
+        openMenu(id, screenNamed(w.screen ?? "").name, rectOf(id), true);
+    }
+
+    property bool pickerOpen: false
+    property string pickerTarget: ""
+    property string pickerScreen: ""
+
+    function openPicker(target, screenName) {
+        closeMenu();
+        pickerTarget = target ?? "";
+        pickerScreen = screenName || (GlobalStates.screen !== "" ? GlobalStates.screen : Quickshell.screens[0].name);
+        pickerOpen = true;
+    }
+
+    function closePicker() {
+        pickerOpen = false;
+    }
+
+    function pickImage(path) {
+        if (pickerTarget !== "" && get(pickerTarget)) update(pickerTarget, { source: path, zoom: 1, panX: 0, panY: 0 });
+        else add("image", { source: path, screen: pickerScreen });
+        closePicker();
     }
 
     property string dragId: ""
@@ -175,7 +216,17 @@ Singleton {
             screen: screenName,
             source: ""
         }, spawn(t.size, screenName), props ?? {})]));
+        added(id);
         return id;
+    }
+
+    function duplicate(id) {
+        const w = get(id);
+        if (!w || types[w.type]?.single) return "";
+        const copy = Object.assign({}, w, { x: (w.x ?? 0) + 36, y: (w.y ?? 0) + 36 });
+        delete copy.id;
+        delete copy.z;
+        return add(w.type, copy);
     }
 
     function update(id, props) {
@@ -199,8 +250,32 @@ Singleton {
         update(id, { z: others + 1 });
     }
 
+    signal added(string id)
+    property var leaving: []
+
     function remove(id) {
+        if (leaving.includes(id)) return;
+        leaving = leaving.concat([id]);
+        removal.createObject(root, { target: id });
+    }
+
+    function finishRemove(id) {
+        leaving = leaving.filter(l => l !== id);
         save(list.filter(w => w.id !== id));
+    }
+
+    Component {
+        id: removal
+
+        Timer {
+            required property string target
+            interval: Theme.anim.medium
+            running: true
+            onTriggered: {
+                root.finishRemove(target);
+                destroy();
+            }
+        }
     }
 
     function migrate() {

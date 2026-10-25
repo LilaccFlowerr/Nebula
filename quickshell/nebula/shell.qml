@@ -40,6 +40,8 @@ ShellRoot {
         }
     }
 
+    ImagePickerWindow {}
+
     LauncherWindow {}
 
     

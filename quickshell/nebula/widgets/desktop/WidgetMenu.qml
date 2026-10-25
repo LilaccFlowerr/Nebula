@@ -8,6 +8,7 @@ import qs.components
 import qs.services
 import qs.theme
 import qs.widgets.settings.components
+import qs.widgets.settings.pages.desktop
 
 PanelWindow {
     id: window
@@ -32,10 +33,10 @@ PanelWindow {
     WlrLayershell.namespace: "quickshell:widgetmenu"
 
     readonly property var cfg: Widgets.get(Widgets.menuId) ?? ({})
+    readonly property bool shapeLocked: cfg.type === "weather" && (cfg.follow ?? true)
     readonly property var kind: Widgets.types[cfg.type] ?? ({ size: 200, minSize: 80, maxSize: 600, color: "secondary" })
     readonly property bool open: Widgets.menuId !== "" && Widgets.menuScreen === modelData.name && cfg.id !== undefined
     readonly property real gap: Theme.spacing.md
-    readonly property real cardWidth: 352
 
     function set(props) {
         Widgets.update(Widgets.menuId, props);
@@ -47,8 +48,38 @@ PanelWindow {
         GlobalStates.openSettings("desktop", "widget:" + id);
     }
 
+    readonly property string menuType: cfg.type ?? ""
+    readonly property var actions: [
+        Widgets.menuExpanded ? { key: "edit", icon: "close_fullscreen", text: "Less" } : { key: "edit", icon: "tune", text: "Edit" },
+        { key: "duplicate", icon: "content_copy", text: "Duplicate", hidden: !!Widgets.types[menuType]?.single },
+        { key: "center", icon: "center_focus_strong", text: "Center" },
+        { key: "image", icon: "image", text: "Image", hidden: menuType !== "image" },
+        { key: "remove", icon: "delete", text: "Hold to remove", danger: true, hold: true }
+    ].filter(a => !a.hidden)
+
+    function act(key) {
+        const id = Widgets.menuId;
+        switch (key) {
+        case "edit": Widgets.menuExpanded = !Widgets.menuExpanded; break;
+        case "center": center(); break;
+        case "image": pick(); break;
+        case "duplicate":
+            Widgets.closeMenu();
+            Widgets.duplicate(id);
+            break;
+        case "remove":
+            Widgets.closeMenu();
+            Widgets.remove(id);
+            break;
+        }
+    }
+
+    function pick() {
+        Widgets.openPicker(Widgets.menuId, modelData.name);
+    }
+
     function center() {
-        const size = cfg.size ?? type.size;
+        const size = cfg.size ?? kind.size;
         set({
             x: Math.round((modelData.width - size) / 2),
             y: Math.round((modelData.height - size) / 2)
@@ -73,16 +104,24 @@ PanelWindow {
         }
     }
 
+    property real expand: Widgets.menuExpanded ? 1 : 0
+
+    Behavior on expand {
+        NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+    }
+
     Rectangle {
         id: card
 
         readonly property real targetX: Widgets.menuX - window.modelData.x
         readonly property real targetY: Widgets.menuY - window.modelData.y
         readonly property real rightX: targetX + Widgets.menuW + window.gap
+        readonly property real fixedHeight: header.height + sizeRow.height + opacityRow.height + colorRow.height + actionRow.height + column.spacing * 5 + Theme.spacing.lg * 2 + (textField.visible ? textField.height + column.spacing : 0)
+        readonly property real maxBody: window.modelData.height - window.gap * 2 - fixedHeight
 
-        width: window.cardWidth
+        width: Theme.widgetEditor.compactWidth + (Theme.widgetEditor.fullWidth - Theme.widgetEditor.compactWidth) * window.expand
         height: column.implicitHeight + Theme.spacing.lg * 2
-        x: rightX + width + window.gap <= window.modelData.width ? rightX : Math.max(window.gap, targetX - width - window.gap)
+        x: rightX + Theme.widgetEditor.fullWidth + window.gap <= window.modelData.width ? rightX : Math.max(window.gap, targetX - width - window.gap)
         y: Math.max(window.gap, Math.min(targetY, window.modelData.height - height - window.gap))
         radius: Theme.radius.large
         color: Qt.alpha(Colors.surfaceContainer, 0.97)
@@ -112,102 +151,61 @@ PanelWindow {
             spacing: Theme.spacing.md
 
             RowLayout {
+                id: header
                 Layout.fillWidth: true
                 spacing: Theme.spacing.sm
 
                 MaterialShape {
-                    Layout.preferredWidth: 28
-                    Layout.preferredHeight: 28
+                    Layout.preferredWidth: 32
+                    Layout.preferredHeight: 32
                     shape: MaterialShape[window.cfg.shape ?? "Circle"] ?? MaterialShape.Circle
                     color: Widgets.palette(window.cfg.color).fill
                     animationDuration: Theme.anim.medium
                 }
 
-                Text {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    text: Widgets.label(window.cfg)
-                    elide: Text.ElideRight
-                    color: Colors.textOnSurface
-                    font.family: Theme.font.family
-                    font.pixelSize: Theme.font.large
-                    font.weight: Font.DemiBold
+                    spacing: 0
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: Widgets.label(window.cfg)
+                        elide: Text.ElideRight
+                        color: Colors.textOnSurface
+                        font.family: Theme.font.family
+                        font.pixelSize: Theme.font.large
+                        font.weight: Font.DemiBold
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: (window.cfg.screen || "All screens") + " · " + Math.round(window.cfg.size ?? window.kind.size) + " px"
+                        elide: Text.ElideRight
+                        color: Colors.textOnSurfaceVariant
+                        font.family: Theme.font.family
+                        font.pixelSize: Theme.font.small
+                    }
                 }
 
                 IconButton {
-                    implicitWidth: 32
-                    implicitHeight: 32
-                    icon: "tune"
+                    implicitWidth: 36
+                    implicitHeight: 36
+                    icon: "open_in_new"
                     onClicked: window.more()
                 }
             }
 
             TextField {
+                id: textField
                 Layout.fillWidth: true
-                visible: window.cfg.type === "text"
+                visible: window.cfg.type === "text" && !Widgets.menuExpanded
                 text: window.cfg.source ?? ""
                 placeholder: "Write something"
                 onEdited: text => window.set({ source: text })
             }
 
-            Flickable {
-                id: shapeFlick
-                Layout.fillWidth: true
-                implicitHeight: Theme.button.size
-                contentWidth: shapeRow.implicitWidth
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                flickableDirection: Flickable.HorizontalFlick
-
-                WheelHandler {
-                    onWheel: event => {
-                        const max = Math.max(0, shapeFlick.contentWidth - shapeFlick.width);
-                        shapeFlick.contentX = Math.max(0, Math.min(max, shapeFlick.contentX - event.angleDelta.y));
-                    }
-                }
-
-                Row {
-                    id: shapeRow
-                    spacing: Theme.spacing.xs
-
-                    Repeater {
-                        model: Widgets.shapes
-
-                        Rectangle {
-                            id: chip
-
-                            required property string modelData
-                            readonly property bool active: modelData === window.cfg.shape
-
-                            width: Theme.button.size
-                            height: Theme.button.size
-                            radius: active ? height / 2 : Theme.radius.medium
-                            color: active ? Colors.secondaryContainer : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.08) : "transparent"
-
-                            Behavior on radius {
-                                NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
-                            }
-
-                            MaterialShape {
-                                anchors.centerIn: parent
-                                width: Theme.settings.iconSize
-                                height: width
-                                shape: MaterialShape[chip.modelData] ?? MaterialShape.Circle
-                                color: chip.active ? Colors.textOnSecondaryContainer : Colors.primary
-                            }
-
-                            MouseArea {
-                                id: chipMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: window.set({ shape: chip.modelData })
-                            }
-                        }
-                    }
-                }
-            }
-
             RowLayout {
+                id: sizeRow
                 Layout.fillWidth: true
                 spacing: Theme.spacing.md
 
@@ -239,6 +237,7 @@ PanelWindow {
             }
 
             RowLayout {
+                id: opacityRow
                 Layout.fillWidth: true
                 spacing: Theme.spacing.md
 
@@ -270,8 +269,17 @@ PanelWindow {
             }
 
             RowLayout {
+                id: colorRow
                 Layout.fillWidth: true
                 spacing: Theme.spacing.sm
+
+                Text {
+                    Layout.rightMargin: Theme.spacing.xs
+                    text: "palette"
+                    font.family: Theme.font.icons
+                    font.pixelSize: Theme.settings.iconSize
+                    color: Colors.textOnSurfaceVariant
+                }
 
                 Repeater {
                     model: Widgets.colorRoles
@@ -289,6 +297,10 @@ PanelWindow {
                         border.width: active ? 3 : 1
                         border.color: active ? Colors.primary : Colors.outlineVariant
 
+                        Behavior on border.width {
+                            NumberAnimation { duration: Theme.anim.fast }
+                        }
+
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
@@ -300,40 +312,102 @@ PanelWindow {
                 Item {
                     Layout.fillWidth: true
                 }
+            }
 
-                IconButton {
-                    implicitWidth: 36
-                    implicitHeight: 36
-                    icon: "center_focus_strong"
-                    onClicked: window.center()
-                }
+            Flickable {
+                id: bodyFlick
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.min(body.implicitHeight, Math.max(0, card.maxBody)) * window.expand
+                visible: window.expand > 0
+                opacity: window.expand
+                contentHeight: body.implicitHeight
+                clip: true
+                interactive: contentHeight > height
+                boundsBehavior: Flickable.StopAtBounds
 
-                IconButton {
-                    implicitWidth: 36
-                    implicitHeight: 36
-                    icon: "image"
-                    visible: window.cfg.type === "image"
-                    onClicked: window.openImagePicker()
-                }
+                ColumnLayout {
+                    id: body
+                    width: bodyFlick.width
+                    spacing: Theme.spacing.lg
 
-                IconButton {
-                    implicitWidth: 36
-                    implicitHeight: 36
-                    icon: "delete"
-                    onClicked: {
-                        const id = Widgets.menuId;
-                        Widgets.closeMenu();
-                        Widgets.remove(id);
+                    SettingGroup {
+                        title: "Shape"
+                        visible: !window.shapeLocked
+
+                        Item {
+                            Layout.fillWidth: true
+                            visible: !window.shapeLocked
+                            implicitHeight: shapeGrid.implicitHeight + Theme.spacing.md * 2
+
+                            Grid {
+                                id: shapeGrid
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                y: Theme.spacing.md
+                                columns: Theme.widgetEditor.shapeColumns
+                                spacing: Theme.spacing.xs
+
+                                Repeater {
+                                    model: Widgets.shapes
+
+                                    Rectangle {
+                                        id: chip
+
+                                        required property string modelData
+                                        readonly property bool active: modelData === window.cfg.shape
+
+                                        width: Theme.widgetEditor.shapeChip
+                                        height: width
+                                        radius: active ? height / 2 : Theme.radius.medium
+                                        color: active ? Colors.secondaryContainer : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.08) : "transparent"
+
+                                        Behavior on radius {
+                                            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+                                        }
+
+                                        MaterialShape {
+                                            anchors.centerIn: parent
+                                            width: Theme.settings.iconSize
+                                            height: width
+                                            shape: MaterialShape[chip.modelData] ?? MaterialShape.Circle
+                                            color: chip.active ? Colors.textOnSecondaryContainer : Colors.primary
+                                        }
+
+                                        MouseArea {
+                                            id: chipMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: window.set({ shape: chip.modelData })
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    WidgetOptions {
+                        id: options
+                        Layout.fillWidth: true
+                        visible: options.hasOptions
+                        arg: Widgets.menuId
+                        spacing: Theme.spacing.lg
+                        onNavigate: target => {
+                            if (target !== "images") return;
+                            Widgets.replacing = "";
+                            window.pick();
+                        }
                     }
                 }
             }
-        }
-    }
 
-    function openImagePicker() {
-        const id = Widgets.menuId;
-        Widgets.closeMenu();
-        Widgets.replacing = id;
-        GlobalStates.openSettings("desktop", "images");
+            WidgetActions {
+                id: actionRow
+                Layout.fillWidth: true
+                Layout.topMargin: Theme.spacing.xs
+                actions: window.actions
+                onTriggered: key => window.act(key)
+            }
+        }
     }
 }
