@@ -11,57 +11,117 @@ Singleton {
     readonly property int normalTimeout: Settings.notifications.normalTimeout
     readonly property int urgentTimeout: Settings.notifications.urgentTimeout
     readonly property int tick: 250
+    readonly property int leaveFallback: 1200
+    readonly property int emptyGrace: 600
 
     property bool paused: false
     property var shown: []
-    property var remaining: ({})
     property var leaving: []
-    property var closing: ({})
-    readonly property int leaveFallback: 1200
+    property var groups: ({})
+    property int revision: 0
     readonly property var current: shown.length > 0 ? shown[0] : null
 
-    function isUrgent(n) {
-        return n !== null && n.urgency === NotificationUrgency.Critical;
+    signal bumped(string key)
+
+    function keyOf(n) {
+        return n.appName + "\u0001" + n.summary;
+    }
+
+    function group(key) {
+        revision;
+        return groups[key] ?? null;
+    }
+
+    function live(key) {
+        revision;
+        const g = groups[key];
+        return g && g.members.length > 0 ? g.members[g.members.length - 1] : null;
+    }
+
+    function isUrgent(data) {
+        return !!data && data.urgency === NotificationUrgency.Critical;
+    }
+
+    function timeoutFor(g) {
+        return isUrgent(g.data) ? urgentTimeout : normalTimeout;
+    }
+
+    function snapshot(n) {
+        return {
+            appName: n.appName,
+            appIcon: n.appIcon,
+            image: n.image,
+            summary: n.summary,
+            body: n.body,
+            urgency: n.urgency,
+            desktopEntry: n.desktopEntry
+        };
     }
 
     function add(n) {
-        remaining[n.id] = isUrgent(n) ? urgentTimeout : normalTimeout;
-        if (shown.includes(n)) return;
-        shown = [n, ...shown];
-        n.closed.connect(() => remove(n));
+        const key = keyOf(n);
+        let g = groups[key];
+        if (!g) {
+            g = { members: [], count: 0, data: null, remaining: 0, emptySince: 0, closing: null };
+            groups[key] = g;
+        }
+        if (!g.members.includes(n)) {
+            g.members.push(n);
+            n.closed.connect(() => memberClosed(key, n));
+        }
+        g.count++;
+        g.data = snapshot(n);
+        g.remaining = timeoutFor(g);
+        g.emptySince = 0;
+        g.closing = null;
+
+        const wasShown = shown.includes(key);
+        leaving = leaving.filter(k => k !== key);
+        shown = [key, ...shown.filter(k => k !== key)];
+        revision++;
+        if (wasShown) bumped(key);
+    }
+
+    function memberClosed(key, n) {
+        const g = groups[key];
+        if (!g) return;
+        g.members = g.members.filter(x => x !== n);
+        if (g.members.length === 0) g.emptySince = Date.now();
+        revision++;
     }
 
     function resetTimers() {
-        for (const n of shown) {
-            if (!leaving.includes(n)) remaining[n.id] = isUrgent(n) ? urgentTimeout : normalTimeout;
+        for (const key of shown) {
+            const g = groups[key];
+            if (g && !leaving.includes(key)) g.remaining = timeoutFor(g);
         }
     }
 
     onPausedChanged: if (!paused) resetTimers()
 
-    function remove(n) {
-        delete remaining[n.id];
-        delete closing[n.id];
-        shown = shown.filter(x => x !== n);
-        leaving = leaving.filter(x => x !== n);
+    function close(key, expired = false) {
+        const g = groups[key];
+        if (!g || leaving.includes(key)) return;
+        g.closing = { expired: expired, at: Date.now() };
+        leaving = [...leaving, key];
     }
 
-    function close(n, expired = false) {
-        if (!n || leaving.includes(n)) return;
-        closing[n.id] = { expired: expired, at: Date.now() };
-        leaving = [...leaving, n];
+    function finish(key) {
+        if (!leaving.includes(key)) return;
+        const g = groups[key];
+        delete groups[key];
+        shown = shown.filter(k => k !== key);
+        leaving = leaving.filter(k => k !== key);
+        revision++;
+        if (!g) return;
+        for (const n of g.members) {
+            if (g.closing?.expired) n.expire();
+            else n.dismiss();
+        }
     }
 
-    function finish(n) {
-        if (!leaving.includes(n)) return;
-        const expired = closing[n.id]?.expired ?? false;
-        remove(n);
-        if (expired) n.expire();
-        else n.dismiss();
-    }
-
-    function focusSource(n) {
-        const names = [n.desktopEntry, n.appName].filter(x => x).map(x => x.toLowerCase().replace(/\.desktop$/, ""));
+    function focusSource(data) {
+        const names = [data.desktopEntry, data.appName].filter(x => x).map(x => x.toLowerCase().replace(/\.desktop$/, ""));
         const window = Hyprland.toplevels.values.find(t => {
             const id = (t.wayland?.appId ?? "").toLowerCase();
             return id !== "" && names.some(x => x === id || x.endsWith("." + id) || id.endsWith("." + x));
@@ -71,16 +131,18 @@ Singleton {
         Hyprland.dispatch(`hl.dsp.focus({ window = "address:${address.startsWith("0x") ? address : "0x" + address}" })`);
     }
 
-    function activate(n = current) {
-        if (!n) return;
-        focusSource(n);
-        const action = n.actions.find(a => a.identifier === "default") ?? n.actions[0];
+    function activate(key = current) {
+        const g = groups[key];
+        if (!g) return;
+        focusSource(g.data);
+        const n = live(key);
+        const action = n ? (n.actions.find(a => a.identifier === "default") ?? n.actions[0]) : null;
         if (action) action.invoke();
-        dismiss(n);
+        close(key);
     }
 
-    function dismiss(n = current) {
-        close(n);
+    function dismiss(key = current) {
+        close(key);
     }
 
     NotificationServer {
@@ -102,14 +164,24 @@ Singleton {
         running: root.shown.length > 0
         onTriggered: {
             const now = Date.now();
-            for (const n of [...root.leaving]) {
-                if (now - root.closing[n.id].at > root.leaveFallback) root.finish(n);
-            }
-            if (root.paused) return;
-            for (const n of root.shown) {
-                if (root.leaving.includes(n)) continue;
-                root.remaining[n.id] -= root.tick;
-                if (root.remaining[n.id] <= 0) root.close(n, true);
+            for (const key of [...root.shown]) {
+                const g = root.groups[key];
+                if (!g) {
+                    root.shown = root.shown.filter(k => k !== key);
+                    root.leaving = root.leaving.filter(k => k !== key);
+                    continue;
+                }
+                if (root.leaving.includes(key)) {
+                    if (now - g.closing.at > root.leaveFallback) root.finish(key);
+                    continue;
+                }
+                if (g.emptySince > 0 && now - g.emptySince > root.emptyGrace) {
+                    root.close(key);
+                    continue;
+                }
+                if (root.paused) continue;
+                g.remaining -= root.tick;
+                if (g.remaining <= 0) root.close(key, true);
             }
         }
     }

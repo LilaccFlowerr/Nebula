@@ -89,7 +89,7 @@ Item {
         NotificationCard {
             id: card
 
-            required property var modelData
+            required property string modelData
             required property int index
 
             readonly property bool leaving: Notifications.leaving.includes(modelData)
@@ -98,7 +98,7 @@ Item {
             property real slide: away
             property real presence: behind ? 0 : 1
 
-            n: modelData
+            key: modelData
             z: -index
             width: root.width
             visible: index < Theme.toast.maxShown
@@ -111,7 +111,14 @@ Item {
 
             onImplicitHeightChanged: root.setHeight(index, implicitHeight)
             onIndexChanged: root.setHeight(index, implicitHeight)
-            onLeavingChanged: if (leaving) leaveAnim.restart()
+            onLeavingChanged: {
+                if (leaving) {
+                    leaveAnim.restart();
+                } else {
+                    leaveAnim.stop();
+                    slide = 0;
+                }
+            }
             Component.onCompleted: {
                 root.setHeight(index, implicitHeight);
                 slide = 0;
