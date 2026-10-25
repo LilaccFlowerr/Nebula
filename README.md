@@ -54,6 +54,33 @@ notifications, and an About page.
 Nebula is made on Arch (EndeavourOS). Other distros can work, but you're on your own for
 the package names.
 
+### Guided install
+
+```bash
+sudo pacman -Syu --needed git
+git clone https://github.com/LilaccFlowerr/Nebula.git ~/setup/dotfiles
+cd ~/setup/dotfiles
+./install.sh
+```
+
+The installer walks you through packages, building m3shapes, linking configs and generating
+colors. Run it as your normal user; it asks for sudo when needed. Before installing,
+it lists any configs it will replace and asks whether to back them up and continue.
+Press Enter or choose No to cancel without changes. Existing `hypr`,
+`quickshell`, `matugen` and `ghostty` configs are moved to a unique
+`~/.config/nebula-backup-*` folder before linking. Keep the checkout where it is.
+
+Use `./install.sh --dry-run` to preview the steps. You can run the installer again after
+a failure; correct links and existing colors are kept. It does a full system package
+upgrade and rebuilds m3shapes each time. It doesn't configure your login manager,
+networking or audio services; start with a working Arch desktop.
+
+When it's done, log out and choose Hyprland on the login screen.
+
+### Manual install
+
+If you'd rather do each step yourself, follow the instructions below.
+
 ### Dependencies
 
 Everything is in the official repos except m3shapes, which you build yourself.
