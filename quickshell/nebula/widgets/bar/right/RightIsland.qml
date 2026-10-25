@@ -10,6 +10,8 @@ import qs.widgets.popups.quicksettings
 import qs.widgets.popups.calendar
 import qs.widgets.popups.tray
 import qs.widgets.popups.system
+import qs.widgets.popups.osd
+import qs.widgets.popups.notifications
 import qs.services
 import qs.theme
 
@@ -31,18 +33,13 @@ Island {
     onTrayOpenChanged: if (!trayOpen) trayMenuItem = null
     readonly property bool fullSettings: GlobalStates.settingsOpen && GlobalStates.isOn(screenName)
     readonly property real presence: quickSettings.presence
-    property bool armed: false
-
-    Timer {
-        interval: 1000
-        running: true
-        onTriggered: root.armed = true
-    }
     property alias powerArea: powerArea
     property alias settingsArea: settingsArea
     property alias calendarArea: calendarArea
     property alias trayArea: trayArea
     property alias systemArea: systemArea
+    property alias alertArea: alertArea
+    readonly property bool anyPopup: powerOpen || settingsOpen || calendarOpen || trayOpen || systemOpen || fullSettings
 
     HoverHandler { id: islandHover }
 
@@ -150,9 +147,55 @@ Island {
 
     implicitWidth: row.implicitWidth + Theme.bar.padding * 2
 
-    Connections {
-        target: Battery
-        function onPluggedInChanged() { if (root.armed) ring.ripple(Battery.pluggedIn ? 1500 : 0); }
+    Column {
+        id: alertArea
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
+        anchors.right: parent.right
+        anchors.rightMargin: Theme.bar.padding
+        spacing: Theme.spacing.sm
+
+        Item {
+            anchors.right: parent.right
+            visible: osd.opacity > 0
+            width: osd.implicitWidth
+            height: osd.open ? osd.implicitHeight : 0
+
+            OsdPill {
+                id: osd
+                anchors.top: parent.top
+                anchors.right: parent.right
+                open: Events.current !== "" && !root.anyPopup
+            }
+        }
+
+        Item {
+            anchors.right: parent.right
+            visible: stack.opacity > 0
+            width: stack.implicitWidth
+            height: stack.open ? stack.implicitHeight : 0
+
+            NotificationStack {
+                id: stack
+                anchors.top: parent.top
+                anchors.right: parent.right
+                open: !root.anyPopup
+            }
+        }
+    }
+
+    Binding {
+        target: Events
+        property: "held"
+        value: true
+        when: osd.hovered
+    }
+
+    Binding {
+        target: Notifications
+        property: "paused"
+        value: true
+        when: stack.hovered || (Notifications.current !== null && root.anyPopup)
     }
 
     RowLayout {

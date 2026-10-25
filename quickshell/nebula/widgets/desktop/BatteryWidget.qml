@@ -69,6 +69,22 @@ Item {
     readonly property real sweep: Math.min(360, 360 * shownLevel)
     readonly property real trackSweep: Math.max(0, 360 - sweep - gap * 2)
 
+    readonly property real numberSize: ringRadius * (Battery.percent >= 100 ? 0.62 : 0.8)
+    readonly property real percentSize: ringRadius * 0.27
+    readonly property real percentGap: ringRadius * 0.03
+    readonly property real lineGap: ringRadius * 0.03
+    readonly property real pillPadding: ringRadius * 0.1
+    readonly property real pillPaddingY: ringRadius * 0.05
+    readonly property real iconSize: ringRadius * 0.22
+    readonly property real iconGap: ringRadius * 0.05
+
+    readonly property real innerRadius: ringRadius - ringWidth / 2 - size * 0.03
+    readonly property real pillWidth: statusMetrics.advanceWidth + pillPadding * 2 + (Battery.charging ? iconSize + iconGap : 0)
+    readonly property real blockHeight: (Battery.available ? numberMetrics.height + lineGap : 0) + statusMetrics.height + pillPaddingY * 2
+    readonly property real numberReach: numberMetrics.advanceWidth / 2 + percentGap + percentMetrics.advanceWidth
+    readonly property real reach: Math.max(Math.hypot(pillWidth / 2, blockHeight / 2), Battery.available ? Math.hypot(numberReach, blockHeight / 2) : 0)
+    readonly property real fit: reach > 0 ? Math.min(1, innerRadius / reach) : 1
+
     function duration(seconds) {
         const minutes = Math.round(seconds / 60);
         if (minutes < 1) return "";
@@ -149,27 +165,31 @@ Item {
 
     Column {
         anchors.centerIn: parent
-        spacing: root.ringRadius * 0.03
+        spacing: root.lineGap * root.fit
 
-        Row {
+        Item {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: Battery.available
-            spacing: root.ringRadius * 0.03
+            implicitWidth: number.implicitWidth
+            implicitHeight: number.implicitHeight
 
             Text {
+                id: number
                 text: Battery.percent
                 font.family: Theme.font.family
-                font.pixelSize: root.ringRadius * (Battery.percent >= 100 ? 0.62 : 0.8)
+                font.pixelSize: root.numberSize * root.fit
                 font.weight: Font.DemiBold
                 color: root.colors.text
             }
 
             Text {
+                anchors.left: number.right
+                anchors.leftMargin: root.percentGap * root.fit
                 anchors.top: parent.top
-                anchors.topMargin: root.ringRadius * 0.12
+                anchors.topMargin: root.ringRadius * 0.12 * root.fit
                 text: "%"
                 font.family: Theme.font.family
-                font.pixelSize: root.ringRadius * 0.27
+                font.pixelSize: root.percentSize * root.fit
                 font.weight: Font.Medium
                 color: root.colors.text
                 opacity: 0.8
@@ -178,35 +198,58 @@ Item {
 
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
-            implicitWidth: statusRow.implicitWidth + root.ringRadius * 0.24
-            implicitHeight: statusRow.implicitHeight + root.ringRadius * 0.1
+            implicitWidth: statusRow.implicitWidth + root.pillPadding * 2 * root.fit
+            implicitHeight: statusRow.implicitHeight + root.pillPaddingY * 2 * root.fit
             radius: height / 2
             color: Qt.alpha(root.colors.text, 0.16)
 
             Row {
                 id: statusRow
                 anchors.centerIn: parent
-                spacing: root.ringRadius * 0.05
+                spacing: root.iconGap * root.fit
 
                 Text {
                     visible: Battery.charging
                     text: "bolt"
                     font.family: Theme.font.icons
-                    font.pixelSize: root.ringRadius * 0.26
+                    font.pixelSize: root.iconSize * root.fit
                     color: root.accent
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Text {
-                    width: Math.min(implicitWidth, root.ringRadius * 0.95)
+                    anchors.verticalCenter: parent.verticalCenter
                     text: root.status
-                    elide: Text.ElideRight
                     font.family: Theme.font.family
-                    font.pixelSize: root.ringRadius * (Battery.available ? 0.19 : 0.3)
+                    font.pixelSize: statusMetrics.font.pixelSize * root.fit
                     font.weight: Font.Medium
                     color: root.colors.text
                 }
             }
         }
+    }
+
+    TextMetrics {
+        id: numberMetrics
+        text: Battery.percent
+        font.family: Theme.font.family
+        font.pixelSize: root.numberSize
+        font.weight: Font.DemiBold
+    }
+
+    TextMetrics {
+        id: percentMetrics
+        text: "%"
+        font.family: Theme.font.family
+        font.pixelSize: root.percentSize
+        font.weight: Font.Medium
+    }
+
+    TextMetrics {
+        id: statusMetrics
+        text: root.status
+        font.family: Theme.font.family
+        font.pixelSize: root.ringRadius * (Battery.available ? 0.19 : 0.3)
+        font.weight: Font.Medium
     }
 }

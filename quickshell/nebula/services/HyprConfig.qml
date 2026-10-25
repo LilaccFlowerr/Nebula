@@ -50,11 +50,12 @@ Singleton {
         const m = saved[name];
         if (!m) return null;
         if (m.disabled) return `hl.monitor({ output = ${lua(name)}, disabled = true })`;
-        return `hl.monitor({ output = ${lua(name)}, mode = ${lua(m.mode ?? "preferred")}, position = "auto", scale = ${m.scale ?? 1} })`;
+        return `hl.monitor({ output = ${lua(name)}, disabled = false, mode = ${lua(m.mode ?? "preferred")}, position = "auto", scale = ${m.scale ?? 1} })`;
     }
 
     function applyDisplays() {
         for (const name of Object.keys(saved)) {
+            if (name.startsWith("eDP")) continue;
             const rule = monitorRule(name);
             if (rule) run(rule);
         }

@@ -10,40 +10,54 @@ Singleton {
 
     readonly property int normalTimeout: Settings.notifications.normalTimeout
     readonly property int urgentTimeout: Settings.notifications.urgentTimeout
+    readonly property int tick: 250
 
     property bool paused: false
-    property real remaining: 0
-    property real startedAt: 0
+    property var shown: []
+    property var remaining: ({})
+    property var leaving: []
+    property var closing: ({})
+    readonly property int leaveFallback: 1200
+    readonly property var current: shown.length > 0 ? shown[0] : null
 
-    property var queue: []
-    property Notification current: null
-    readonly property bool urgent: current !== null && current.urgency === NotificationUrgency.Critical
+    function isUrgent(n) {
+        return n !== null && n.urgency === NotificationUrgency.Critical;
+    }
 
-    function next() {
-        const q = queue.filter(n => n && n.tracked);
-        current = q.length > 0 ? q[0] : null;
-        queue = q.slice(1);
-        timer.stop();
-        if (current) {
-            remaining = urgent ? urgentTimeout : normalTimeout;
-            if (!paused) startTimer();
+    function add(n) {
+        remaining[n.id] = isUrgent(n) ? urgentTimeout : normalTimeout;
+        if (shown.includes(n)) return;
+        shown = [n, ...shown];
+        n.closed.connect(() => remove(n));
+    }
+
+    function resetTimers() {
+        for (const n of shown) {
+            if (!leaving.includes(n)) remaining[n.id] = isUrgent(n) ? urgentTimeout : normalTimeout;
         }
     }
 
-    function startTimer() {
-        startedAt = Date.now();
-        timer.interval = Math.max(remaining, 1500);
-        timer.restart();
+    onPausedChanged: if (!paused) resetTimers()
+
+    function remove(n) {
+        delete remaining[n.id];
+        delete closing[n.id];
+        shown = shown.filter(x => x !== n);
+        leaving = leaving.filter(x => x !== n);
     }
 
-    onPausedChanged: {
-        if (!current) return;
-        if (paused) {
-            timer.stop();
-            remaining -= Date.now() - startedAt;
-        } else {
-            startTimer();
-        }
+    function close(n, expired = false) {
+        if (!n || leaving.includes(n)) return;
+        closing[n.id] = { expired: expired, at: Date.now() };
+        leaving = [...leaving, n];
+    }
+
+    function finish(n) {
+        if (!leaving.includes(n)) return;
+        const expired = closing[n.id]?.expired ?? false;
+        remove(n);
+        if (expired) n.expire();
+        else n.dismiss();
     }
 
     function focusSource(n) {
@@ -57,20 +71,16 @@ Singleton {
         Hyprland.dispatch(`hl.dsp.focus({ window = "address:${address.startsWith("0x") ? address : "0x" + address}" })`);
     }
 
-    function activate() {
-        if (!current) return;
-        const n = current;
+    function activate(n = current) {
+        if (!n) return;
         focusSource(n);
         const action = n.actions.find(a => a.identifier === "default") ?? n.actions[0];
         if (action) action.invoke();
-        if (current === n) dismiss();
+        dismiss(n);
     }
 
-    function dismiss() {
-        if (!current) return;
-        const n = current;
-        next();
-        n.dismiss();
+    function dismiss(n = current) {
+        close(n);
     }
 
     NotificationServer {
@@ -82,22 +92,25 @@ Singleton {
         onNotification: n => {
             n.tracked = true;
             if (Dnd.enabled && n.urgency !== NotificationUrgency.Critical) return;
-            root.queue = [...root.queue, n];
-            if (!root.current) root.next();
+            root.add(n);
         }
     }
 
-    Connections {
-        target: root.current
-        function onClosed() { root.next(); }
-    }
-
     Timer {
-        id: timer
+        interval: root.tick
+        repeat: true
+        running: root.shown.length > 0
         onTriggered: {
-            const n = root.current;
-            root.next();
-            if (n) n.expire();
+            const now = Date.now();
+            for (const n of [...root.leaving]) {
+                if (now - root.closing[n.id].at > root.leaveFallback) root.finish(n);
+            }
+            if (root.paused) return;
+            for (const n of root.shown) {
+                if (root.leaving.includes(n)) continue;
+                root.remaining[n.id] -= root.tick;
+                if (root.remaining[n.id] <= 0) root.close(n, true);
+            }
         }
     }
 }

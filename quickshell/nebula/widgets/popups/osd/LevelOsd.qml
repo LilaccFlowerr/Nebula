@@ -9,16 +9,8 @@ RowLayout {
 
     property string kind: "volume"
     readonly property bool brightness: kind === "brightness"
-    readonly property alias artSlot: artSlot
 
     spacing: Theme.spacing.sm
-
-    Item {
-        id: artSlot
-        visible: Media.active
-        implicitWidth: Theme.bar.eventArtSize
-        implicitHeight: Theme.bar.eventArtSize
-    }
 
     Text {
         text: !root.brightness ? Audio.icon

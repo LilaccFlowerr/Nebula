@@ -25,17 +25,30 @@ Singleton {
         Behavior on centerT { NumberAnimation { duration: Math.round(380 * motion); easing.type: Easing.Linear } }
         Behavior on rightT { NumberAnimation { duration: Math.round(380 * motion); easing.type: Easing.Linear } }
         readonly property int centerMinWidth: 336
-        readonly property int eventArtSize: 22
         readonly property int skipSlide: 24
         readonly property int skipNudge: 6
         readonly property int notificationWidth: 400
         readonly property int notificationIconSize: 36
-        readonly property int notificationBadgeSize: 18
         readonly property int notificationMaxLines: 6
         readonly property real opacity: Settings.bar.opacity / 100
         readonly property real pillOpacity: Settings.bar.pillOpacity / 100
     }
     readonly property Bar bar: Bar {}
+
+    component Toast: QtObject {
+        readonly property int width: 420
+        readonly property int iconSize: 52
+        readonly property int radius: 28
+        readonly property int gap: 8
+        readonly property int peek: 12
+        readonly property real peekFade: 0.2
+        readonly property int peekInset: 12
+        readonly property int maxPeek: 2
+        readonly property int maxShown: 3
+        readonly property real swipeThreshold: 0.3
+        readonly property int bodyLines: 2
+    }
+    readonly property Toast toast: Toast {}
 
     component Glass: QtObject {
         readonly property real tint: 0.72
@@ -149,6 +162,35 @@ Singleton {
         readonly property int slideDistance: 48
     }
     readonly property RecorderCorner recorder: RecorderCorner {}
+
+    component WidgetCorner: QtObject {
+        readonly property int windowWidth: 560
+        readonly property int windowHeight: 820
+        readonly property int openWidth: 440
+        readonly property int listHeight: 440
+        readonly property int rowHeight: 64
+        readonly property int previewSize: 44
+        readonly property int tileHeight: 176
+        readonly property int tileShape: 88
+    }
+    readonly property WidgetCorner widgetCorner: WidgetCorner {}
+
+    component WidgetEditor: QtObject {
+        readonly property int compactWidth: 352
+        readonly property int fullWidth: 480
+        readonly property int shapeChip: 44
+        readonly property int shapeColumns: 7
+    }
+    readonly property WidgetEditor widgetEditor: WidgetEditor {}
+
+    component ImagePicker: QtObject {
+        readonly property int width: 820
+        readonly property int height: 680
+        readonly property int columns: 4
+        readonly property real backdropDim: 0.35
+        readonly property real openScale: 0.92
+    }
+    readonly property ImagePicker imagePicker: ImagePicker {}
 
     component NowPlaying: QtObject {
         readonly property int margin: 32

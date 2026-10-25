@@ -16,8 +16,8 @@ PanelWindow {
         bottom: true
         left: true
     }
-    implicitWidth: Theme.recorder.windowSize
-    implicitHeight: Theme.recorder.windowSize
+    implicitWidth: Theme.widgetCorner.windowWidth
+    implicitHeight: Theme.widgetCorner.windowHeight
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
 
@@ -28,13 +28,27 @@ PanelWindow {
 
     property bool open: false
     property bool adding: false
+    property string filter: "all"
     onOpenChanged: if (!open) adding = false
     readonly property color fill: Qt.alpha(Colors.surface, Theme.bar.opacity)
-    readonly property int rowHeight: 44
+
+    readonly property var screens: Quickshell.screens.map(s => s.name)
+    readonly property bool anyHidden: Widgets.list.some(w => w.enabled !== true)
+    readonly property var filters: [{ key: "all", text: "All" }]
+        .concat(screens.length > 1 ? screens.map(s => ({ key: "screen:" + s, text: s })) : [])
+        .concat(anyHidden ? [{ key: "hidden", text: "Hidden" }] : [])
+    readonly property var shownIds: Widgets.list.filter(matches).map(w => w.id)
+
+    function matches(w) {
+        if (filter === "hidden") return w.enabled !== true;
+        if (filter.startsWith("screen:")) return !w.screen || w.screen === filter.slice(7);
+        return true;
+    }
 
     function addType(entry) {
         if (entry.picker) {
-            openSettings("images");
+            window.open = false;
+            Widgets.openPicker("", window.screen.name);
             return;
         }
         const props = { screen: window.screen.name };
@@ -43,10 +57,17 @@ PanelWindow {
         adding = false;
     }
 
+    function edit(id) {
+        window.open = false;
+        Widgets.edit(id);
+    }
+
     function openSettings(tab) {
         window.open = false;
         GlobalStates.openSettings("desktop", tab);
     }
+
+    onFiltersChanged: if (!filters.some(f => f.key === filter)) filter = "all"
 
     Timer {
         id: closeTimer
@@ -66,7 +87,7 @@ PanelWindow {
         }
     }
 
-    readonly property real targetWidth: open ? Theme.recorder.openWidth : Theme.recorder.hotWidth - Theme.recorder.flare * 2
+    readonly property real targetWidth: open ? Theme.widgetCorner.openWidth : Theme.recorder.hotWidth - Theme.recorder.flare * 2
     readonly property real targetHeight: open ? content.implicitHeight + Theme.spacing.lg * 2 : 0
 
     Item {
@@ -76,6 +97,84 @@ PanelWindow {
         anchors.bottom: parent.bottom
         width: Math.max(Theme.recorder.hotWidth, window.targetWidth + Theme.recorder.flare * 2)
         height: Math.max(Theme.recorder.hotHeight, window.targetHeight)
+    }
+
+    component Chip: Rectangle {
+        id: chip
+
+        property string text
+        property bool active
+
+        signal clicked()
+
+        implicitWidth: chipText.implicitWidth + Theme.spacing.lg * 2
+        implicitHeight: 32
+        radius: active ? height / 2 : Theme.radius.small
+        color: active ? Colors.secondaryContainer : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.06) : "transparent"
+        border.width: active ? 0 : 1
+        border.color: Colors.outlineVariant
+
+        Behavior on radius {
+            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+        }
+
+        Text {
+            id: chipText
+            anchors.centerIn: parent
+            text: chip.text
+            color: chip.active ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
+            font.family: Theme.font.family
+            font.pixelSize: Theme.font.small
+            font.weight: chip.active ? Font.DemiBold : Font.Normal
+        }
+
+        MouseArea {
+            id: chipMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: chip.clicked()
+        }
+    }
+
+    component Preview: Item {
+        id: preview
+
+        property var cfg: ({})
+        property string icon: "widgets"
+        property bool dim: false
+        readonly property var colors: Widgets.palette(cfg.color)
+
+        opacity: dim ? 0.4 : 1
+
+        ShapedArt {
+            anchors.fill: parent
+            visible: preview.cfg.type === "image"
+            shape: MaterialShape[preview.cfg.shape ?? "Clover4Leaf"] ?? MaterialShape.Clover4Leaf
+            color: preview.colors.fill
+            source: visible && preview.cfg.source ? Wallpaper.url(preview.cfg.source) : ""
+            sourceSize: Qt.size(width * 2, height * 2)
+            zoom: preview.cfg.zoom ?? 1
+            panX: preview.cfg.panX ?? 0
+            panY: preview.cfg.panY ?? 0
+            animationDuration: Theme.anim.medium
+        }
+
+        MaterialShape {
+            anchors.fill: parent
+            visible: preview.cfg.type !== "image"
+            shape: MaterialShape[preview.cfg.shape ?? "Circle"] ?? MaterialShape.Circle
+            color: preview.colors.fill
+            animationDuration: Theme.anim.medium
+
+            Text {
+                anchors.centerIn: parent
+                text: preview.icon
+                font.family: Theme.font.icons
+                font.pixelSize: preview.width * 0.42
+                color: preview.colors.text
+            }
+        }
     }
 
     Rectangle {
@@ -108,37 +207,76 @@ PanelWindow {
 
             RowLayout {
                 Layout.fillWidth: true
+                spacing: Theme.spacing.sm
 
                 IconButton {
-                    implicitWidth: 32
-                    implicitHeight: 32
+                    implicitWidth: 36
+                    implicitHeight: 36
                     visible: window.adding
                     icon: "arrow_back"
                     onClicked: window.adding = false
                 }
 
-                Text {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    text: window.adding ? "Add widget" : "Widgets"
-                    color: Colors.textOnSurface
-                    font.family: Theme.font.family
-                    font.pixelSize: Theme.font.large
-                    font.weight: Font.DemiBold
+                    spacing: 0
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: window.adding ? "Add widget" : "Widgets"
+                        color: Colors.textOnSurface
+                        font.family: Theme.font.family
+                        font.pixelSize: 22
+                        font.weight: Font.DemiBold
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        visible: !window.adding
+                        text: Widgets.list.length === 1 ? "1 on your desktop" : Widgets.list.length + " on your desktop"
+                        color: Colors.textOnSurfaceVariant
+                        font.family: Theme.font.family
+                        font.pixelSize: Theme.font.small
+                    }
+                }
+
+                ActionButton {
+                    visible: !window.adding
+                    icon: "add"
+                    text: "Add"
+                    filled: true
+                    onClicked: window.adding = true
                 }
 
                 IconButton {
-                    implicitWidth: 32
-                    implicitHeight: 32
+                    implicitWidth: 36
+                    implicitHeight: 36
                     visible: !window.adding
                     icon: "settings"
                     onClicked: window.openSettings("")
                 }
             }
 
+            Row {
+                visible: !window.adding && window.filters.length > 1
+                spacing: Theme.spacing.sm
+
+                Repeater {
+                    model: window.filters
+
+                    Chip {
+                        required property var modelData
+                        text: modelData.text
+                        active: window.filter === modelData.key
+                        onClicked: window.filter = modelData.key
+                    }
+                }
+            }
+
             Flickable {
                 Layout.fillWidth: true
                 visible: !window.adding
-                implicitHeight: Math.min(contentHeight, window.rowHeight * 5)
+                implicitHeight: Math.min(contentHeight, Theme.widgetCorner.listHeight)
                 contentHeight: list.implicitHeight
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
@@ -146,28 +284,33 @@ PanelWindow {
                 Column {
                     id: list
                     width: parent.width
+                    spacing: Theme.settings.rowGap
 
                     Repeater {
                         model: Widgets.idModel
 
-                        Item {
+                        Rectangle {
                             id: entry
 
                             required property string modelData
                             readonly property var cfg: Widgets.get(modelData) ?? ({})
+                            readonly property var kind: Widgets.types[cfg.type] ?? ({ icon: "widgets", size: 200 })
                             readonly property bool on: cfg.enabled === true
+                            readonly property int position: window.shownIds.indexOf(modelData)
+                            readonly property real outer: Theme.radius.large
+                            readonly property real inner: Theme.settings.rowRadius
 
                             width: list.width
-                            height: window.rowHeight
+                            height: Theme.widgetCorner.rowHeight
+                            visible: position >= 0
+                            topLeftRadius: position === 0 ? outer : inner
+                            topRightRadius: topLeftRadius
+                            bottomLeftRadius: position === window.shownIds.length - 1 ? outer : inner
+                            bottomRightRadius: bottomLeftRadius
+                            color: rowMouse.containsMouse ? Qt.tint(Colors.surfaceContainerHigh, Qt.alpha(Colors.textOnSurface, 0.05)) : Colors.surfaceContainerHigh
 
-                            HoverHandler {
-                                id: rowHover
-                            }
-
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: Theme.radius.medium
-                                color: rowHover.hovered ? Qt.alpha(Colors.textOnSurface, 0.06) : "transparent"
+                            Behavior on color {
+                                ColorAnimation { duration: Theme.anim.fast }
                             }
 
                             MouseArea {
@@ -175,44 +318,52 @@ PanelWindow {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: window.openSettings("widget:" + entry.modelData)
+                                onClicked: window.edit(entry.modelData)
                             }
 
                             RowLayout {
                                 anchors.fill: parent
-                                anchors.leftMargin: Theme.spacing.sm
-                                anchors.rightMargin: Theme.spacing.sm
+                                anchors.leftMargin: Theme.spacing.md
+                                anchors.rightMargin: Theme.spacing.lg
                                 spacing: Theme.spacing.md
 
-                                MaterialShape {
-                                    Layout.preferredWidth: 28
-                                    Layout.preferredHeight: 28
-                                    shape: MaterialShape[entry.cfg.shape ?? "Circle"] ?? MaterialShape.Circle
-                                    color: Widgets.palette(entry.cfg.color).fill
-                                    opacity: entry.on ? 1 : 0.4
-                                    animationDuration: Theme.anim.medium
+                                Preview {
+                                    Layout.preferredWidth: Theme.widgetCorner.previewSize
+                                    Layout.preferredHeight: Theme.widgetCorner.previewSize
+                                    cfg: entry.cfg
+                                    icon: entry.kind.icon
+                                    dim: !entry.on
                                 }
 
-                                Text {
+                                ColumnLayout {
                                     Layout.fillWidth: true
-                                    text: Widgets.label(entry.cfg)
-                                    elide: Text.ElideRight
-                                    color: entry.on ? Colors.textOnSurface : Colors.textOnSurfaceVariant
-                                    font.family: Theme.font.family
-                                    font.pixelSize: Theme.font.normal
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: Widgets.label(entry.cfg)
+                                        elide: Text.ElideRight
+                                        color: entry.on ? Colors.textOnSurface : Colors.textOnSurfaceVariant
+                                        font.family: Theme.font.family
+                                        font.pixelSize: Theme.font.normal
+                                        font.weight: Font.Medium
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: (entry.cfg.screen || "All screens") + " · " + Math.round(entry.cfg.size ?? entry.kind.size) + " px"
+                                        elide: Text.ElideRight
+                                        color: Colors.textOnSurfaceVariant
+                                        font.family: Theme.font.family
+                                        font.pixelSize: Theme.font.small
+                                    }
                                 }
 
                                 IconButton {
-                                    implicitWidth: 32
-                                    implicitHeight: 32
-                                    icon: "delete"
-                                    opacity: rowHover.hovered ? 1 : 0
-                                    enabled: rowHover.hovered
-                                    onClicked: Widgets.remove(entry.modelData)
-
-                                    Behavior on opacity {
-                                        NumberAnimation { duration: Theme.anim.fast }
-                                    }
+                                    implicitWidth: 36
+                                    implicitHeight: 36
+                                    icon: "tune"
+                                    onClicked: window.edit(entry.modelData)
                                 }
 
                                 Switch {
@@ -225,25 +376,40 @@ PanelWindow {
                 }
             }
 
-            Column {
+            Text {
+                Layout.fillWidth: true
+                visible: !window.adding
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                text: Widgets.list.length === 0 ? "No widgets yet. Add one to get started" : window.shownIds.length === 0 ? "Nothing here" : "Right click a widget on the desktop to edit it"
+                color: Colors.textOnSurfaceVariant
+                font.family: Theme.font.family
+                font.pixelSize: Theme.font.small
+            }
+
+            GridLayout {
                 Layout.fillWidth: true
                 visible: window.adding
+                columns: 2
+                rowSpacing: Theme.spacing.sm
+                columnSpacing: Theme.spacing.sm
 
                 Repeater {
                     model: window.adding ? Widgets.available() : []
 
-                    Item {
+                    Rectangle {
                         id: option
 
                         required property var modelData
 
-                        width: parent.width
-                        height: window.rowHeight + Theme.spacing.md
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        implicitHeight: Theme.widgetCorner.tileHeight
+                        radius: Theme.radius.large
+                        color: optionMouse.containsMouse ? Colors.secondaryContainer : Colors.surfaceContainerHigh
 
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: Theme.radius.medium
-                            color: optionMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.06) : "transparent"
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.anim.fast }
                         }
 
                         MouseArea {
@@ -254,62 +420,50 @@ PanelWindow {
                             onClicked: window.addType(option.modelData)
                         }
 
-                        RowLayout {
+                        ColumnLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: Theme.spacing.sm
-                            anchors.rightMargin: Theme.spacing.sm
-                            spacing: Theme.spacing.md
+                            anchors.margins: Theme.spacing.md
+                            spacing: 2
 
-                            MaterialShape {
-                                Layout.preferredWidth: 40
-                                Layout.preferredHeight: 40
-                                shape: MaterialShape[option.modelData.shape] ?? MaterialShape.Circle
-                                color: Widgets.palette(option.modelData.color).fill
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
 
-                                Text {
+                                Preview {
                                     anchors.centerIn: parent
-                                    text: option.modelData.icon
-                                    font.family: Theme.font.icons
-                                    font.pixelSize: 20
-                                    color: Widgets.palette(option.modelData.color).text
+                                    width: Theme.widgetCorner.tileShape
+                                    height: width
+                                    cfg: ({ type: option.modelData.key === "image" ? "" : option.modelData.key, shape: option.modelData.shape, color: option.modelData.color })
+                                    icon: option.modelData.icon
+                                    scale: optionMouse.containsMouse ? 1.08 : 1
+
+                                    Behavior on scale {
+                                        NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+                                    }
                                 }
                             }
 
-                            ColumnLayout {
+                            Text {
                                 Layout.fillWidth: true
-                                spacing: 0
+                                text: option.modelData.title
+                                elide: Text.ElideRight
+                                color: optionMouse.containsMouse ? Colors.textOnSecondaryContainer : Colors.textOnSurface
+                                font.family: Theme.font.family
+                                font.pixelSize: Theme.font.normal
+                                font.weight: Font.DemiBold
+                            }
 
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: option.modelData.title
-                                    elide: Text.ElideRight
-                                    color: Colors.textOnSurface
-                                    font.family: Theme.font.family
-                                    font.pixelSize: Theme.font.normal
-                                    font.weight: Font.DemiBold
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: option.modelData.description
-                                    elide: Text.ElideRight
-                                    color: Colors.textOnSurfaceVariant
-                                    font.family: Theme.font.family
-                                    font.pixelSize: Theme.font.small
-                                }
+                            Text {
+                                Layout.fillWidth: true
+                                text: option.modelData.description
+                                elide: Text.ElideRight
+                                color: optionMouse.containsMouse ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
+                                font.family: Theme.font.family
+                                font.pixelSize: Theme.font.small
                             }
                         }
                     }
                 }
-            }
-
-            ActionButton {
-                Layout.alignment: Qt.AlignHCenter
-                visible: !window.adding
-                icon: "add"
-                text: "Add widget"
-                filled: true
-                onClicked: window.adding = true
             }
         }
     }
