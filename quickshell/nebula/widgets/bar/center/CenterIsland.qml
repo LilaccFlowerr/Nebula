@@ -17,10 +17,8 @@ Island {
     readonly property real pillMargin: (Theme.bar.height - Theme.button.size) / 2
     readonly property real minPillWidth: Theme.bar.centerMinWidth - pillMargin * 2
 
-    readonly property bool isExpanded: media.expanded
-    readonly property bool showMedia: Media.active
-    readonly property bool showWindow: ActiveWindow.hasWindow && !showMedia
-    readonly property bool empty: !showWindow && !showMedia
+    readonly property bool showWindow: ActiveWindow.hasWindow
+    readonly property bool empty: !showWindow
 
     Rectangle {
         id: pill
@@ -28,20 +26,13 @@ Island {
         anchors.top: parent.top
         anchors.topMargin: root.pillMargin
 
-        implicitWidth: root.isExpanded ? media.implicitWidth
-                     : Math.max(root.minPillWidth, root.showMedia ? media.implicitWidth
-                        : root.empty ? emptyContent.implicitWidth + Theme.spacing.lg * 2
-                        : windowContent.implicitWidth + Theme.spacing.lg * 2)
-        implicitHeight: root.isExpanded ? media.implicitHeight : Theme.button.size
-        radius: root.isExpanded ? Theme.radius.large : Theme.radius.full
+        implicitWidth: Math.max(root.minPillWidth, (root.empty ? emptyContent.implicitWidth : windowContent.implicitWidth) + Theme.spacing.lg * 2)
+        implicitHeight: Theme.button.size
+        radius: Theme.radius.full
         color: Qt.alpha(Colors.surfaceContainer, Theme.bar.pillOpacity)
         clip: true
 
-        Behavior on implicitHeight {
-            NumberAnimation { duration: Theme.anim.island; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
-        }
         Behavior on implicitWidth {
-            enabled: !media.resizing
             NumberAnimation { duration: Theme.anim.island; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
         }
 
@@ -56,12 +47,6 @@ Island {
             anchors.centerIn: parent
             visible: root.showWindow
             maxTitleWidth: 360
-        }
-
-        MediaView {
-            id: media
-            anchors.fill: parent
-            visible: root.showMedia
         }
     }
 }

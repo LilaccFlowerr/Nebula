@@ -67,18 +67,6 @@ ColumnLayout {
                 onEdited: value => Settings.bar.osdDuration = value
             }
         }
-
-        SettingRow {
-            icon: "deployed_code"
-            title: "Logo when idle"
-            clickable: true
-            onClicked: Settings.bar.osLogo = !Settings.bar.osLogo
-
-            Switch {
-                checked: Settings.bar.osLogo
-                onToggled: Settings.bar.osLogo = !Settings.bar.osLogo
-            }
-        }
     }
 
     SettingGroup {

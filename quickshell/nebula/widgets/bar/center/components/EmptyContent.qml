@@ -7,14 +7,6 @@ RowLayout {
     spacing: Theme.spacing.sm
 
     Text {
-        visible: Settings.bar.osLogo
-        text: SystemInfo.osLogo
-        font.family: Theme.font.logos
-        font.pixelSize: Theme.button.iconSize
-        color: Colors.textOnSurface
-    }
-
-    Text {
         text: Time.date
         color: Colors.textOnSurface
         font.family: Theme.font.family

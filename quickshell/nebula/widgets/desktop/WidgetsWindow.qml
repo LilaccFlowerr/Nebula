@@ -172,14 +172,15 @@ Variants {
 
                 required property string modelData
                 readonly property var cfg: Widgets.get(modelData) ?? ({})
+                readonly property var pos: Widgets.position(cfg, window.modelData)
 
                 readonly property real maxX: Math.max(0, window.width - width)
                 readonly property real maxY: Math.max(0, window.height - height)
                 readonly property bool ghost: !!cfg.screen && Widgets.dragId === modelData && Widgets.dragSource !== window.modelData.name
                 readonly property real restX: ghost ? Widgets.dragX - window.modelData.x
-                    : (cfg.x ?? -1) < 0 ? Theme.nowPlaying.margin : Math.min(cfg.x, maxX)
+                    : pos.x < 0 ? Theme.nowPlaying.margin : Math.min(pos.x, maxX)
                 readonly property real restY: ghost ? Widgets.dragY - window.modelData.y
-                    : (cfg.y ?? -1) < 0 ? maxY - Theme.nowPlaying.margin : Math.min(cfg.y, maxY)
+                    : pos.y < 0 ? maxY - Theme.nowPlaying.margin : Math.min(pos.y, maxY)
 
                 readonly property bool isTop: window.topHover === modelData
                 readonly property real offX: ghost ? 0 : ((cfg.size ?? width) - width) / 2
@@ -188,6 +189,10 @@ Variants {
                 property real shown: 1
                 readonly property bool leaving: Widgets.leaving.includes(modelData)
 
+                property real glide: 0
+                property real fromX: 0
+                property real fromY: 0
+
                 Connections {
                     target: Widgets
                     function onAdded(id) {
@@ -195,6 +200,23 @@ Variants {
                         slot.shown = 0;
                         popIn.start();
                     }
+                    function onGliding() {
+                        if (!slot.active || slot.leaving) return;
+                        slot.fromX = slot.x;
+                        slot.fromY = slot.y;
+                        slot.glide = 1;
+                        glideAnim.restart();
+                    }
+                }
+
+                NumberAnimation {
+                    id: glideAnim
+                    target: slot
+                    property: "glide"
+                    to: 0
+                    duration: Theme.anim.slow
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.anim.emphasizedDecel
                 }
 
                 onLeavingChanged: {
@@ -228,9 +250,9 @@ Variants {
                 scale: 0.5 + 0.5 * shown
                 z: cfg.z ?? 0
                 opacity: (cfg.opacity ?? 1) * Math.min(shown, 1)
-                active: cfg.enabled === true && Widgets.types[cfg.type] !== undefined && (ghost || !cfg.screen || cfg.screen === window.modelData.name)
-                x: restX + offX + (drag.active ? drag.translation.x : 0)
-                y: restY + offY + (drag.active ? drag.translation.y : 0)
+                active: cfg.enabled === true && Widgets.types[cfg.type] !== undefined && (ghost || Widgets.shownOn(cfg, window.modelData.name))
+                x: restX + offX + (drag.active ? drag.translation.x : 0) + glide * (fromX - restX - offX)
+                y: restY + offY + (drag.active ? drag.translation.y : 0) + glide * (fromY - restY - offY)
                 width: item?.implicitWidth ?? 0
                 height: item?.implicitHeight ?? 0
 

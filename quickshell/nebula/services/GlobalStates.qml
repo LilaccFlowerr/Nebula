@@ -21,6 +21,7 @@ Singleton {
     property string settingsTab: ""
     property string screen: ""
     property bool capturing: false
+    property string pickFor: ""
     readonly property bool popupOpen: powerMenuOpen || quickSettingsOpen || calendarOpen || trayOpen || systemOpen || mediaExpanded
 
     function isOn(screenName) {

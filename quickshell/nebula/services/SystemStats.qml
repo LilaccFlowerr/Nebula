@@ -41,6 +41,15 @@ Singleton {
     property bool hasNvidia: false
     property bool nvidiaActive: false
     property string nvidiaName: ""
+    property real nvidia: 0
+    property real nvidiaTemp: 0
+    property int nvidiaMhz: 0
+    property real nvidiaMemUsed: 0
+    property real nvidiaMemTotal: 0
+
+    readonly property bool useNvidia: hasNvidia && nvidiaActive
+    readonly property real gpuLoad: useNvidia ? nvidia : gpu
+    readonly property string activeGpuName: useNvidia ? nvidiaName : gpuName
 
     property string intelCard: ""
     property string nvidiaCard: ""
@@ -182,6 +191,22 @@ Singleton {
                 const fields = text.trim().split("\n")[1]?.trim().split(/\s+/) ?? [];
                 root.diskTotal = parseInt(fields[0]) || 0;
                 root.diskUsed = parseInt(fields[1]) || 0;
+            }
+        }
+    }
+
+    Process {
+        running: root.running && root.useNvidia
+        command: ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu,clocks.gr,memory.used,memory.total", "--format=csv,noheader,nounits", "-lms", String(root.interval)]
+        onRunningChanged: if (!running) root.nvidia = 0
+        stdout: SplitParser {
+            onRead: line => {
+                const [util, temp, mhz, used, total] = line.split(",").map(v => parseFloat(v) || 0);
+                root.nvidia = util / 100;
+                root.nvidiaTemp = temp;
+                root.nvidiaMhz = mhz;
+                root.nvidiaMemUsed = used * 1048576;
+                root.nvidiaMemTotal = total * 1048576;
             }
         }
     }

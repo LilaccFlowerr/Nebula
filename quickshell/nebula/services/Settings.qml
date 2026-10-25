@@ -30,6 +30,8 @@ Singleton {
 
     component WidgetsGroup: JsonObject {
         property string items: ""
+        property string presets: "[]"
+        property string preset: ""
     }
 
     component ClockGroup: JsonObject {
@@ -100,6 +102,10 @@ Singleton {
         property bool lyrics: true
         property int osdDuration: 1500
         property bool osLogo: true
+        property string logoMode: "os"
+        property string logoPreset: "arch"
+        property string logoImage: ""
+        property string logoText: ""
         property bool trayButton: true
         property bool batteryRing: true
         property bool eventVolume: true

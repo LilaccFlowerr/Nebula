@@ -36,17 +36,47 @@ Singleton {
         return match ? match[1] : "linux";
     }
 
-    readonly property string osLogo: ({
-        "fedora": "",
-        "arch": "",
-        "endeavouros": "\uf322",
-        "ubuntu": "",
-        "debian": "",
-        "nixos": "",
-        "opensuse-tumbleweed": "",
-        "linuxmint": "",
-        "pop": "",
-    })[osId] ?? ""
+    readonly property var logoPresets: [
+        { key: "fedora", name: "Fedora", glyph: "" },
+        { key: "arch", name: "Arch", glyph: "" },
+        { key: "endeavouros", name: "EndeavourOS", glyph: "\uf322" },
+        { key: "ubuntu", name: "Ubuntu", glyph: "" },
+        { key: "debian", name: "Debian", glyph: "" },
+        { key: "nixos", name: "NixOS", glyph: "" },
+        { key: "opensuse-tumbleweed", name: "openSUSE", glyph: "" },
+        { key: "linuxmint", name: "Mint", glyph: "" },
+        { key: "pop", name: "Pop!_OS", glyph: "" },
+        { key: "gentoo", name: "Gentoo", glyph: "\uf30d" },
+        { key: "void", name: "Void", glyph: "\uf32e" },
+        { key: "alpine", name: "Alpine", glyph: "\uf300" },
+        { key: "manjaro", name: "Manjaro", glyph: "\uf312" },
+        { key: "garuda", name: "Garuda", glyph: "\uf337" },
+        { key: "artix", name: "Artix", glyph: "\uf31f" },
+        { key: "centos", name: "CentOS", glyph: "\uf304" },
+        { key: "rhel", name: "Red Hat", glyph: "\uf316" },
+        { key: "rocky", name: "Rocky", glyph: "\uf32b" },
+        { key: "almalinux", name: "AlmaLinux", glyph: "\uf31d" },
+        { key: "kali", name: "Kali", glyph: "\uf327" },
+        { key: "elementary", name: "elementary", glyph: "\uf309" },
+        { key: "zorin", name: "Zorin", glyph: "\uf32f" },
+        { key: "mx", name: "MX", glyph: "\uf33f" },
+        { key: "neon", name: "KDE neon", glyph: "\uf331" },
+        { key: "solus", name: "Solus", glyph: "\uf32d" },
+        { key: "deepin", name: "Deepin", glyph: "\uf321" },
+        { key: "mageia", name: "Mageia", glyph: "\uf310" },
+        { key: "slackware", name: "Slackware", glyph: "\uf319" },
+        { key: "freebsd", name: "FreeBSD", glyph: "\uf30c" },
+        { key: "linux", name: "Tux", glyph: "\uf31a" }
+    ]
+
+    function glyphFor(key) {
+        return logoPresets.find(p => p.key === key)?.glyph ?? "";
+    }
+
+    readonly property string osLogo: glyphFor(osId)
+    readonly property string logo: Settings.bar.logoMode === "preset" ? glyphFor(Settings.bar.logoPreset)
+        : Settings.bar.logoMode === "text" ? Settings.bar.logoText
+        : osLogo
 
     FileView {
         id: osRelease

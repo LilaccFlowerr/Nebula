@@ -25,6 +25,7 @@ Singleton {
         { key: "burst", name: "Burst", shape: MaterialShape.SoftBurst },
         { key: "heart", name: "Heart", shape: MaterialShape.Heart },
         { key: "circle", name: "Circle", shape: MaterialShape.Circle },
+        { key: "glitch", name: "Glitch", shape: -1 },
         { key: "fade", name: "Fade", shape: -1 },
         { key: "none", name: "None", shape: -1 }
     ]

@@ -24,12 +24,18 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:widgetcorner"
 
+    WlrLayershell.keyboardFocus: editing !== "" ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
     mask: Region { item: hitArea }
 
     property bool open: false
     property bool adding: false
     property string filter: "all"
-    onOpenChanged: if (!open) adding = false
+    property string editing: ""
+    onOpenChanged: if (!open) {
+        adding = false;
+        editing = "";
+    }
     readonly property color fill: Qt.alpha(Colors.surface, Theme.bar.opacity)
 
     readonly property var screens: Quickshell.screens.map(s => s.name)
@@ -41,7 +47,7 @@ PanelWindow {
 
     function matches(w) {
         if (filter === "hidden") return w.enabled !== true;
-        if (filter.startsWith("screen:")) return !w.screen || w.screen === filter.slice(7);
+        if (filter.startsWith("screen:")) return Widgets.shownOn(w, filter.slice(7));
         return true;
     }
 
@@ -55,6 +61,17 @@ PanelWindow {
         if (entry.key === "nowplaying") Object.assign(props, { x: -1, y: -1 });
         Widgets.add(entry.key, props);
         adding = false;
+    }
+
+    function savePreset() {
+        const name = Widgets.freeName();
+        Widgets.savePreset(name);
+        editing = name;
+    }
+
+    function renamePreset(name) {
+        Widgets.renamePreset(editing, name);
+        if (Widgets.presetNamed(name)) editing = name;
     }
 
     function edit(id) {
@@ -103,11 +120,14 @@ PanelWindow {
         id: chip
 
         property string text
+        property string icon: ""
         property bool active
+        property bool dot: false
 
         signal clicked()
+        signal rightClicked()
 
-        implicitWidth: chipText.implicitWidth + Theme.spacing.lg * 2
+        implicitWidth: chipRow.implicitWidth + Theme.spacing.lg * 2
         implicitHeight: 32
         radius: active ? height / 2 : Theme.radius.small
         color: active ? Colors.secondaryContainer : chipMouse.containsMouse ? Qt.alpha(Colors.textOnSurface, 0.06) : "transparent"
@@ -118,14 +138,37 @@ PanelWindow {
             NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
         }
 
-        Text {
-            id: chipText
+        Row {
+            id: chipRow
             anchors.centerIn: parent
-            text: chip.text
-            color: chip.active ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
-            font.family: Theme.font.family
-            font.pixelSize: Theme.font.small
-            font.weight: chip.active ? Font.DemiBold : Font.Normal
+            spacing: Theme.spacing.xs
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: chip.icon !== ""
+                text: chip.icon
+                font.family: Theme.font.icons
+                font.pixelSize: Theme.font.normal
+                color: chip.active ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: chip.text
+                color: chip.active ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
+                font.family: Theme.font.family
+                font.pixelSize: Theme.font.small
+                font.weight: chip.active ? Font.DemiBold : Font.Normal
+            }
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 6
+                height: 6
+                radius: 3
+                visible: chip.dot
+                color: Colors.primary
+            }
         }
 
         MouseArea {
@@ -133,7 +176,8 @@ PanelWindow {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: chip.clicked()
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: mouse => mouse.button === Qt.RightButton ? chip.rightClicked() : chip.clicked()
         }
     }
 
@@ -254,6 +298,70 @@ PanelWindow {
                     visible: !window.adding
                     icon: "settings"
                     onClicked: window.openSettings("")
+                }
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                visible: !window.adding
+                spacing: Theme.spacing.sm
+
+                Repeater {
+                    model: Widgets.presets
+
+                    Chip {
+                        required property var modelData
+                        text: modelData.name
+                        icon: "dashboard"
+                        active: Widgets.activePreset === modelData.name
+                        dot: active && Widgets.modified
+                        onClicked: Widgets.loadPreset(modelData.name)
+                        onRightClicked: window.editing = window.editing === modelData.name ? "" : modelData.name
+                    }
+                }
+
+                Chip {
+                    text: Widgets.presets.length === 0 ? "Save as preset" : "Save"
+                    icon: "add"
+                    onClicked: window.savePreset()
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                visible: !window.adding && window.editing !== ""
+                spacing: Theme.spacing.xs
+
+                TextField {
+                    Layout.fillWidth: true
+                    implicitWidth: 0
+                    text: window.editing
+                    placeholder: "Preset name"
+                    onEdited: name => window.renamePreset(name)
+                }
+
+                IconButton {
+                    implicitWidth: 36
+                    implicitHeight: 36
+                    icon: "save"
+                    onClicked: Widgets.updatePreset(window.editing)
+                }
+
+                IconButton {
+                    implicitWidth: 36
+                    implicitHeight: 36
+                    icon: "delete"
+                    onClicked: {
+                        Widgets.deletePreset(window.editing);
+                        window.editing = "";
+                    }
+                }
+
+                IconButton {
+                    implicitWidth: 36
+                    implicitHeight: 36
+                    icon: "close"
+                    onClicked: window.editing = ""
                 }
             }
 

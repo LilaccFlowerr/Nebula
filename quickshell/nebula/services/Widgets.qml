@@ -67,9 +67,42 @@ Singleton {
         if (!w) return Qt.rect(0, 0, 0, 0);
         const s = screenNamed(w.screen ?? "");
         const size = w.size ?? types[w.type]?.size ?? 200;
-        const x = (w.x ?? -1) < 0 ? Theme.nowPlaying.margin : w.x;
-        const y = (w.y ?? -1) < 0 ? s.height - size - Theme.nowPlaying.margin : w.y;
+        const p = position(w, s);
+        const x = p.x < 0 ? Theme.nowPlaying.margin : p.x;
+        const y = p.y < 0 ? s.height - size - Theme.nowPlaying.margin : p.y;
         return Qt.rect(s.x + x, s.y + y, size, size);
+    }
+
+    function present(name) {
+        return Quickshell.screens.some(s => s.name === name);
+    }
+
+    function shownOn(w, screenName) {
+        if (!w.screen) return true;
+        if (present(w.screen)) return w.screen === screenName;
+        return Quickshell.screens[0]?.name === screenName;
+    }
+
+    function sizeOf(name) {
+        const live = Quickshell.screens.find(s => s.name === name);
+        if (live) return { width: live.width, height: live.height };
+        const m = HyprConfig.monitors.find(m => m.name === name);
+        if (!m) return null;
+        const [width, height] = m.mode.split("@")[0].split("x").map(Number);
+        const scale = m.scale || 1;
+        return { width: width / scale, height: height / scale };
+    }
+
+    function position(w, target) {
+        const x = w.x ?? -1;
+        const y = w.y ?? -1;
+        const from = !w.screen || present(w.screen) ? null : sizeOf(w.screen);
+        if (!from || !target) return { x: x, y: y };
+        const half = (w.size ?? types[w.type]?.size ?? 200) / 2;
+        return {
+            x: x < 0 ? x : Math.max(0, (x + half) * target.width / from.width - half),
+            y: y < 0 ? y : Math.max(0, (y + half) * target.height / from.height - half)
+        };
     }
 
     function edit(id) {
@@ -191,6 +224,127 @@ Singleton {
         }
     }
 
+    property var presets: []
+    property string activePreset: ""
+    readonly property bool modified: activePreset !== "" && differs(list.filter(w => !leaving.includes(w.id)), presetNamed(activePreset))
+
+    signal gliding()
+
+    function parsePresets(raw) {
+        try {
+            const data = JSON.parse(raw);
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    property bool writingPresets: false
+
+    function savePresets(next, active) {
+        presets = next;
+        if (active !== undefined) activePreset = active;
+        writingPresets = true;
+        Settings.widgets.presets = JSON.stringify(next);
+        Settings.widgets.preset = activePreset;
+        writingPresets = false;
+    }
+
+    function syncPresets() {
+        if (writingPresets) return;
+        presets = parsePresets(Settings.widgets.presets);
+        activePreset = Settings.widgets.preset;
+    }
+
+    function presetNamed(name) {
+        return presets.find(p => p.name === name) ?? null;
+    }
+
+    function freeName() {
+        let n = presets.length + 1;
+        while (presetNamed("Preset " + n)) n++;
+        return "Preset " + n;
+    }
+
+    function screenSize(name) {
+        return sizeOf(name ?? "") ?? screenNamed(name ?? "");
+    }
+
+    function snapshot(w) {
+        const s = screenSize(w.screen);
+        const half = (w.size ?? types[w.type]?.size ?? 200) / 2;
+        const item = Object.assign({}, w);
+        delete item.x;
+        delete item.y;
+        delete item.z;
+        item.fx = (w.x ?? -1) < 0 ? -1 : (w.x + half) / s.width;
+        item.fy = (w.y ?? -1) < 0 ? -1 : (w.y + half) / s.height;
+        return item;
+    }
+
+    function restore(item) {
+        const s = screenSize(item.screen);
+        const half = (item.size ?? types[item.type]?.size ?? 200) / 2;
+        const w = Object.assign({}, item);
+        delete w.fx;
+        delete w.fy;
+        w.x = item.fx < 0 ? -1 : Math.max(0, Math.round(item.fx * s.width - half));
+        w.y = item.fy < 0 ? -1 : Math.max(0, Math.round(item.fy * s.height - half));
+        return w;
+    }
+
+    function savePreset(name) {
+        const entry = { name: name, items: list.filter(w => !leaving.includes(w.id)).map(snapshot) };
+        const exists = presetNamed(name) !== null;
+        savePresets(exists ? presets.map(p => p.name === name ? entry : p) : presets.concat([entry]), name);
+    }
+
+    function loadPreset(name) {
+        const p = presetNamed(name);
+        if (!p) return;
+        const next = p.items.map(restore);
+        const nextIds = next.map(w => w.id);
+        const gone = list.filter(w => !nextIds.includes(w.id));
+        const fresh = nextIds.filter(id => get(id) === null);
+        gliding();
+        save(next.concat(gone));
+        savePresets(presets, name);
+        for (const w of gone) remove(w.id);
+        for (const id of fresh) added(id);
+    }
+
+    function updatePreset(name) {
+        savePreset(name);
+    }
+
+    function renamePreset(from, to) {
+        const name = to.trim();
+        if (name === "" || name === from || presetNamed(name)) return;
+        savePresets(presets.map(p => p.name === from ? Object.assign({}, p, { name: name }) : p), activePreset === from ? name : undefined);
+    }
+
+    function deletePreset(name) {
+        savePresets(presets.filter(p => p.name !== name), activePreset === name ? "" : undefined);
+    }
+
+    function differs(current, preset) {
+        if (!preset) return false;
+        if (current.length !== preset.items.length) return true;
+        return current.map(snapshot).some(a => {
+            const b = preset.items.find(i => i.id === a.id);
+            if (!b) return true;
+            const keys = new Set(Object.keys(a).concat(Object.keys(b)));
+            for (const key of keys) {
+                if (key === "fx" || key === "fy") {
+                    if (Math.abs((a[key] ?? -1) - (b[key] ?? -1)) > 0.002) return true;
+                } else if (JSON.stringify(a[key]) !== JSON.stringify(b[key])) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
     function get(id) {
         return list.find(w => w.id === id) ?? null;
     }
@@ -294,6 +448,7 @@ Singleton {
 
     function sync() {
         if (!Settings.ready) return;
+        syncPresets();
         if (Settings.widgets.items === "") migrate();
         else list = parse(Settings.widgets.items);
     }
@@ -309,6 +464,8 @@ Singleton {
             if (root.pending || Date.now() < root.holdUntil) return;
             if (Settings.widgets.items !== JSON.stringify(root.list)) root.sync();
         }
+        function onPresetsChanged() { root.syncPresets(); }
+        function onPresetChanged() { root.syncPresets(); }
     }
 
     Component.onCompleted: sync()

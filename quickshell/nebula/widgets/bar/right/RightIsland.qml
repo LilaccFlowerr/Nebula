@@ -224,7 +224,7 @@ Island {
             readonly property bool showsStats: mode > 0
             readonly property bool shownStats: shownMode > 0
             readonly property var current: modes[shownMode]
-            readonly property real value: shownMode === 1 ? SystemStats.cpu : shownMode === 2 ? SystemStats.mem : SystemStats.gpu
+            readonly property real value: shownMode === 1 ? SystemStats.cpu : shownMode === 2 ? SystemStats.mem : SystemStats.gpuLoad
             readonly property bool active: root.calendarOpen || root.systemOpen
 
             function setMode(next, step) {

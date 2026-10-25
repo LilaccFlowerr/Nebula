@@ -52,6 +52,15 @@ Singleton {
     }
     readonly property Toast toast: Toast {}
 
+    component MediaIslandTokens: QtObject {
+        readonly property int minWave: 60
+        readonly property int maxWave: 200
+        readonly property int minText: 80
+        readonly property int maxText: 220
+        readonly property int cardWidth: 500
+    }
+    readonly property MediaIslandTokens media: MediaIslandTokens {}
+
     component Glass: QtObject {
         readonly property real tint: 0.72
         readonly property real topLight: 0.08
@@ -260,6 +269,7 @@ Singleton {
         readonly property string github: "LilaccFlowerr"
         readonly property int controlWidth: 260
         readonly property int fieldWidth: 76
+        readonly property int logoButton: 36
         readonly property int dialogWidth: 380
         readonly property int expandDuration: 400
         readonly property real fadeScale: 0.96

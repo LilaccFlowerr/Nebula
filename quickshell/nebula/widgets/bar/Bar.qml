@@ -1,6 +1,7 @@
 import qs.widgets.bar.left
 import qs.widgets.bar.right
 import qs.widgets.bar.center
+import qs.widgets.bar.media
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
@@ -37,6 +38,7 @@ Variants {
             regions: [
                 Region { item: leftIsland },
                 Region { item: centerIsland },
+                Region { item: mediaIsland },
                 Region { item: rightIsland },
                 Region { item: rightIsland.powerArea },
                 Region { item: rightIsland.settingsArea },
@@ -75,6 +77,17 @@ Variants {
 
         LeftIsland   { id: leftIsland;   anchors.left: parent.left; anchors.leftMargin: Theme.bar.floatMargin; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
         CenterIsland { id: centerIsland; anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
+        MediaIsland {
+            id: mediaIsland
+
+            readonly property real gapLeft: leftIsland.x + leftIsland.width
+            readonly property real gapRight: centerIsland.x
+
+            available: gapRight - gapLeft - Theme.bar.gap * 2
+            x: Math.max(gapLeft + Theme.bar.gap, gapLeft + (gapRight - gapLeft - width) / 2)
+            anchors.top: parent.top
+            anchors.topMargin: Theme.bar.floatMargin
+        }
         RightIsland  { id: rightIsland;  anchors.right: parent.right; anchors.rightMargin: Theme.bar.floatMargin; anchors.top: parent.top; anchors.topMargin: Theme.bar.floatMargin }
     }
 }
