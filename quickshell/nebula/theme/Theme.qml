@@ -46,6 +46,8 @@ Singleton {
         readonly property int maxPeek: 2
         readonly property int maxShown: 3
         readonly property real swipeThreshold: 0.3
+        readonly property int badgeSize: 20
+        readonly property real bumpScale: 1.12
         readonly property int bodyLines: 2
     }
     readonly property Toast toast: Toast {}

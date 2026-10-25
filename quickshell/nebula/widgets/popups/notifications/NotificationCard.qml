@@ -10,24 +10,38 @@ import qs.theme
 Item {
     id: root
 
-    required property var n
+    required property string key
     property bool open: hovered
     property real contentOpacity: 1
     readonly property bool hovered: hover.hovered
 
-    readonly property bool urgent: Notifications.isUrgent(n)
-    readonly property bool hasPhoto: n !== null && n.image !== "" && !n.image.startsWith("image://icon/")
-    readonly property string iconSource: !n ? ""
-        : n.image.startsWith("image://icon/") ? Quickshell.iconPath(n.image.slice(13), true)
-        : Quickshell.iconPath(n.appIcon, true)
+    readonly property var m: Notifications.group(key)?.data ?? null
+    readonly property int count: Notifications.group(key)?.count ?? 1
+    readonly property bool bumping: bumpTimer.running
+    readonly property bool urgent: Notifications.isUrgent(m)
+    readonly property bool hasPhoto: m !== null && m.image !== "" && !m.image.startsWith("image://icon/")
+    readonly property string iconSource: !m ? ""
+        : m.image.startsWith("image://icon/") ? Quickshell.iconPath(m.image.slice(13), true)
+        : Quickshell.iconPath(m.appIcon, true)
     readonly property color onFill: urgent ? Colors.textOnErrorContainer : Colors.textOnPrimaryContainer
-    readonly property var actions: n ? n.actions.filter(a => a.identifier !== "default") : []
+    readonly property var liveN: Notifications.live(key)
+    readonly property var actions: liveN ? liveN.actions.filter(a => a.identifier !== "default") : []
 
     implicitWidth: Theme.toast.width
     implicitHeight: layout.implicitHeight + Theme.spacing.lg * 2
 
     HoverHandler {
         id: hover
+    }
+
+    Timer {
+        id: bumpTimer
+        interval: Theme.anim.medium
+    }
+
+    Connections {
+        target: Notifications
+        function onBumped(key) { if (key === root.key) bumpTimer.restart(); }
     }
 
     GlassRect {
@@ -40,7 +54,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: Notifications.activate(root.n)
+        onClicked: Notifications.activate(root.key)
     }
 
     RowLayout {
@@ -57,6 +71,11 @@ Item {
             Layout.alignment: Qt.AlignTop
             implicitWidth: Theme.toast.iconSize
             implicitHeight: Theme.toast.iconSize
+            scale: root.bumping ? Theme.toast.bumpScale : 1
+
+            Behavior on scale {
+                NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+            }
 
             MaterialShape {
                 anchors.fill: parent
@@ -71,7 +90,7 @@ Item {
                 visible: root.hasPhoto
                 shape: MaterialShape.Cookie9Sided
                 color: Colors.primaryContainer
-                source: root.hasPhoto ? root.n.image : ""
+                source: root.hasPhoto ? root.m.image : ""
                 sourceSize: Qt.size(Theme.toast.iconSize * 2, Theme.toast.iconSize * 2)
             }
 
@@ -90,6 +109,32 @@ Item {
                 font.pixelSize: Theme.button.iconSize + 4
                 color: root.urgent ? Colors.textOnError : Colors.textOnPrimary
             }
+
+            MaterialShape {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: -4
+                anchors.bottomMargin: -4
+                implicitSize: Theme.toast.badgeSize
+                shape: MaterialShape.Circle
+                color: Colors.tertiary
+                visible: root.count > 1
+                scale: root.bumping ? Theme.toast.bumpScale : 1
+
+                Behavior on scale {
+                    NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+                }
+
+                Text {
+                    id: badgeText
+                    anchors.centerIn: parent
+                    text: root.count > 99 ? "99+" : root.count
+                    color: Colors.textOnTertiary
+                    font.family: Theme.font.family
+                    font.pixelSize: 11
+                    font.weight: Font.Bold
+                }
+            }
         }
 
         ColumnLayout {
@@ -102,7 +147,7 @@ Item {
 
                 Text {
                     Layout.fillWidth: true
-                    text: root.n ? root.n.appName : ""
+                    text: root.m ? root.m.appName : ""
                     elide: Text.ElideRight
                     color: root.onFill
                     opacity: 0.75
@@ -115,13 +160,13 @@ Item {
                     implicitWidth: 26
                     implicitHeight: 26
                     icon: "close"
-                    onClicked: Notifications.dismiss(root.n)
+                    onClicked: Notifications.dismiss(root.key)
                 }
             }
 
             Text {
                 Layout.fillWidth: true
-                text: root.n ? root.n.summary : ""
+                text: root.m ? root.m.summary : ""
                 elide: Text.ElideRight
                 color: root.onFill
                 font.family: Theme.font.family
@@ -132,7 +177,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 visible: text !== ""
-                text: root.n ? root.n.body : ""
+                text: root.m ? root.m.body : ""
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
                 maximumLineCount: root.open ? Theme.bar.notificationMaxLines : Theme.toast.bodyLines
@@ -178,9 +223,9 @@ Item {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                const n = root.n;
+                                const key = root.key;
                                 modelData.invoke();
-                                Notifications.dismiss(n);
+                                Notifications.dismiss(key);
                             }
                         }
                     }
