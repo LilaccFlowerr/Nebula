@@ -45,7 +45,7 @@ Item {
         { key: "bar", title: "Bar", subtitle: "Style and each island", icon: "toolbar", shape: MaterialShape.Pill, source: "pages/SectionsPage.qml", reset: ["bar", "blur", "clock", "weather", "quickSettings"], sections: [
             { key: "style", title: "Layout", subtitle: "Style, gap, corners and opacity", icon: "dock_to_bottom", source: "pages/bar/StyleTab.qml" },
             { key: "left", title: "Left island", subtitle: "Workspaces", icon: "view_week", source: "pages/bar/LeftTab.qml" },
-            { key: "middle", title: "Middle island", subtitle: "Visualizer, lyrics and popups", icon: "graphic_eq", source: "pages/bar/MiddleTab.qml" },
+            { key: "middle", title: "Dock", subtitle: "Apps, media and popups", icon: "apps", source: "pages/bar/MiddleTab.qml" },
             { key: "right", title: "Right island", subtitle: "Clock, buttons, weather and tiles", icon: "schedule", source: "pages/bar/RightTab.qml" }
         ] },
         { key: "connections", title: "Connections", subtitle: "Wifi, cable and bluetooth", icon: "wifi", shape: MaterialShape.Cookie12Sided, source: "pages/SectionsPage.qml", sections: [
@@ -53,8 +53,9 @@ Item {
             { key: "ethernet", title: "Ethernet", subtitle: "Cable, IP and MAC address", icon: "lan", source: "pages/connections/EthernetTab.qml" },
             { key: "bluetooth", title: "Bluetooth", subtitle: "Devices and pairing", icon: "bluetooth", source: "pages/connections/BluetoothTab.qml" }
         ] },
-        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "pages/SectionsPage.qml", reset: ["input", "power"], sections: [
+        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "pages/SectionsPage.qml", reset: ["input", "power", "sound"], sections: [
             { key: "displays", title: "Displays", subtitle: "Resolution, scale and brightness", icon: "monitor", source: "pages/system/DisplaysTab.qml" },
+            { key: "sound", title: "Sound", subtitle: "Output device and Bluetooth", icon: "volume_up", source: "pages/system/SoundTab.qml" },
             { key: "power", title: "Power", subtitle: "Power mode and battery", icon: "battery_horiz_075", source: "pages/system/PowerTab.qml" },
             { key: "input", title: "Input", subtitle: "Keyboard, mouse and touchpad", icon: "keyboard", source: "pages/system/InputTab.qml" }
         ] },

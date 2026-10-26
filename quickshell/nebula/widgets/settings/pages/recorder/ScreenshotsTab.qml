@@ -10,6 +10,23 @@ ColumnLayout {
     spacing: Theme.spacing.xl
 
     SettingGroup {
+        title: "Selecting"
+
+        SettingRow {
+            icon: "ac_unit"
+            title: "Freeze the screen"
+            subtitle: "Everything stands still while you pick a region"
+            clickable: true
+            onClicked: Settings.screenshot.freeze = !Screenshot.freeze
+
+            Switch {
+                checked: Screenshot.freeze
+                onToggled: Settings.screenshot.freeze = !Screenshot.freeze
+            }
+        }
+    }
+
+    SettingGroup {
         title: "After a screenshot"
 
         SettingRow {

@@ -51,12 +51,9 @@ Variants {
         }
 
         function show() {
-            if (busy) return;
+            if (busy || !Settings.ready) return;
             target = Wallpaper.url(Wallpaper.current);
-            if (String(base.source) === String(target) && !replayPending) {
-                Wallpaper.settled();
-                return;
-            }
+            if (String(base.source) === String(target) && !replayPending) return;
             replayPending = false;
             style = base.status === Image.Ready ? Wallpaper.transition.key : "none";
             transitionShape = Wallpaper.transitionShape;
@@ -93,10 +90,14 @@ Variants {
             prepared = false;
             busy = false;
             if (String(target) !== String(Wallpaper.url(Wallpaper.current)) || replayPending) Qt.callLater(show);
-            else Wallpaper.settled();
         }
 
         Component.onCompleted: show()
+
+        Connections {
+            target: Settings
+            function onReadyChanged() { window.show(); }
+        }
 
         Connections {
             target: Wallpaper

@@ -15,6 +15,7 @@ Singleton {
     property bool trayOpen: false
     property bool systemOpen: false
     property bool mediaExpanded: false
+    property string dockMenu: ""
     property bool settingsOpen: false
     property bool settingsFromQuick: false
     property string settingsPage: ""
@@ -22,7 +23,7 @@ Singleton {
     property string screen: ""
     property bool capturing: false
     property string pickFor: ""
-    readonly property bool popupOpen: powerMenuOpen || quickSettingsOpen || calendarOpen || trayOpen || systemOpen || mediaExpanded
+    readonly property bool popupOpen: powerMenuOpen || quickSettingsOpen || calendarOpen || trayOpen || systemOpen || mediaExpanded || dockMenu !== ""
 
     function isOn(screenName) {
         return screen === screenName;
@@ -69,6 +70,16 @@ Singleton {
             closeAll();
             screen = screenName;
             trayOpen = true;
+        }
+    }
+
+    function toggleDockMenu(key, screenName = focusedScreen()) {
+        if (dockMenu === key && screen === screenName) {
+            dockMenu = "";
+        } else {
+            closeAll();
+            screen = screenName;
+            dockMenu = key;
         }
     }
 
@@ -126,6 +137,7 @@ Singleton {
         calendarOpen = false;
         trayOpen = false;
         systemOpen = false;
+        dockMenu = "";
     }
 
     Connections {
@@ -146,6 +158,7 @@ Singleton {
         trayOpen = false;
         systemOpen = false;
         mediaExpanded = false;
+        dockMenu = "";
         settingsOpen = false;
     }
 

@@ -23,8 +23,40 @@ Singleton {
     readonly property bool micMuted: micReady ? source.audio.muted : false
     readonly property string micIcon: micMuted ? "mic_off" : "mic"
 
+    readonly property var outputs: Pipewire.ready
+        ? Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio !== null)
+        : []
+    readonly property var bluetoothOutput: outputs.find(n => isBluetooth(n)) ?? null
+
     PwObjectTracker {
-        objects: [root.sink, root.source]
+        objects: [root.sink, root.source].concat(root.outputs)
+    }
+
+    function isBluetooth(node) {
+        return node.name.startsWith("bluez_output");
+    }
+
+    function label(node) {
+        return node.nickname || node.description || node.name;
+    }
+
+    function setOutput(node) {
+        Pipewire.preferredDefaultAudioSink = node;
+    }
+
+    function preferBluetooth() {
+        if (Settings.sound.bluetoothFirst && bluetoothOutput && sink !== bluetoothOutput)
+            setOutput(bluetoothOutput);
+    }
+
+    onBluetoothOutputChanged: preferBluetooth()
+
+    Connections {
+        target: Settings.sound
+
+        function onBluetoothFirstChanged() {
+            root.preferBluetooth();
+        }
     }
 
     function setVolume(value) {

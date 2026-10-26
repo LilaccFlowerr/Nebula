@@ -5,6 +5,7 @@ import qs.widgets.recorder
 import qs.widgets.launcher
 import qs.widgets.wallpaper
 import qs.widgets.desktop
+import qs.widgets.screenshot
 import qs.services
 
 ShellRoot {
@@ -43,6 +44,8 @@ ShellRoot {
     ImagePickerWindow {}
 
     LauncherWindow {}
+
+    FreezeWindow {}
 
     
 }

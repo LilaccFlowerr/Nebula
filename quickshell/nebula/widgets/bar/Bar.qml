@@ -38,7 +38,9 @@ Variants {
             regions: [
                 Region { item: leftIsland },
                 Region { item: centerIsland },
+                Region { item: centerIsland.menuArea },
                 Region { item: mediaIsland },
+                Region { item: mediaIsland.bodyArea },
                 Region { item: rightIsland },
                 Region { item: rightIsland.powerArea },
                 Region { item: rightIsland.settingsArea },
@@ -84,6 +86,7 @@ Variants {
             readonly property real gapRight: centerIsland.x
 
             available: gapRight - gapLeft - Theme.bar.gap * 2
+            panelRoom: rightIsland.x - x - Theme.bar.gap
             x: Math.max(gapLeft + Theme.bar.gap, gapLeft + (gapRight - gapLeft - width) / 2)
             anchors.top: parent.top
             anchors.topMargin: Theme.bar.floatMargin

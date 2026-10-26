@@ -56,27 +56,11 @@ Singleton {
         return path.split("/").pop().replace(/\.[^.]+$/, "");
     }
 
-    property bool schemePending: false
-
     function set(path) {
         if (!path) return;
         roll();
-        schemePending = true;
-        schemeTimer.restart();
         Settings.wallpaper.path = path;
-    }
-
-    function settled() {
-        if (!schemePending) return;
-        schemePending = false;
-        schemeTimer.stop();
         Scheme.apply();
-    }
-
-    Timer {
-        id: schemeTimer
-        interval: 5000
-        onTriggered: root.settled()
     }
 
     FolderListModel {
