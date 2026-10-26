@@ -9,6 +9,50 @@ ColumnLayout {
     spacing: Theme.spacing.xl
 
     SettingGroup {
+        title: "Dock"
+
+        SettingRow {
+            icon: "apps"
+            title: "Running apps"
+            subtitle: "Show open apps that aren't pinned"
+            clickable: true
+            onClicked: Settings.bar.dockRunning = !Settings.bar.dockRunning
+
+            Switch {
+                checked: Settings.bar.dockRunning
+                onToggled: Settings.bar.dockRunning = !Settings.bar.dockRunning
+            }
+        }
+
+        SettingRow {
+            icon: "label"
+            title: "App names"
+            subtitle: "Show the name under an app on hover"
+            clickable: true
+            onClicked: Settings.bar.dockTooltips = !Settings.bar.dockTooltips
+
+            Switch {
+                checked: Settings.bar.dockTooltips
+                onToggled: Settings.bar.dockTooltips = !Settings.bar.dockTooltips
+            }
+        }
+
+        SettingRow {
+            icon: "push_pin"
+            title: "Pinned apps"
+            subtitle: Dock.pinned.length === 0 ? "Right click an app in the dock to pin it" : Dock.pinned.length === 1 ? "1 app pinned" : Dock.pinned.length + " apps pinned"
+
+            ActionButton {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: Dock.pinned.length > 0
+                icon: "delete"
+                text: "Unpin all"
+                onClicked: Settings.bar.dockPinned = "[]"
+            }
+        }
+    }
+
+    SettingGroup {
         title: "Media"
 
         SettingRow {

@@ -25,6 +25,9 @@ var entries = [
 
     { title: "Workspaces per group", page: "bar", tab: "left", words: "workspace count dots" },
     { title: "Workspace style", page: "bar", tab: "left", words: "numbers pills shapes" },
+    { title: "Dock running apps", page: "bar", tab: "middle", words: "dock windows open apps taskbar" },
+    { title: "Dock app names", page: "bar", tab: "middle", words: "dock tooltip labels hover" },
+    { title: "Pinned apps", page: "bar", tab: "middle", words: "dock pin favorites unpin" },
     { title: "Visualizer", page: "bar", tab: "middle", words: "cava bars music island" },
     { title: "Synced lyrics", page: "bar", tab: "middle", words: "music media card" },
     { title: "Volume and brightness popup", page: "bar", tab: "middle", words: "osd duration island" },
@@ -44,6 +47,8 @@ var entries = [
     { title: "Resolution", page: "system", tab: "displays", words: "refresh rate hz monitor" },
     { title: "Scale", page: "system", tab: "displays", words: "zoom size monitor" },
     { title: "Screen brightness", page: "system", tab: "displays", words: "backlight" },
+    { title: "Sound output", page: "system", tab: "sound", words: "speaker headphones audio device hdmi" },
+    { title: "Bluetooth audio first", page: "system", tab: "sound", words: "headphones default output" },
     { title: "Power mode", page: "system", tab: "power", words: "profile saver balanced performance" },
     { title: "Low battery warning", page: "system", tab: "power", words: "battery percentage" },
     { title: "Keyboard layout", page: "system", tab: "input", words: "keyboard us qwerty language" },
@@ -63,6 +68,7 @@ var entries = [
     { title: "Urgent popup duration", page: "notifications", words: "critical timeout" },
 
     { title: "Record audio", page: "recorder", tab: "recording", words: "sound microphone recording" },
+    { title: "Freeze the screen", page: "recorder", tab: "screenshots", words: "screenshot freeze pause region still" },
     { title: "Start with a region", page: "recorder", tab: "recording", words: "area recording" },
     { title: "Framerate", page: "recorder", tab: "recording", words: "fps recording" },
     { title: "Recordings folder", page: "recorder", tab: "recording", words: "videos files" },

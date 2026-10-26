@@ -13,6 +13,9 @@ RowLayout {
     property string trackArtist: ""
     property real slide: 0
     property real fade: 1
+    property real extrasOpacity: 1
+    property real textOpacity: 1
+    readonly property alias textBlock: textBlock
     readonly property alias artSlot: artSlot
     readonly property bool resizing: textWidthAnim.running
 
@@ -37,9 +40,10 @@ RowLayout {
     }
 
     ColumnLayout {
+        id: textBlock
         Layout.preferredWidth: root.textWidth
         spacing: 0
-        opacity: root.fade
+        opacity: root.fade * root.textOpacity
         transform: Translate { x: root.slide }
 
         Text {
@@ -65,6 +69,7 @@ RowLayout {
 
     WavyProgress {
         implicitWidth: root.waveWidth
+        opacity: root.extrasOpacity
         progress: Media.progress
         animated: Media.playing
     }

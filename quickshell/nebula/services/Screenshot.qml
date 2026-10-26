@@ -10,9 +10,13 @@ Singleton {
     id: root
 
     readonly property string directory: Quickshell.env("HOME") + "/Pictures/Screenshots"
-    readonly property bool busy: proc.running
+    readonly property bool busy: proc.running || freezing
     readonly property bool copy: Settings.screenshot.copy
     readonly property bool notify: Settings.screenshot.notify
+    readonly property bool freeze: Settings.screenshot.freeze
+
+    property bool freezing: false
+    property int frozen: 0
 
     readonly property string select: `select_region() {
         ws=$(hyprctl monitors -j | jq -c '[.[].activeWorkspace.id]')
@@ -40,8 +44,31 @@ Singleton {
     }
 
     function take(useRegion) {
-        if (proc.running) return;
+        if (busy) return;
         GlobalStates.capturing = true;
+        if (useRegion && freeze) {
+            frozen = 0;
+            freezing = true;
+            freezeTimeout.restart();
+            return;
+        }
+        start(useRegion);
+    }
+
+    function markFrozen() {
+        frozen++;
+        if (freezing && frozen >= Quickshell.screens.length) start(true);
+    }
+
+    Timer {
+        id: freezeTimeout
+        interval: 600
+        onTriggered: if (root.freezing) root.start(true)
+    }
+
+    function start(useRegion) {
+        if (proc.running) return;
+        freezeTimeout.stop();
         proc.command = ["sh", "-c", select + `
             dir=$1; region=$2; monitor=$3; copy=$4; notify=$5
             mkdir -p "$dir"
@@ -65,7 +92,10 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: if (text !== "") root.saved(text)
         }
-        onExited: GlobalStates.capturing = false
+        onExited: {
+            GlobalStates.capturing = false;
+            root.freezing = false;
+        }
     }
 
     IpcHandler {

@@ -21,6 +21,7 @@ Singleton {
     readonly property alias input: adapter.input
     readonly property alias displays: adapter.displays
     readonly property alias power: adapter.power
+    readonly property alias sound: adapter.sound
     readonly property alias quickSettings: adapter.quickSettings
     readonly property alias screenshot: adapter.screenshot
     readonly property alias weather: adapter.weather
@@ -90,6 +91,10 @@ Singleton {
         property int lowBattery: 20
     }
 
+    component SoundGroup: JsonObject {
+        property bool bluetoothFirst: true
+    }
+
     component BarGroup: JsonObject {
         property int workspaces: 5
         property string workspaceStyle: "numbers"
@@ -108,6 +113,9 @@ Singleton {
         property string logoText: ""
         property bool trayButton: true
         property bool batteryRing: true
+        property string dockPinned: "[]"
+        property bool dockRunning: true
+        property bool dockTooltips: true
         property bool eventVolume: true
         property bool eventBrightness: true
         property bool eventCharger: true
@@ -135,6 +143,7 @@ Singleton {
     component ScreenshotGroup: JsonObject {
         property bool copy: true
         property bool notify: true
+        property bool freeze: true
     }
 
     component WeatherGroup: JsonObject {
@@ -167,6 +176,7 @@ Singleton {
         readonly property InputGroup input: InputGroup {}
         readonly property DisplaysGroup displays: DisplaysGroup {}
         readonly property PowerGroup power: PowerGroup {}
+        readonly property SoundGroup sound: SoundGroup {}
         readonly property BarGroup bar: BarGroup {}
         readonly property BlurGroup blur: BlurGroup {}
         readonly property WindowsGroup windows: WindowsGroup {}
@@ -201,7 +211,7 @@ Singleton {
     }
 
     function resetAll() {
-        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "bar", "blur", "windows", "theme", "quickSettings", "screenshot"]);
+        reset(["clock", "notifications", "recorder", "wallpaper", "nowPlaying", "apps", "input", "power", "sound", "bar", "blur", "windows", "theme", "quickSettings", "screenshot"]);
     }
 
     Process {
@@ -235,6 +245,7 @@ Singleton {
             property InputGroup input: InputGroup {}
             property DisplaysGroup displays: DisplaysGroup {}
             property PowerGroup power: PowerGroup {}
+            property SoundGroup sound: SoundGroup {}
             property BarGroup bar: BarGroup {}
             property BlurGroup blur: BlurGroup {}
             property WindowsGroup windows: WindowsGroup {}

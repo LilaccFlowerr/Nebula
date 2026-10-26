@@ -57,7 +57,13 @@ Singleton {
         readonly property int maxWave: 200
         readonly property int minText: 80
         readonly property int maxText: 220
-        readonly property int cardWidth: 500
+        readonly property int panelWidth: 940
+        readonly property int panelPadding: 22
+        readonly property int artSize: 200
+        readonly property int cavaWidth: 220
+        readonly property int cavaRows: 32
+        readonly property int cavaBar: 3
+        readonly property int lyricsAnchor: 3
     }
     readonly property MediaIslandTokens media: MediaIslandTokens {}
 
@@ -156,6 +162,27 @@ Singleton {
         readonly property int menuRowHeight: 40
     }
     readonly property Tray tray: Tray {}
+
+    component DockTokens: QtObject {
+        readonly property int itemSize: 40
+        readonly property int iconSize: 26
+        readonly property int spacing: 4
+        readonly property int dotSize: 4
+        readonly property int dotActiveWidth: 12
+        readonly property int dividerWidth: 2
+        readonly property int dividerHeight: 20
+        readonly property int tooltipGap: 8
+        readonly property int menuWidth: 240
+        readonly property int dotGap: 3
+        readonly property int maxDots: 3
+        readonly property int previewDelay: 350
+        readonly property int thumbWidth: 200
+        readonly property int thumbHeight: 125
+        readonly property int windowButton: 26
+        readonly property int breathDuration: 700
+        readonly property real breathDepth: 0.18
+    }
+    readonly property DockTokens dock: DockTokens {}
 
     component RecorderCorner: QtObject {
         readonly property int windowSize: 480

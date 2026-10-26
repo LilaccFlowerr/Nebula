@@ -5,6 +5,8 @@ import qs.theme
 Item {
     id: root
 
+    property int anchorLine: Theme.lyrics.anchorLine
+
     clip: true
 
     Column {
@@ -12,7 +14,7 @@ Item {
 
         visible: Lyrics.synced
         width: parent.width
-        y: (Theme.lyrics.anchorLine - Math.max(0, Lyrics.currentIndex)) * Theme.lyrics.lineHeight
+        y: (root.anchorLine - Math.max(0, Lyrics.currentIndex)) * Theme.lyrics.lineHeight
 
         Behavior on y {
             NumberAnimation { duration: Theme.anim.slow; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }

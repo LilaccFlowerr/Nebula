@@ -11,14 +11,14 @@ Item {
 
     property int textWidth: 220
     property int waveWidth: 200
-    property int cardWidth: 500
+    property real headerT: 0
 
     readonly property string screenName: QsWindow.window?.screen?.name ?? ""
-    readonly property bool expanded: GlobalStates.mediaExpanded && GlobalStates.isOn(screenName) && Media.active
     readonly property bool resizing: row.resizing
+    readonly property alias row: row
 
-    implicitWidth: expanded ? cardWidth + Theme.spacing.lg * 2 : row.implicitWidth + Theme.spacing.lg * 2
-    implicitHeight: expanded ? card.implicitHeight + Theme.spacing.lg * 2 : Theme.button.size
+    implicitWidth: row.implicitWidth + Theme.spacing.lg * 2
+    implicitHeight: Theme.button.size
 
     property bool holding: false
     property string heldTitle: ""
@@ -31,12 +31,6 @@ Item {
     property int skipDirection: 1
     property real skipSlide: 0
     property real skipFade: 1
-
-    HyprlandFocusGrab {
-        windows: [root.QsWindow.window]
-        active: root.expanded && !GlobalStates.capturing
-        onCleared: GlobalStates.mediaExpanded = false
-    }
 
     Connections {
         target: Media
@@ -79,89 +73,41 @@ Item {
         anchors.fill: parent
         anchors.leftMargin: parent.height / 2
         anchors.rightMargin: parent.height / 2
-        visible: !root.expanded
-        opacity: Theme.visualizer.pillOpacity
+        opacity: Theme.visualizer.pillOpacity * (1 - root.headerT)
         barWidth: Theme.visualizer.barWidth
         count: Cava.bars
         values: Cava.values
-    }
-
-    Visualizer {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: Theme.spacing.lg
-        height: Theme.visualizer.cardHeight
-        opacity: root.expanded ? Theme.visualizer.pillOpacity : 0
-        visible: opacity > 0
-        barWidth: Theme.visualizer.barWidth
-        count: Cava.bars
-        values: Cava.values
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.anim.medium }
-        }
     }
 
     MouseArea {
         anchors.fill: parent
-        enabled: !root.expanded
         cursorShape: Qt.PointingHandCursor
         onClicked: GlobalStates.toggleMedia(root.screenName)
     }
 
     MediaRow {
+        extrasOpacity: 1 - root.headerT
+        textOpacity: root.headerT > 0.001 ? 0 : 1
         id: row
         anchors.centerIn: parent
-        opacity: root.expanded ? 0 : 1
         maxTextWidth: root.textWidth
         waveWidth: root.waveWidth
         trackTitle: root.shownTitle
         trackArtist: root.shownArtist
         slide: root.skipSlide
         fade: root.skipFade
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.anim.fast }
-        }
-    }
-
-    MediaCard {
-        id: card
-        expanded: root.expanded
-        trackTitle: root.shownTitle
-        trackArtist: root.shownArtist
-        slide: root.skipSlide
-        fade: root.skipFade
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Theme.spacing.lg
-        width: root.cardWidth
     }
 
     ClippingRectangle {
         id: art
+        opacity: 1 - root.headerT
+        visible: opacity > 0
 
-        property real t: root.expanded ? 1 : 0
-
-        Behavior on t {
-            NumberAnimation {
-                duration: Theme.anim.island
-                easing.type: Easing.OutBack
-                easing.overshoot: Theme.anim.overshoot
-            }
-        }
-
-        readonly property real smallX: row.x + row.artSlot.x
-        readonly property real smallY: row.y + row.artSlot.y
-        readonly property real bigX: card.x + card.artX
-        readonly property real bigY: card.y + card.artY
-
-        x: smallX + (bigX - smallX) * t
-        y: smallY + (bigY - smallY) * t
-        width: row.artSlot.width + (card.artSlot.width - row.artSlot.width) * t
+        x: row.x + row.artSlot.x
+        y: row.y + row.artSlot.y
+        width: row.artSlot.width
         height: width
-        radius: Theme.radius.small + (Theme.radius.medium - Theme.radius.small) * t
+        radius: Theme.radius.small
         color: Colors.surfaceContainerHigh
 
         Item {
