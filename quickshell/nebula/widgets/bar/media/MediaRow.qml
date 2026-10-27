@@ -21,8 +21,7 @@ RowLayout {
 
     spacing: Theme.spacing.sm
 
-    property real textWidth: Media.playing ? maxTextWidth
-        : Math.min(maxTextWidth, Math.max(title.implicitWidth, artist.implicitWidth))
+    property real textWidth: maxTextWidth
 
     Behavior on textWidth {
         NumberAnimation {

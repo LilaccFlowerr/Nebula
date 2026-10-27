@@ -11,6 +11,7 @@ Item {
     property alias color: fill.color
     property alias animationDuration: fill.animationDuration
     property alias animationEasing: fill.animationEasing
+    property real shapeRotation: 0
     property real zoom: 1
     property real panX: 0
     property real panY: 0
@@ -31,17 +32,23 @@ Item {
         anchors.fill: parent
         shape: MaterialShape.Cookie9Sided
         color: "transparent"
+        rotation: root.shapeRotation
     }
 
-    MaterialShape {
+    Item {
         id: mask
         anchors.fill: parent
-        shape: fill.shape
-        color: "black"
-        animationDuration: fill.animationDuration
-        animationEasing: fill.animationEasing
         layer.enabled: true
         visible: false
+
+        MaterialShape {
+            anchors.fill: parent
+            shape: fill.shape
+            color: "black"
+            rotation: root.shapeRotation
+            animationDuration: fill.animationDuration
+            animationEasing: fill.animationEasing
+        }
     }
 
     Item {
