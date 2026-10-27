@@ -55,6 +55,7 @@ Singleton {
         property string path: ""
         property string directory: ""
         property string transition: "cookie9"
+        property bool pauseOnBattery: true
     }
 
     component NowPlayingGroup: JsonObject {

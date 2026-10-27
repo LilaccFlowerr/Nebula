@@ -14,12 +14,6 @@ Rectangle {
     property string shownKey: ""
     readonly property var shownApp: Dock.app(shownKey)
     readonly property var windows: shownApp?.windows ?? []
-    readonly property bool pinned: Dock.isPinned(shownKey)
-    readonly property var actions: [
-        { icon: "add", text: "New window", run: () => Dock.launch(root.shownKey), show: !!root.shownApp?.entry },
-        { icon: "push_pin", text: pinned ? "Unpin" : "Pin", run: () => Dock.togglePin(root.shownKey), show: true },
-        { icon: "close", text: windows.length > 1 ? "Close all" : "Close", run: () => Dock.closeAll(root.shownKey), show: windows.length > 0 }
-    ].filter(a => a.show)
 
     signal requestClose()
 
@@ -29,7 +23,9 @@ Rectangle {
         Dock.refresh();
     }
 
-    implicitWidth: Math.max(Theme.dock.menuWidth, thumbs.implicitWidth, actionRow.implicitWidth) + Theme.spacing.md * 2
+    onWindowsChanged: if (open && windows.length === 0) requestClose()
+
+    implicitWidth: Math.max(Theme.dock.menuWidth, thumbs.implicitWidth) + Theme.spacing.md * 2
     implicitHeight: content.implicitHeight + Theme.spacing.md * 2
     radius: Theme.radius.large
     color: Qt.alpha(Colors.surface, Theme.bar.opacity)
@@ -229,68 +225,6 @@ Rectangle {
                         font.pixelSize: Theme.font.small
                         font.weight: card.current ? Font.DemiBold : Font.Normal
                         color: Colors.textOnSurface
-                    }
-                }
-            }
-        }
-
-        Row {
-            id: actionRow
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Theme.settings.rowGap
-
-            Repeater {
-                model: root.actions
-
-                Rectangle {
-                    id: action
-
-                    required property var modelData
-                    required property int index
-
-                    width: actionContent.implicitWidth + Theme.spacing.md * 2
-                    height: Theme.tray.menuRowHeight
-                    topLeftRadius: index === 0 ? height / 2 : Theme.settings.rowRadius
-                    bottomLeftRadius: topLeftRadius
-                    topRightRadius: index === root.actions.length - 1 ? height / 2 : Theme.settings.rowRadius
-                    bottomRightRadius: topRightRadius
-                    color: actionMouse.containsMouse ? Colors.secondaryContainer : Colors.surfaceContainerHigh
-
-                    Behavior on color {
-                        ColorAnimation { duration: Theme.anim.fast }
-                    }
-
-                    Row {
-                        id: actionContent
-                        anchors.centerIn: parent
-                        spacing: Theme.spacing.xs
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: action.modelData.icon
-                            font.family: Theme.font.icons
-                            font.pixelSize: Theme.tray.iconSize - 4
-                            color: actionMouse.containsMouse ? Colors.textOnSecondaryContainer : Colors.primary
-                        }
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: action.modelData.text
-                            font.family: Theme.font.family
-                            font.pixelSize: Theme.font.small
-                            color: actionMouse.containsMouse ? Colors.textOnSecondaryContainer : Colors.textOnSurface
-                        }
-                    }
-
-                    MouseArea {
-                        id: actionMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            action.modelData.run();
-                            root.requestClose();
-                        }
                     }
                 }
             }

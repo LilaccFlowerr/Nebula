@@ -17,11 +17,32 @@ Island {
 
     readonly property real margin: (Theme.bar.height - Theme.dock.itemSize) / 2
     readonly property bool empty: Dock.pinned.length === 0 && Dock.running.length === 0
-    readonly property bool menuOpen: GlobalStates.dockMenu !== "" && GlobalStates.isOn(QsWindow.window?.screen?.name ?? "")
+    readonly property bool here: GlobalStates.isOn(QsWindow.window?.screen?.name ?? "")
+    readonly property bool previewOpen: GlobalStates.dockPreview !== "" && here
+    readonly property bool contextOpen: GlobalStates.dockContext !== "" && here
+    readonly property bool menuOpen: previewOpen || contextOpen
     readonly property bool showDivider: Dock.pinned.length > 0 && Dock.running.length > 0
     property Item hoveredItem: null
 
     property alias menuArea: menuArea
+    property alias contextArea: contextArea
+
+    function centerOf(item) {
+        return item ? item.mapToItem(root, item.width / 2, 0).x : root.width / 2;
+    }
+
+    function placeUnder(centerX, w) {
+        const left = root.x;
+        const room = QsWindow.window?.width ?? root.width;
+        const m = Theme.bar.floatMargin;
+        return Math.round(Math.max(m - left, Math.min(room - m - left - w, centerX - w / 2)));
+    }
+
+    Connections {
+        target: GlobalStates
+        function onDockPreviewChanged() { if (GlobalStates.dockPreview !== "") menuArea.centerX = root.centerOf(root.hoveredItem); }
+        function onDockContextChanged() { if (GlobalStates.dockContext !== "") contextArea.centerX = root.centerOf(root.hoveredItem); }
+    }
 
     Behavior on implicitWidth {
         NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
@@ -57,9 +78,9 @@ Island {
     HoverHandler { id: islandHover }
 
     HoverDismiss {
-        active: root.menuOpen
+        active: root.previewOpen
         hovered: islandHover.hovered || menuHover.hovered
-        onDismissed: GlobalStates.dockMenu = ""
+        onDismissed: GlobalStates.dockPreview = ""
     }
 
     EmptyContent {
@@ -168,19 +189,46 @@ Island {
     Item {
         id: menuArea
 
+        property real centerX: root.width / 2
+
         HoverHandler { id: menuHover }
-        anchors.horizontalCenter: parent.horizontalCenter
+        x: root.placeUnder(centerX, width)
         anchors.top: parent.bottom
         anchors.topMargin: Theme.spacing.sm
-        width: menu.width
-        height: root.menuOpen ? menu.height : 0
+        width: preview.width
+        height: root.previewOpen ? preview.height : 0
 
-        DockMenu {
-            id: menu
+        Behavior on centerX {
+            enabled: preview.visible
+            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        }
+
+        DockPreview {
+            id: preview
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            key: root.menuOpen ? GlobalStates.dockMenu : ""
-            onRequestClose: GlobalStates.dockMenu = ""
+            key: root.previewOpen ? GlobalStates.dockPreview : ""
+            onRequestClose: GlobalStates.dockPreview = ""
+        }
+    }
+
+    Item {
+        id: contextArea
+
+        property real centerX: root.width / 2
+
+        x: root.placeUnder(centerX, width)
+        anchors.top: parent.bottom
+        anchors.topMargin: Theme.spacing.sm
+        width: contextMenu.width
+        height: root.contextOpen ? contextMenu.height : 0
+
+        DockContextMenu {
+            id: contextMenu
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            key: root.contextOpen ? GlobalStates.dockContext : ""
+            onRequestClose: GlobalStates.dockContext = ""
         }
     }
 }

@@ -1,0 +1,45 @@
+[32m  INFO[0m: Launching config: "/tmp/claude-1000/-home-bloep-setup-dotfiles/899ba31d-404f-40bb-af5b-8dfc3ae6484e/scratchpad/vidtest/shell.qml"
+[32m  INFO[0m: Shell ID: "e7e7f2f496962de2199a0bf61e6ccdc7" Path ID "e7e7f2f496962de2199a0bf61e6ccdc7"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/91uaq1lnt/log.qslog"
+MESA-EGL: warning: pci id for fd 25: 10de:28a0, driver (null)
+pci id for fd 26: 10de:28a0, driver (null)
+pci id for fd 27: 10de:28a0, driver (null)
+MESA-EGL: warning: egl: failed to create dri2 screen
+pci id for fd 26: 10de:28a0, driver (null)
+pci id for fd 27: 10de:28a0, driver (null)
+MESA-EGL: warning: egl: failed to create dri2 screen
+[34m DEBUG[97m qt.scenegraph.general[0m: threaded render loop
+[34m DEBUG[97m qt.scenegraph.general[0m: Using sg animation driver
+[34m DEBUG[97m qt.scenegraph.general[0m: Animation Driver: using vsync: 6.94 ms
+[32m  INFO[97m qt.multimedia.ffmpeg[0m: Using Qt multimedia with FFmpeg version n9.0.2 GPL version 3 or later
+[32m  INFO[0m: Configuration Loaded
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/tmp/claude-1000/-home-bloep-setup-dotfiles/899ba31d-404f-40bb-af5b-8dfc3ae6484e/scratchpad/vidtest/test.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf63.1.102
+  Duration: 00:00:05.00, start: 0.000000, bitrate: 8756 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 8749 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      encoder         : Lavc63.1.102 libx264
+[34m DEBUG[97m qt.scenegraph.general[0m: Animation Driver: using vsync: 6.94 ms
+[34m DEBUG[97m qt.scenegraph.general[0m: Creating QRhi with backend OpenGL for window 0x7fdda18b9960 (wflags 0x1)
+  Graphics API debug/validation layers: 0
+  Debug markers: 0
+  Timestamps: 0
+  Prefer software device: 0
+  Shader/pipeline cache collection: 1
+[34m DEBUG[97m qt.rhi.general[0m: Created OpenGL context QSurfaceFormat(version 4.6, options QFlags<QSurfaceFormat::FormatOption>(DeprecatedFunctions|ResetNotification), depthBufferSize 24, redBufferSize 8, greenBufferSize 8, blueBufferSize 8, alphaBufferSize 8, stencilBufferSize 8, samples 0, swapBehavior QSurfaceFormat::DefaultSwapBehavior, swapInterval 1, colorSpace QColorSpace(), profile  QSurfaceFormat::CompatibilityProfile)
+[34m DEBUG[97m qt.rhi.general[0m: OpenGL VENDOR: Mesa RENDERER: llvmpipe (LLVM 23.1.3, 256 bits) VERSION: 4.6 (Compatibility Profile) Mesa 26.2.5-arch1.1
+[34m DEBUG[97m qt.scenegraph.general[0m: Created QRhi 0x7fdd5600c008 for window 0x7fdda18b9960
+[34m DEBUG[97m qt.scenegraph.general[0m: Attempting to seed pipeline cache for QRhi 0x7fdd5600c008 from '/home/bloep/.cache/quickshell/qtpipelinecache-x86_64-little_endian-lp64/qqpc_opengl'
+[34m DEBUG[97m qt.rhi.general[0m: setPipelineCacheData: OpenGL vendor/renderer/version does not match
+[34m DEBUG[97m qt.scenegraph.general[0m: MSAA sample count for the swapchain is 1. Alpha channel requested = no.
+[34m DEBUG[97m qt.scenegraph.general[0m: rhi texture atlas dimensions: 512x512
+[32m  INFO[97m qml[0m: state 1
+[33m  WARN[0m: eglCreateImage failed for plane 0 with error code EGL_BAD_MATCH, disabling hardware acceleration. This could indicate an EGL implementation issue.
+EGL vendor: Mesa Project
+[33m  WARN[0m: VAAPI driver: Intel iHD driver for Intel(R) Gen Graphics - 26.3.5 ()
+[33m  WARN[0m:     failed to get textures for frame; format: 44

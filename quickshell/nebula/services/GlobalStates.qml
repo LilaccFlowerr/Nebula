@@ -15,7 +15,8 @@ Singleton {
     property bool trayOpen: false
     property bool systemOpen: false
     property bool mediaExpanded: false
-    property string dockMenu: ""
+    property string dockPreview: ""
+    property string dockContext: ""
     property bool settingsOpen: false
     property bool settingsFromQuick: false
     property string settingsPage: ""
@@ -23,7 +24,7 @@ Singleton {
     property string screen: ""
     property bool capturing: false
     property string pickFor: ""
-    readonly property bool popupOpen: powerMenuOpen || quickSettingsOpen || calendarOpen || trayOpen || systemOpen || mediaExpanded || dockMenu !== ""
+    readonly property bool popupOpen: powerMenuOpen || quickSettingsOpen || calendarOpen || trayOpen || systemOpen || mediaExpanded || dockPreview !== "" || dockContext !== ""
 
     function isOn(screenName) {
         return screen === screenName;
@@ -73,13 +74,20 @@ Singleton {
         }
     }
 
-    function toggleDockMenu(key, screenName = focusedScreen()) {
-        if (dockMenu === key && screen === screenName) {
-            dockMenu = "";
+    function openDockPreview(key, screenName = focusedScreen()) {
+        if (dockPreview === key && screen === screenName) return;
+        closeAll();
+        screen = screenName;
+        dockPreview = key;
+    }
+
+    function toggleDockContext(key, screenName = focusedScreen()) {
+        if (dockContext === key && screen === screenName) {
+            dockContext = "";
         } else {
             closeAll();
             screen = screenName;
-            dockMenu = key;
+            dockContext = key;
         }
     }
 
@@ -137,7 +145,8 @@ Singleton {
         calendarOpen = false;
         trayOpen = false;
         systemOpen = false;
-        dockMenu = "";
+        dockPreview = "";
+        dockContext = "";
     }
 
     Connections {
@@ -158,7 +167,8 @@ Singleton {
         trayOpen = false;
         systemOpen = false;
         mediaExpanded = false;
-        dockMenu = "";
+        dockPreview = "";
+        dockContext = "";
         settingsOpen = false;
     }
 

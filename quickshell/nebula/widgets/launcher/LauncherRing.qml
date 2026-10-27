@@ -110,7 +110,7 @@ Item {
         width: Theme.launcher.previewSize
         height: Theme.launcher.previewSize
         shape: Wallpaper.transitionShape
-        source: wallpaper ? Wallpaper.url(wallpaper.path) : ""
+        source: wallpaper ? Wallpaper.thumb(wallpaper.path) : ""
         sourceSize: Qt.size(width * 2, height * 2)
         color: Colors.surfaceContainer
         scale: Math.max(0, root.shownWall)

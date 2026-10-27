@@ -24,7 +24,7 @@ ColumnLayout {
 
         Image {
             anchors.fill: parent
-            source: Wallpaper.url(Wallpaper.current)
+            source: Wallpaper.thumb(Wallpaper.current)
             sourceSize.width: width * 2
             sourceSize.height: height * 2
             fillMode: Image.PreserveAspectCrop
