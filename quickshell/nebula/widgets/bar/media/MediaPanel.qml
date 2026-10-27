@@ -17,6 +17,22 @@ Item {
 
     readonly property real fullHeight: content.implicitHeight + Theme.media.panelPadding * 2
 
+    property real spin: 0
+    property real speed: Media.playing && Settings.nowPlaying.spin && !Settings.theme.reduceMotion ? 360 / Settings.nowPlaying.spinSeconds : 0
+
+    Behavior on speed {
+        NumberAnimation {
+            duration: Math.round(Theme.nowPlaying.spinUpDuration * Theme.anim.scale)
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Theme.anim.standard
+        }
+    }
+
+    FrameAnimation {
+        running: root.open && root.speed > 0
+        onTriggered: root.spin = (root.spin + root.speed * frameTime) % 360
+    }
+
     signal requestClose()
 
     HyprlandFocusGrab {
@@ -39,7 +55,8 @@ Item {
             ShapedArt {
                 Layout.preferredWidth: Theme.media.artSize
                 Layout.preferredHeight: Theme.media.artSize
-                shape: MaterialShape.Cookie12Sided
+                shape: MaterialShape.Cookie7Sided
+                shapeRotation: root.spin
                 color: Colors.surfaceContainerHigh
                 source: root.art
                 sourceSize: Qt.size(Theme.media.artSize * 2, Theme.media.artSize * 2)
