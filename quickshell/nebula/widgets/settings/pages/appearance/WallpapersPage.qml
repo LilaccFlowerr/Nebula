@@ -50,7 +50,7 @@ ColumnLayout {
                         Image {
                             id: thumb
                             anchors.fill: parent
-                            source: Wallpaper.url(wall.modelData)
+                            source: Wallpaper.thumb(wall.modelData)
                             sourceSize.width: Theme.settings.thumbWidth
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true

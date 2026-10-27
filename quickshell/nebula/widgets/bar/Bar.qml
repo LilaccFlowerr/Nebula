@@ -39,6 +39,7 @@ Variants {
                 Region { item: leftIsland },
                 Region { item: centerIsland },
                 Region { item: centerIsland.menuArea },
+                Region { item: centerIsland.contextArea },
                 Region { item: mediaIsland },
                 Region { item: mediaIsland.bodyArea },
                 Region { item: rightIsland },

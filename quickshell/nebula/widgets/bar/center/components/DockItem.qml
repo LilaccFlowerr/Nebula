@@ -18,7 +18,7 @@ Item {
     readonly property bool running: windowCount > 0
     readonly property bool active: app?.active ?? false
     readonly property bool launching: Dock.isLaunching(key)
-    readonly property bool menuOpen: GlobalStates.dockMenu === key
+    readonly property bool menuOpen: GlobalStates.dockPreview === key || GlobalStates.dockContext === key
     readonly property bool hovered: mouse.containsMouse
     readonly property string screenName: QsWindow.window?.screen?.name ?? ""
     readonly property int ownShape: Dock.shapeFor(key)
@@ -45,8 +45,11 @@ Item {
     onHoveredChanged: {
         if (!hovered) {
             hoverOpen.stop();
-        } else if (running && GlobalStates.dockMenu !== "" && GlobalStates.isOn(screenName)) {
-            GlobalStates.dockMenu = key;
+        } else if (GlobalStates.dockContext !== "") {
+            return;
+        } else if (GlobalStates.dockPreview !== "" && GlobalStates.isOn(screenName)) {
+            if (running) GlobalStates.openDockPreview(key, screenName);
+            else GlobalStates.dockPreview = "";
         } else if (running) {
             hoverOpen.restart();
         }
@@ -55,7 +58,7 @@ Item {
     Timer {
         id: hoverOpen
         interval: Theme.dock.previewDelay
-        onTriggered: if (root.hovered && GlobalStates.dockMenu === "") GlobalStates.toggleDockMenu(root.key, root.screenName)
+        onTriggered: if (root.hovered && root.running && GlobalStates.dockPreview === "" && GlobalStates.dockContext === "") GlobalStates.openDockPreview(root.key, root.screenName)
     }
 
     NumberAnimation {
@@ -172,10 +175,11 @@ Item {
         onClicked: event => {
             hoverOpen.stop();
             if (event.button === Qt.RightButton) {
-                GlobalStates.toggleDockMenu(root.key, root.screenName);
+                GlobalStates.toggleDockContext(root.key, root.screenName);
                 return;
             }
-            GlobalStates.dockMenu = "";
+            GlobalStates.dockPreview = "";
+            GlobalStates.dockContext = "";
             if (event.button === Qt.MiddleButton) Dock.launch(root.key);
             else Dock.activate(root.key);
         }

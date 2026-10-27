@@ -65,7 +65,7 @@ Item {
         width: Theme.launcher.itemSize
         height: Theme.launcher.itemSize
         shape: mouse.containsMouse && !root.empty ? MaterialShape.Cookie9Sided : root.shape
-        source: root.isWallpaper ? Wallpaper.url(root.shownEntry.path) : ""
+        source: root.isWallpaper ? Wallpaper.thumb(root.shownEntry.path) : ""
         sourceSize: Qt.size(Theme.launcher.itemSize * 2, Theme.launcher.itemSize * 2)
         color: root.preview?.primary ?? (root.selected ? Colors.primaryContainer : mouse.containsMouse ? Colors.surfaceContainerHighest : Colors.surfaceContainerHigh)
         opacity: root.empty ? 0.25 : 1

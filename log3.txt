@@ -1,0 +1,79 @@
+[32m  INFO[0m: Launching config: "/tmp/claude-1000/-home-bloep-setup-dotfiles/899ba31d-404f-40bb-af5b-8dfc3ae6484e/scratchpad/vidtest/shell.qml"
+[32m  INFO[0m: Shell ID: "e7e7f2f496962de2199a0bf61e6ccdc7" Path ID "e7e7f2f496962de2199a0bf61e6ccdc7"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/ygu0r1lnt/log.qslog"
+[32m  INFO[97m qt.multimedia.ffmpeg[0m: Using Qt multimedia with FFmpeg version n9.0.2 GPL version 3 or later
+[34m DEBUG[97m qt.multimedia.ffmpeg[0m: Available HW decoding frameworks:
+[34m DEBUG[97m qt.multimedia.ffmpeg[0m:      vulkan
+[34m DEBUG[97m qt.multimedia.ffmpeg[0m: Available HW encoding frameworks:
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m: Check device types
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Checking HW context: vdpau
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Using above hw context.
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Checking HW context: cuda
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Using above hw context.
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Checking HW context: vaapi
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Using above hw context.
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Checking HW context: qsv
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Could not create hw context: Unknown error occurred
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Checking HW context: vulkan
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Using above hw context.
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m: Device types checked. Spent time: 249898us
+[34m DEBUG[97m qt.multimedia.ffmpeg[0m:      cuda
+[34m DEBUG[97m qt.multimedia.ffmpeg[0m:      vaapi
+[34m DEBUG[97m qt.multimedia.ffmpeg[0m:      vdpau
+[34m DEBUG[97m qt.multimedia.ffmpeg[0m:      vulkan
+[34m DEBUG[97m qt.multimedia.ffmpeg.mediadataholder[0m: Using custom network timeout: 20000ms
+[32m  INFO[0m: Configuration Loaded
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/tmp/claude-1000/-home-bloep-setup-dotfiles/899ba31d-404f-40bb-af5b-8dfc3ae6484e/scratchpad/vidtest/test.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf63.1.102
+  Duration: 00:00:05.00, start: 0.000000, bitrate: 8756 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 8749 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      encoder         : Lavc63.1.102 libx264
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:    checking: language und
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:        adding QMediaMetaData::Language
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:    checking: handler_name VideoHandler
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:    checking: encoder Lavc63.1.102 libx264
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:    checking: major_brand isom
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:    checking: minor_version 512
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:    checking: compatible_brands isomiso2avc1mp41
+[34m DEBUG[97m qt.multimedia.ffmpeg.metadata[0m:    checking: encoder Lavf63.1.102
+[34m DEBUG[97m qt.multimedia.ffmpeg.playbackengine[0m: Create PlaybackEngine
+[34m DEBUG[97m qt.multimedia.ffmpeg.playbackengine[0m: set playback engine loops: -1 prev loops: -1 index: 0
+[34m DEBUG[97m qt.multimedia.ffmpeg.playbackengine[0m: Create codec for stream: 0 trackType: VideoStream
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "avui"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "pdv"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "s302m"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "dca"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "mlp"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "opus"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "truehd"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip experimental codec "vorbis"
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "h263_v4l2m2m" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "av1_amf" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "h264_amf" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "h264_v4l2m2m" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "hevc_amf" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "hevc_v4l2m2m" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "mpeg4_v4l2m2m" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.codecstorage[0m: Skip encoder "vp8_v4l2m2m" due to disabled matching hw acceleration, or dysfunctional codec
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m: Found potential codec "h264" for hw accel vulkan ; Checking the hw device...
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Checking HW context: vulkan
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m:     Using above hw context.
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m: HW device is OK
+[34m DEBUG[97m qt.multimedia.ffmpeg.streamdecoder[0m: Create stream decoder, trackType VideoStream absSeekPos: 0
+[34m DEBUG[97m qt.multimedia.ffmpeg.demuxer[0m: Create demuxer. pos: 0 loop offset: 0 loop index: 0 loops: -1
+[34m DEBUG[97m qt.multimedia.ffmpeg.demuxer[0m: Activate demuxing stream 0 , trackType: VideoStream
+[32m  INFO[97m qml[0m: state 1
+[34m DEBUG[97m qt.multimedia.ffmpeg.playbackengine[0m: Delay of demuxer initialization: 53701us
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m: Selected format vulkan for hw vulkan
+[h264 @ 0x7ff5acafb980] Device does not support the VK_KHR_video_decode_queue extension!
+[h264 @ 0x7ff5acafb980] Failed setup for format vulkan: hwaccel initialisation returned error.
+[34m DEBUG[97m qt.multimedia.ffmpeg.hwaccel[0m: Selected format with no conversion yuv420p
+[34m DEBUG[97m qt.multimedia.ffmpeg.demuxer[0m: Seeking to offset 0us from media start.
+[34m DEBUG[97m qt.multimedia.ffmpeg.demuxer[0m: Demuxer loops changed. Index: 1 Offset: 5000000
+[34m DEBUG[97m qt.multimedia.ffmpeg.streamdecoder[0m: flush buffers due to new loop: 1

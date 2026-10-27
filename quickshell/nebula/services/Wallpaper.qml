@@ -14,6 +14,9 @@ Singleton {
     readonly property string fallback: Quickshell.shellDir + "/assets/default.jpg"
     readonly property string current: Settings.wallpaper.path || fallback
     property var files: []
+    readonly property var videoTypes: ["mp4", "webm", "mkv", "mov", "gif"]
+    readonly property string posterDir: home + "/.cache/nebula/posters"
+    readonly property string still: isVideo(current) ? poster(current) : current
 
     readonly property var transitions: [
         { key: "random", name: "Random", shape: -1 },
@@ -52,6 +55,34 @@ Singleton {
         return "file://" + path.split("/").map(encodeURIComponent).join("/");
     }
 
+    function isVideo(path) {
+        return videoTypes.includes(String(path).split(".").pop().toLowerCase());
+    }
+
+    function poster(path) {
+        return posterDir + "/" + Qt.md5(path) + ".jpg";
+    }
+
+    function thumb(path) {
+        return url(isVideo(path) ? poster(path) : path);
+    }
+
+    function makePosters(paths, done) {
+        const videos = paths.filter(isVideo);
+        if (videos.length === 0) {
+            done();
+            return;
+        }
+        const proc = posterProc.createObject(root, { done: done });
+        proc.command = ["sh", "-c", `
+            mkdir -p "$0"
+            while [ $# -gt 0 ]; do
+                [ -s "$2" ] || ffmpeg -v error -y -i "$1" -vf "thumbnail,scale=1920:-2" -frames:v 1 "$2" < /dev/null
+                shift 2
+            done`, posterDir].concat(...videos.map(v => [v, poster(v)]));
+        proc.running = true;
+    }
+
     function name(path) {
         return path.split("/").pop().replace(/\.[^.]+$/, "");
     }
@@ -60,18 +91,31 @@ Singleton {
         if (!path) return;
         roll();
         Settings.wallpaper.path = path;
-        Scheme.apply();
+        makePosters([path], () => Scheme.apply());
+    }
+
+    Component {
+        id: posterProc
+
+        Process {
+            property var done
+            onExited: {
+                done();
+                destroy();
+            }
+        }
     }
 
     FolderListModel {
         id: folder
         folder: "file://" + root.directory
-        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp"]
+        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp"].concat(root.videoTypes.map(t => "*." + t))
         caseSensitive: false
         showDirs: false
         sortField: FolderListModel.Name
         function update() {
-            root.files = Array.from({ length: count }, (_, i) => get(i, "filePath"));
+            const paths = Array.from({ length: count }, (_, i) => get(i, "filePath"));
+            root.makePosters(paths, () => root.files = paths);
         }
 
         onCountChanged: update()

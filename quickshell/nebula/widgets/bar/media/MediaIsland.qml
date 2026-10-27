@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Shapes
 import Quickshell
 import qs.components
@@ -101,6 +102,36 @@ Item {
                 PathLine { x: 0; y: 0 }
             }
         }
+    }
+
+    FloatingShapes {
+        id: floating
+        width: root.fullWidth
+        height: glass.bodyTop + panel.fullHeight
+        running: root.expanded && Media.playing
+        visible: false
+        layer.enabled: root.t > 0.001
+    }
+
+    ShaderEffectSource {
+        id: floatingMask
+        width: floating.width
+        height: floating.height
+        sourceItem: glass
+        sourceRect: Qt.rect(0, 0, width, height)
+        visible: false
+    }
+
+    MultiEffect {
+        width: floating.width
+        height: floating.height
+        visible: root.t > 0.001
+        opacity: panel.opacity
+        source: floating
+        maskEnabled: true
+        maskSource: floatingMask
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
     }
 
     MediaView {

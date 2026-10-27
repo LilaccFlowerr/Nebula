@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
+import Quickshell.Services.UPower
 import M3Shapes
 import qs.services
 import qs.theme
@@ -28,8 +30,8 @@ Variants {
         WlrLayershell.layer: WlrLayer.Background
         WlrLayershell.namespace: "quickshell:wallpaper"
 
-        property Image base: first
-        property Image incoming: second
+        property WallpaperSlot base: first
+        property WallpaperSlot incoming: second
         property url target
         property bool busy: false
         property bool prepared: false
@@ -40,6 +42,8 @@ Variants {
         property real endScale: 1
         property real stretch: 1
         readonly property bool shaped: style !== "none" && style !== "fade" && style !== "glitch"
+        readonly property HyprlandMonitor monitor: Hyprland.monitorFor(modelData)
+        readonly property bool playing: !(monitor?.activeWorkspace?.hasFullscreen ?? false) && !(Settings.wallpaper.pauseOnBattery && UPower.onBattery)
 
         function measure() {
             let inner = Theme.launcher.previewSize / 2;
@@ -55,7 +59,7 @@ Variants {
             target = Wallpaper.url(Wallpaper.current);
             if (String(base.source) === String(target) && !replayPending) return;
             replayPending = false;
-            style = base.status === Image.Ready ? Wallpaper.transition.key : "none";
+            style = base.ready ? Wallpaper.transition.key : "none";
             transitionShape = Wallpaper.transitionShape;
             reveal = 0;
             prepared = false;
@@ -66,13 +70,13 @@ Variants {
 
         function prepare() {
             if (!busy || prepared) return;
-            if (incoming.status === Image.Error) {
+            if (incoming.failed) {
                 busy = false;
                 console.warn("Unable to load wallpaper:", target);
                 if (String(target) !== String(Wallpaper.url(Wallpaper.current))) Qt.callLater(show);
                 return;
             }
-            if (incoming.status !== Image.Ready) return;
+            if (!incoming.ready) return;
             if (style === "none") {
                 finish();
                 return;
@@ -87,6 +91,7 @@ Variants {
             const previous = base;
             base = incoming;
             incoming = previous;
+            previous.source = "";
             prepared = false;
             busy = false;
             if (String(target) !== String(Wallpaper.url(Wallpaper.current)) || replayPending) Qt.callLater(show);
@@ -130,26 +135,22 @@ Variants {
             onFinished: window.finish()
         }
 
-        Image {
+        WallpaperSlot {
             id: first
             anchors.fill: parent
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            sourceSize.width: window.width
-            sourceSize.height: window.height
             visible: window.base === first
-            onStatusChanged: Qt.callLater(window.prepare)
+            playing: window.playing && (visible || window.incoming === first && window.busy)
+            onReadyChanged: Qt.callLater(window.prepare)
+            onFailedChanged: Qt.callLater(window.prepare)
         }
 
-        Image {
+        WallpaperSlot {
             id: second
             anchors.fill: parent
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            sourceSize.width: window.width
-            sourceSize.height: window.height
             visible: window.base === second
-            onStatusChanged: Qt.callLater(window.prepare)
+            playing: window.playing && (visible || window.incoming === second && window.busy)
+            onReadyChanged: Qt.callLater(window.prepare)
+            onFailedChanged: Qt.callLater(window.prepare)
         }
 
         MultiEffect {
