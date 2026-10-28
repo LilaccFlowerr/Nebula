@@ -21,7 +21,7 @@ Item {
     readonly property var palette: Widgets.palette(colorRole)
 
     readonly property var baseColors: [Colors.outline, Colors.errorColor, Colors.secondary, Colors.tertiary, Colors.primary, Colors.tertiary, Colors.secondary, palette.text]
-    readonly property var ansiColors: baseColors.map(c => String(c)).concat(baseColors.map(c => String(Qt.lighter(c, 1.15))))
+    readonly property var ansiColors: baseColors.concat(baseColors).map(c => String(c))
     readonly property var swatchShapes: [MaterialShape.Circle, MaterialShape.Cookie4Sided, MaterialShape.Clover4Leaf, MaterialShape.Cookie6Sided, MaterialShape.Sunny, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Flower]
 
     property string infoRaw: ""
@@ -65,10 +65,15 @@ Item {
         return ref.distanceAtAngle(((angle % 360) + 360) % 360) / ref.width;
     }
     readonly property bool backdrop: logoMode === "background"
-    readonly property real stackLogo: backdrop ? 0 : infoW * Theme.fetch.stackLogo
-    readonly property real sideLogo: backdrop ? 0 : infoH * Theme.fetch.sideLogo
+    readonly property bool asciiLogo: !showArt
+    readonly property real logoAspect: asciiLogo ? Math.max(1, logoLines.length) * metrics.lineSpacing / (Math.max(1, Ansi.columns(logoLines)) * metrics.averageCharacterWidth) : 1
+    readonly property real stackLogoW: backdrop ? 0 : Math.min(infoW * Theme.fetch.stackLogo / Math.min(1, logoAspect), infoW)
+    readonly property real stackLogoH: stackLogoW * logoAspect
+    readonly property real sideLogoH: backdrop ? 0 : Math.min(infoH * Theme.fetch.sideLogo, infoW / logoAspect)
+    readonly property real sideLogoW: sideLogoH / logoAspect
     readonly property real gap: backdrop ? 0 : Theme.fetch.gap
-    readonly property real logoSize: stacked ? stackLogo : sideLogo
+    readonly property real logoW: stacked ? stackLogoW : sideLogoW
+    readonly property real logoH: stacked ? stackLogoH : sideLogoH
     readonly property real infoW: Math.max(1, info.implicitWidth)
     readonly property real infoH: Math.max(1, info.implicitHeight)
 
@@ -82,8 +87,8 @@ Item {
         return size * s * Theme.fetch.fill;
     }
 
-    readonly property real sideScale: fit(sideLogo + root.gap + infoW, Math.max(sideLogo, infoH))
-    readonly property real stackScale: fit(Math.max(stackLogo, infoW), stackLogo + root.gap + infoH)
+    readonly property real sideScale: fit(sideLogoW + root.gap + infoW, Math.max(sideLogoH, infoH))
+    readonly property real stackScale: fit(Math.max(stackLogoW, infoW), stackLogoH + root.gap + infoH)
     readonly property bool stacked: stackScale > sideScale
     readonly property real k: Math.max(sideScale, stackScale)
 
@@ -160,8 +165,8 @@ Item {
     Item {
         id: content
 
-        width: root.stacked ? Math.max(root.logoSize, root.infoW) : root.logoSize + root.gap + root.infoW
-        height: root.stacked ? root.logoSize + root.gap + root.infoH : Math.max(root.logoSize, root.infoH)
+        width: root.stacked ? Math.max(root.logoW, root.infoW) : root.logoW + root.gap + root.infoW
+        height: root.stacked ? root.logoH + root.gap + root.infoH : Math.max(root.logoH, root.infoH)
         anchors.centerIn: parent
         scale: root.k
 
@@ -171,8 +176,8 @@ Item {
 
             x: root.stacked ? (content.width - width) / 2 : 0
             y: root.stacked ? 0 : (content.height - height) / 2
-            width: root.logoSize
-            height: root.logoSize
+            width: root.logoW
+            height: root.logoH
 
             ShapedArt {
                 visible: root.showArt
@@ -180,36 +185,30 @@ Item {
                 shape: MaterialShape[root.logoShape]
                 color: Colors.primaryContainer
                 source: root.picture
-                sourceSize: Qt.size(root.logoSize * 2, root.logoSize * 2)
+                sourceSize: Qt.size(root.logoW * 2, root.logoH * 2)
             }
 
-            MaterialShape {
-                visible: !root.showArt
-                anchors.fill: parent
-                implicitSize: root.logoSize
-                shape: MaterialShape[root.logoShape]
-                color: Colors.primaryContainer
+            Column {
+                id: ascii
 
-                Column {
-                    id: ascii
+                readonly property real fontSize: root.logoW / (Math.max(1, Ansi.columns(root.logoLines)) * metrics.averageCharacterWidth / 100)
 
-                    readonly property real box: root.logoSize * Theme.fetch.asciiInner
-                    readonly property real fontSize: Math.min(box / (Math.max(1, Ansi.columns(root.logoLines)) * metrics.averageCharacterWidth / 100), box / (Math.max(1, root.logoLines.length) * metrics.lineSpacing / 100))
+                visible: root.asciiLogo
+                anchors.centerIn: parent
 
-                    anchors.centerIn: parent
+                Repeater {
+                    model: root.logoLines
 
-                    Repeater {
-                        model: root.logoLines
+                    Text {
+                        required property var modelData
 
-                        Text {
-                            required property var modelData
-
-                            textFormat: Text.RichText
-                            text: modelData.html
-                            font.family: Theme.font.mono
-                            font.pixelSize: Math.max(1, ascii.fontSize)
-                            color: Colors.textOnPrimaryContainer
-                        }
+                        textFormat: Text.RichText
+                        text: modelData.html
+                        font.family: Theme.font.mono
+                        font.weight: Font.Bold
+                        font.pixelSize: Math.max(1, ascii.fontSize)
+                        lineHeight: 1
+                        color: Colors.primary
                     }
                 }
             }
@@ -218,8 +217,8 @@ Item {
         Column {
             id: info
 
-            x: root.stacked ? (content.width - root.infoW) / 2 : root.logoSize + root.gap
-            y: root.stacked ? root.logoSize + root.gap : (content.height - root.infoH) / 2
+            x: root.stacked ? (content.width - root.infoW) / 2 : root.logoW + root.gap
+            y: root.stacked ? root.logoH + root.gap : (content.height - root.infoH) / 2
 
             Repeater {
                 model: root.lines

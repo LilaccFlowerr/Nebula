@@ -337,8 +337,7 @@ Singleton {
         readonly property real stackLogo: 0.62
         readonly property real sideLogo: 0.95
         readonly property int gap: 24
-        readonly property real asciiInner: 0.6
-        readonly property real fill: 0.95
+        readonly property real fill: 0.88
         readonly property real backdropDim: 0.6
         readonly property int textSize: 17
         readonly property real swatchScale: 1.4
