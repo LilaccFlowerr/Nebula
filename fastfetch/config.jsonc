@@ -1,0 +1,23 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "data",
+        "source": "$3        .  $2✦$3   ·\n$3    ·  $1.-~~~~-.$3   $2⋆\n$2  ✦  $1.' $2.~~~.$1 '.\n$3    $1(  $2( $4✺$2 )$1  )$3   ·\n$3  ·  $1'. $2'~~~'$1 .'  $2✦\n$3    $2⋆  $1'-~~~~-'\n$3       ·     .  $2✦",
+        "color": { "1": "blue", "2": "magenta", "3": "90", "4": "yellow" },
+        "padding": { "right": 4 }
+    },
+    "display": { "separator": "  ", "key": { "width": 9 }, "color": { "keys": "blue", "title": "magenta" } },
+    "modules": [
+        "title",
+        "break",
+        { "type": "os", "key": "os", "format": "{pretty-name}" },
+        { "type": "kernel", "key": "kernel", "format": "{release}" },
+        { "type": "uptime", "key": "uptime" },
+        { "type": "packages", "key": "pkgs", "format": "{all}" },
+        { "type": "command", "key": "shell", "text": "basename \"$(getent passwd \"$USER\" | cut -d: -f7)\"" },
+        { "type": "wm", "key": "wm", "format": "{pretty-name}" },
+        { "type": "memory", "key": "ram", "format": "{used} / {total}" },
+        "break",
+        { "type": "colors", "paddingLeft": 0, "symbol": "circle" }
+    ]
+}
