@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import Quickshell
 import qs.components
 import qs.services
@@ -12,8 +13,19 @@ Island {
     detach: Theme.bar.centerT
     hookLeft: true
     hookRight: true
-    implicitWidth: Math.max(Theme.bar.centerMinWidth, (empty ? emptyContent.implicitWidth + Theme.spacing.lg * 2 : row.implicitWidth) + margin * 2)
-    implicitHeight: Theme.bar.height
+    ink: notch
+    bottomRadius: Theme.bar.radius + Theme.dock.notchRadius * lift
+    implicitWidth: baseWidth + Theme.dock.notchGrow * lift
+    implicitHeight: Theme.bar.height + Theme.dock.notchDrop * lift
+
+    property real baseWidth: Math.max(Theme.bar.centerMinWidth, (empty ? emptyContent.implicitWidth + Theme.spacing.lg * 2 : row.implicitWidth) + margin * 2)
+    readonly property real notch: 1 - Theme.bar.centerT
+    readonly property bool lifted: notch > 0.5 && (root.bgHovered || islandHover.hovered || menuOpen)
+    property real lift: lifted ? 1 : 0
+
+    Behavior on lift {
+        NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+    }
 
     readonly property real margin: (Theme.bar.height - Theme.dock.itemSize) / 2
     readonly property bool empty: Dock.pinned.length === 0 && Dock.running.length === 0
@@ -31,6 +43,12 @@ Island {
         return item ? item.mapToItem(root, item.width / 2, 0).x : root.width / 2;
     }
 
+    function dripX(centerX, w) {
+        const edge = root.bottomRadius + Theme.dock.dripHook;
+        if (w > root.width - edge * 2) return Math.round((root.width - w) / 2);
+        return Math.round(Math.max(edge, Math.min(root.width - edge - w, centerX - w / 2)));
+    }
+
     function placeUnder(centerX, w) {
         const left = root.x;
         const room = QsWindow.window?.width ?? root.width;
@@ -40,11 +58,11 @@ Island {
 
     Connections {
         target: GlobalStates
-        function onDockPreviewChanged() { if (GlobalStates.dockPreview !== "") menuArea.centerX = root.centerOf(root.hoveredItem); }
-        function onDockContextChanged() { if (GlobalStates.dockContext !== "") contextArea.centerX = root.centerOf(root.hoveredItem); }
+        function onDockPreviewChanged() { if (GlobalStates.dockPreview !== "") Qt.callLater(() => { if (root.hoveredItem) menuArea.centerX = root.centerOf(root.hoveredItem); }); }
+        function onDockContextChanged() { if (GlobalStates.dockContext !== "") Qt.callLater(() => { if (root.hoveredItem) contextArea.centerX = root.centerOf(root.hoveredItem); }); }
     }
 
-    Behavior on implicitWidth {
+    Behavior on baseWidth {
         NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
     }
 
@@ -79,7 +97,7 @@ Island {
 
     HoverDismiss {
         active: root.previewOpen
-        hovered: islandHover.hovered || menuHover.hovered
+        hovered: islandHover.hovered || root.bgHovered || menuHover.hovered
         onDismissed: GlobalStates.dockPreview = ""
     }
 
@@ -98,6 +116,7 @@ Island {
         id: row
         anchors.centerIn: parent
         spacing: Theme.dock.spacing
+        scale: 1 + (Theme.dock.notchIconScale - 1) * root.lift
 
         Repeater {
             model: pinnedModel
@@ -144,7 +163,7 @@ Island {
     Rectangle {
         id: tooltip
 
-        readonly property bool show: Settings.bar.dockTooltips && root.hoveredItem !== null && !root.menuOpen
+        readonly property bool show: root.notch <= 0.5 && Settings.bar.dockTooltips && root.hoveredItem !== null && !root.menuOpen
         property string text: ""
         property real centerX: 0
 
@@ -187,14 +206,121 @@ Island {
     }
 
     Item {
+        id: drip
+
+        readonly property bool peek: root.notch > 0.5 && root.previewOpen
+        readonly property bool show: peek || (root.notch > 0.5 && Settings.bar.dockTooltips && root.hoveredItem !== null && !root.contextOpen)
+        readonly property real hookSize: Theme.dock.dripHook
+        readonly property real bodyHeight: dripLabel.implicitHeight + Theme.spacing.xs * 2
+        property real labelWidth: dripLabel.implicitWidth + Theme.spacing.md * 2
+        readonly property real labelX: root.dripX(centerX, labelWidth)
+        readonly property bool hookLeft: x - hookSize >= root.bottomRadius - 1
+        readonly property bool hookRight: x + width + hookSize <= root.width - root.bottomRadius + 1
+        readonly property real cornerRadius: Math.min(height, width) / 2 * (1 - grow) + Theme.radius.large * grow
+        property string text: ""
+        property real centerX: 0
+        property real drop: show ? 1 : 0
+        property real grow: peek ? 1 : 0
+
+        onShowChanged: if (show) update()
+        Connections {
+            target: root
+            function onHoveredItemChanged() { if (root.hoveredItem) drip.update(); }
+        }
+
+        function update() {
+            text = root.hoveredItem?.app?.name ?? "";
+            centerX = root.centerOf(root.hoveredItem);
+        }
+
+        x: Math.round(labelX + (menuArea.x - labelX) * grow)
+        y: root.height - 1
+        width: labelWidth + (preview.width - labelWidth) * grow
+        height: (bodyHeight + (preview.height - bodyHeight) * grow) * Math.max(0, drop)
+        visible: drop > 0.01
+
+        Behavior on drop {
+            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
+        }
+        Behavior on centerX {
+            enabled: drip.visible
+            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        }
+        Behavior on labelWidth {
+            NumberAnimation { duration: Theme.anim.fast; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.standard }
+        }
+        Behavior on grow {
+            NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: root.fill
+            topLeftRadius: drip.hookLeft ? 0 : drip.cornerRadius
+            topRightRadius: drip.hookRight ? 0 : drip.cornerRadius
+            bottomLeftRadius: drip.cornerRadius
+            bottomRightRadius: drip.cornerRadius
+        }
+
+        Shape {
+            x: -drip.hookSize
+            width: drip.hookSize
+            height: drip.hookSize
+            visible: drip.hookLeft
+            scale: Math.min(1, Math.max(0, drip.drop))
+            transformOrigin: Item.TopRight
+            preferredRendererType: Shape.CurveRenderer
+
+            ShapePath {
+                strokeWidth: -1
+                fillColor: root.fill
+                startX: 0; startY: 0
+                PathLine { x: drip.hookSize; y: 0 }
+                PathLine { x: drip.hookSize; y: drip.hookSize }
+                PathArc { x: 0; y: 0; radiusX: drip.hookSize; radiusY: drip.hookSize; direction: PathArc.Counterclockwise }
+            }
+        }
+
+        Shape {
+            x: drip.width
+            width: drip.hookSize
+            height: drip.hookSize
+            visible: drip.hookRight
+            scale: Math.min(1, Math.max(0, drip.drop))
+            transformOrigin: Item.TopLeft
+            preferredRendererType: Shape.CurveRenderer
+
+            ShapePath {
+                strokeWidth: -1
+                fillColor: root.fill
+                startX: drip.hookSize; startY: 0
+                PathLine { x: 0; y: 0 }
+                PathLine { x: 0; y: drip.hookSize }
+                PathArc { x: drip.hookSize; y: 0; radiusX: drip.hookSize; radiusY: drip.hookSize }
+            }
+        }
+
+        Text {
+            id: dripLabel
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: parent.height - drip.bodyHeight + Theme.spacing.xs
+            text: drip.text
+            color: Colors.textOnSurface
+            opacity: Math.max(0, Math.min(1, (drip.drop - 0.6) / 0.4)) * Math.max(0, 1 - drip.grow * 3)
+            font.family: Theme.font.family
+            font.pixelSize: Theme.font.small
+        }
+    }
+
+    Item {
         id: menuArea
 
         property real centerX: root.width / 2
 
         HoverHandler { id: menuHover }
-        x: root.placeUnder(centerX, width)
+        x: root.notch > 0.5 ? root.dripX(centerX, width) : root.placeUnder(centerX, width)
         anchors.top: parent.bottom
-        anchors.topMargin: Theme.spacing.sm
+        anchors.topMargin: root.notch > 0.5 ? -1 : Theme.spacing.sm
         width: preview.width
         height: root.previewOpen ? preview.height : 0
 
@@ -208,6 +334,7 @@ Island {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             key: root.previewOpen ? GlobalStates.dockPreview : ""
+            attached: root.notch > 0.5
             onRequestClose: GlobalStates.dockPreview = ""
         }
     }

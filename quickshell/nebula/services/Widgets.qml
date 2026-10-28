@@ -14,6 +14,7 @@ Singleton {
         calendar: { title: "Calendar", description: "Today, tap to open the month", icon: "calendar_month", shape: "Cookie9Sided", size: 200, minSize: 140, maxSize: 420, color: "tertiary" },
         battery: { title: "Battery", description: "Fills like water as you charge", icon: "battery_full", shape: "Cookie12Sided", size: 200, minSize: 120, maxSize: 480, color: "secondary" },
         weather: { title: "Weather", description: "Today's weather, in its own shape", icon: "partly_cloudy_day", shape: "Cookie9Sided", size: 220, minSize: 140, maxSize: 480, color: "primary" },
+        terminal: { title: "Fetch", description: "Your system at a glance, rice style", icon: "terminal", shape: "Square", size: 520, minSize: 240, maxSize: 1000, color: "surface" },
         text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
     })
 

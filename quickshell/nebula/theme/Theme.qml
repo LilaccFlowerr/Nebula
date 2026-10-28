@@ -60,10 +60,13 @@ Singleton {
         readonly property int panelWidth: 940
         readonly property int panelPadding: 22
         readonly property int artSize: 200
-        readonly property int cavaWidth: 220
+        readonly property int cavaWidth: 160
         readonly property int cavaRows: 32
         readonly property int cavaBar: 3
-        readonly property int lyricsAnchor: 3
+        readonly property int lyricsAnchor: 2
+        readonly property int openDuration: 450
+        readonly property int closeDuration: 300
+        readonly property real popFrom: 0.6
     }
     readonly property MediaIslandTokens media: MediaIslandTokens {}
 
@@ -181,6 +184,11 @@ Singleton {
         readonly property int windowButton: 26
         readonly property int breathDuration: 700
         readonly property real breathDepth: 0.18
+        readonly property int notchDrop: 10
+        readonly property int notchGrow: 24
+        readonly property int notchRadius: 8
+        readonly property real notchIconScale: 1.08
+        readonly property int dripHook: 10
     }
     readonly property DockTokens dock: DockTokens {}
 
@@ -306,11 +314,11 @@ Singleton {
     readonly property SettingsWindow settings: SettingsWindow {}
 
     component Lyrics: QtObject {
-        readonly property int lineHeight: 26
+        readonly property int lineHeight: 34
         readonly property int anchorLine: 1
-        readonly property int fontSize: 16
+        readonly property int fontSize: 22
         readonly property int titleWidth: 120
-        readonly property real nearScale: 0.75
+        readonly property real nearScale: 0.8
         readonly property real farScale: 0.7
         readonly property real nearOpacity: 0.55
         readonly property real farOpacity: 0.22
@@ -323,6 +331,21 @@ Singleton {
         readonly property int cardHeight: 120
     }
     readonly property Visualizer visualizer: Visualizer {}
+
+    component FetchTokens: QtObject {
+        readonly property int size: 520
+        readonly property real stackLogo: 0.62
+        readonly property real sideLogo: 0.95
+        readonly property int gap: 24
+        readonly property real asciiInner: 0.6
+        readonly property real fill: 0.95
+        readonly property real backdropDim: 0.6
+        readonly property int textSize: 17
+        readonly property real swatchScale: 1.4
+        readonly property real swatchSpacing: 0.4
+        readonly property int swatchGap: 6
+    }
+    readonly property FetchTokens fetch: FetchTokens {}
 
     component Radius: QtObject {
         readonly property int small: 8
@@ -345,6 +368,7 @@ Singleton {
         readonly property string family: "Inter"
         readonly property string icons: "Material Symbols Rounded"
         readonly property string logos: "Symbols Nerd Font"
+        readonly property string mono: "JetBrains Mono"
         readonly property int small: 12
         readonly property int normal: 14
         readonly property int large: 16

@@ -12,8 +12,13 @@ Item {
     property bool edgeRight: false
     property bool roundLeft: false
     property bool roundRight: false
+    property real ink: 0
+    property real bottomRadius: Theme.bar.radius
 
-    readonly property color fill: Qt.alpha(Colors.surface, Theme.bar.opacity)
+    readonly property bool bgHovered: bgHover.hovered
+    property alias background: bg
+
+    readonly property color fill: Qt.alpha(Qt.tint(Colors.surface, Qt.alpha(Colors.surfaceContainerLowest, ink)), Theme.bar.opacity + (1 - Theme.bar.opacity) * ink)
     readonly property real attach: Math.max(0, Math.min(1, 1 - detach))
     readonly property real reach: Theme.bar.floatMargin * smooth(phase(attach, 0, 0.4))
     readonly property real rounding: 1 - smooth(phase(attach, 0.4, 0.3))
@@ -38,10 +43,12 @@ Item {
         height: root.height + root.reach
         color: root.fill
 
+        HoverHandler { id: bgHover }
+
         topLeftRadius: Theme.bar.radius * root.rounding
         topRightRadius: Theme.bar.radius * root.rounding
-        bottomLeftRadius: root.roundLeft ? Theme.bar.radius : Theme.bar.radius * root.rounding
-        bottomRightRadius: root.roundRight ? Theme.bar.radius : Theme.bar.radius * root.rounding
+        bottomLeftRadius: root.roundLeft ? root.bottomRadius : root.bottomRadius * root.rounding
+        bottomRightRadius: root.roundRight ? root.bottomRadius : root.bottomRadius * root.rounding
     }
 
     Shape {

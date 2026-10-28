@@ -25,14 +25,45 @@ Item {
     readonly property real fullRadius: Theme.radius.large + Theme.spacing.sm
     readonly property real neck: Theme.spacing.sm
 
-    property real t: expanded ? 1 : 0
+    property real t: 0
     property alias bodyArea: body
 
-    Behavior on t {
+    onExpandedChanged: {
+        if (expanded) {
+            closeAnim.stop();
+            media.pop = Theme.media.popFrom;
+            openAnim.restart();
+        } else {
+            openAnim.stop();
+            closeAnim.restart();
+        }
+    }
+
+    NumberAnimation {
+        id: openAnim
+        target: root; property: "t"; to: 1
+        duration: Theme.media.openDuration * Theme.anim.scale
+        easing.type: Easing.OutBack
+        easing.overshoot: Theme.anim.overshoot
+    }
+
+    ParallelAnimation {
+        id: closeAnim
+
         NumberAnimation {
-            duration: Theme.anim.island
-            easing.type: Easing.OutBack
-            easing.overshoot: Theme.anim.overshoot * 0.6
+            target: root; property: "t"; to: 0
+            duration: Theme.media.closeDuration * Theme.anim.scale
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Theme.anim.emphasizedDecel
+        }
+        SequentialAnimation {
+            PauseAnimation { duration: Theme.media.closeDuration * Theme.anim.scale * 0.4 }
+            NumberAnimation {
+                target: media; property: "pop"; to: 1
+                duration: Theme.anim.slow
+                easing.type: Easing.OutBack
+                easing.overshoot: Theme.anim.overshoot * 2
+            }
         }
     }
 
@@ -182,6 +213,14 @@ Item {
             font.family: Theme.font.family
             font.pixelSize: Theme.font.small
         }
+    }
+
+    MouseArea {
+        id: clicker
+        anchors.fill: parent
+        enabled: root.active
+        cursorShape: Qt.PointingHandCursor
+        onClicked: GlobalStates.toggleMedia(root.screenName)
     }
 
     Item {

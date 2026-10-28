@@ -12,6 +12,7 @@ Item {
     property int textWidth: 220
     property int waveWidth: 200
     property real headerT: 0
+    property real pop: 1
 
     readonly property string screenName: QsWindow.window?.screen?.name ?? ""
     readonly property bool resizing: row.resizing
@@ -79,14 +80,9 @@ Item {
         values: Cava.values
     }
 
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: GlobalStates.toggleMedia(root.screenName)
-    }
-
     MediaRow {
         extrasOpacity: 1 - root.headerT
+        extrasScale: root.pop
         textOpacity: root.headerT > 0.001 ? 0 : 1
         id: row
         anchors.centerIn: parent
@@ -102,6 +98,7 @@ Item {
         id: art
         opacity: 1 - root.headerT
         visible: opacity > 0
+        scale: root.pop
 
         x: row.x + row.artSlot.x
         y: row.y + row.artSlot.y
@@ -145,15 +142,6 @@ Item {
                     duration: Theme.anim.medium
                     easing.type: Easing.OutBack
                 }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                GlobalStates.mediaExpanded = false;
-                Media.raise();
             }
         }
     }

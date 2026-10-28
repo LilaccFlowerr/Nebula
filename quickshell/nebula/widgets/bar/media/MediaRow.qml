@@ -14,6 +14,7 @@ RowLayout {
     property real slide: 0
     property real fade: 1
     property real extrasOpacity: 1
+    property real extrasScale: 1
     property real textOpacity: 1
     readonly property alias textBlock: textBlock
     readonly property alias artSlot: artSlot
@@ -69,6 +70,7 @@ RowLayout {
     WavyProgress {
         implicitWidth: root.waveWidth
         opacity: root.extrasOpacity
+        scale: root.extrasScale
         progress: Media.progress
         animated: Media.playing
     }
