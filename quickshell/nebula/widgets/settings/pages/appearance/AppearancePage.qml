@@ -195,6 +195,49 @@ ColumnLayout {
     }
 
     SettingGroup {
+        title: "Video wallpaper"
+
+        SettingRow {
+            icon: "pause_circle"
+            title: "Pause video"
+            subtitle: "Show a still frame instead"
+            clickable: true
+            onClicked: Settings.wallpaper.paused = !Settings.wallpaper.paused
+
+            Switch {
+                checked: Settings.wallpaper.paused
+                onToggled: Settings.wallpaper.paused = !Settings.wallpaper.paused
+            }
+        }
+
+        SettingRow {
+            icon: "battery_saver"
+            title: "Pause on battery"
+            subtitle: "Saves power when unplugged"
+            clickable: true
+            onClicked: Settings.wallpaper.pauseOnBattery = !Settings.wallpaper.pauseOnBattery
+
+            Switch {
+                checked: Settings.wallpaper.pauseOnBattery
+                onToggled: Settings.wallpaper.pauseOnBattery = !Settings.wallpaper.pauseOnBattery
+            }
+        }
+
+        SettingRow {
+            icon: "fullscreen"
+            title: "Pause behind fullscreen"
+            subtitle: "When a window fills the screen"
+            clickable: true
+            onClicked: Settings.wallpaper.pauseOnFullscreen = !Settings.wallpaper.pauseOnFullscreen
+
+            Switch {
+                checked: Settings.wallpaper.pauseOnFullscreen
+                onToggled: Settings.wallpaper.pauseOnFullscreen = !Settings.wallpaper.pauseOnFullscreen
+            }
+        }
+    }
+
+    SettingGroup {
         title: "Color style"
 
         GridLayout {

@@ -127,5 +127,6 @@ Singleton {
 
         function set(path: string): void { root.set(path); }
         function replay(): void { root.replay(); }
+        function togglePause(): void { Settings.wallpaper.paused = !Settings.wallpaper.paused; }
     }
 }

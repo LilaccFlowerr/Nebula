@@ -43,7 +43,7 @@ Variants {
         property real stretch: 1
         readonly property bool shaped: style !== "none" && style !== "fade" && style !== "glitch"
         readonly property HyprlandMonitor monitor: Hyprland.monitorFor(modelData)
-        readonly property bool playing: !(monitor?.activeWorkspace?.hasFullscreen ?? false) && !(Settings.wallpaper.pauseOnBattery && UPower.onBattery)
+        readonly property bool playing: !Settings.wallpaper.paused && !(Settings.wallpaper.pauseOnFullscreen && (monitor?.activeWorkspace?.hasFullscreen ?? false)) && !(Settings.wallpaper.pauseOnBattery && UPower.onBattery)
 
         function measure() {
             let inner = Theme.launcher.previewSize / 2;
