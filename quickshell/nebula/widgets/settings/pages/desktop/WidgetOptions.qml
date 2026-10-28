@@ -18,7 +18,7 @@ ColumnLayout {
         Widgets.update(arg, props);
     }
 
-    readonly property bool hasOptions: ["text", "image", "clock", "calendar", "nowplaying", "weather"].includes(cfg.type)
+    readonly property bool hasOptions: ["text", "image", "clock", "calendar", "nowplaying", "weather", "terminal"].includes(cfg.type)
 
     visible: hasOptions
     spacing: Theme.spacing.xl
@@ -356,6 +356,73 @@ ColumnLayout {
             Switch {
                 checked: page.cfg.follow ?? true
                 onToggled: page.set({ follow: !(page.cfg.follow ?? true) })
+            }
+        }
+    }
+
+    SettingGroup {
+        title: "Fetch"
+        visible: page.cfg.type === "terminal"
+
+        SettingRow {
+            icon: "image"
+            title: "Logo"
+            subtitle: "The logo from your fastfetch config, a picture, or a picture behind everything"
+
+            SegmentedButton {
+                readonly property var modes: ["fastfetch", "image", "background"]
+
+                width: Theme.settings.controlWidth
+                anchors.verticalCenter: parent.verticalCenter
+                options: ["fastfetch", "Picture", "Behind"]
+                currentIndex: Math.max(0, modes.indexOf(page.cfg.logo ?? "fastfetch"))
+                onSelected: index => page.set({ logo: modes[index] })
+            }
+        }
+
+        SettingRow {
+            visible: page.cfg.logo === "image" || page.cfg.logo === "background"
+            icon: "photo"
+            title: "Picture"
+            subtitle: (page.cfg.source ?? "") !== "" ? page.cfg.source.split("/").pop() : "Your profile picture"
+
+            ActionButton {
+                icon: "folder_open"
+                text: "Change"
+                filled: true
+                anchors.verticalCenter: parent.verticalCenter
+                onClicked: {
+                    Widgets.replacing = page.arg;
+                    page.navigate("images");
+                }
+            }
+        }
+
+        SettingRow {
+            icon: "terminal"
+            title: "Extra flags"
+            subtitle: "Uses your ~/.config/fastfetch config, or Nebula's when you have none. E.g. -c ~/my.jsonc"
+
+            TextField {
+                anchors.verticalCenter: parent.verticalCenter
+                text: page.cfg.args ?? ""
+                placeholder: "-c path/to/config.jsonc"
+                onEdited: text => page.set({ args: text })
+            }
+        }
+
+        SettingRow {
+            icon: "refresh"
+            title: "Update every"
+            subtitle: "0 = only when it appears"
+
+            NumberField {
+                anchors.verticalCenter: parent.verticalCenter
+                value: page.cfg.refresh ?? 60
+                from: 0
+                to: 3600
+                suffix: " s"
+                onEdited: value => page.set({ refresh: value })
             }
         }
     }

@@ -147,6 +147,21 @@ Variants {
         }
 
         Component {
+            id: terminalWidget
+
+            TerminalWidget {
+                live: !window.covered
+                shapeName: parent?.cfg?.shape ?? "Square"
+                colorRole: parent?.cfg?.color ?? "surface"
+                baseSize: parent?.cfg?.size ?? 520
+                logoMode: parent?.cfg?.logo ?? "fastfetch"
+                source: parent?.cfg?.source ?? ""
+                args: parent?.cfg?.args ?? ""
+                refresh: parent?.cfg?.refresh ?? 60
+            }
+        }
+
+        Component {
             id: clockWidget
 
             ClockWidget {
@@ -262,7 +277,7 @@ Variants {
                 onWidthChanged: window.updateBounds()
                 onHeightChanged: window.updateBounds()
 
-                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : nowPlayingWidget
+                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : nowPlayingWidget
 
                 HoverHandler {
                     enabled: !slot.ghost

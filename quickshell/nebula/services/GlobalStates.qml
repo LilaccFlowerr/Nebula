@@ -155,7 +155,7 @@ Singleton {
         function onRawEvent(event) {
             if (!root.popupOpen || root.capturing) return;
             if (event.name === "workspacev2" || event.name === "focusedmonv2" || (event.name === "activewindowv2" && event.data !== ""))
-                root.closePopups(true);
+                root.closePopups(event.name === "activewindowv2");
         }
     }
 
