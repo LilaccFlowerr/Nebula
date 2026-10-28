@@ -3,6 +3,9 @@
 var entries = [
     { title: "Wallpaper", page: "appearance", words: "background image picture change" },
     { title: "Wallpaper transition", page: "appearance", words: "animation reveal shape cookie fade" },
+    { title: "Pause video", page: "appearance", words: "video wallpaper live animated stop still" },
+    { title: "Pause on battery", page: "appearance", words: "video wallpaper live animated power" },
+    { title: "Pause behind fullscreen", page: "appearance", words: "video wallpaper live animated maximized game" },
     { title: "Color style", page: "appearance", words: "scheme theme colors palette matugen" },
     { title: "Dark mode", page: "appearance", words: "light mode theme" },
     { title: "Opacity", page: "bar", tab: "style", words: "transparency transparent blur popup island pill wallpaper shine" },
