@@ -208,8 +208,10 @@ Island {
     Item {
         id: drip
 
-        readonly property bool peek: root.notch > 0.5 && root.previewOpen
-        readonly property bool show: peek || (root.notch > 0.5 && Settings.bar.dockTooltips && root.hoveredItem !== null && !root.contextOpen)
+        readonly property bool peek: root.notch > 0.5 && root.menuOpen
+        readonly property bool show: peek || (root.notch > 0.5 && Settings.bar.dockTooltips && root.hoveredItem !== null)
+        property Item target: menuArea
+        readonly property real targetHeight: target === contextArea ? contextMenu.height : preview.height
         readonly property real hookSize: Theme.dock.dripHook
         readonly property real bodyHeight: dripLabel.implicitHeight + Theme.spacing.xs * 2
         property real labelWidth: dripLabel.implicitWidth + Theme.spacing.md * 2
@@ -226,6 +228,8 @@ Island {
         Connections {
             target: root
             function onHoveredItemChanged() { if (root.hoveredItem) drip.update(); }
+            function onContextOpenChanged() { if (root.contextOpen) drip.target = contextArea; }
+            function onPreviewOpenChanged() { if (root.previewOpen) drip.target = menuArea; }
         }
 
         function update() {
@@ -233,10 +237,10 @@ Island {
             centerX = root.centerOf(root.hoveredItem);
         }
 
-        x: Math.round(labelX + (menuArea.x - labelX) * grow)
+        x: Math.round(labelX + (target.x - labelX) * grow)
         y: root.height - 1
-        width: labelWidth + (preview.width - labelWidth) * grow
-        height: (bodyHeight + (preview.height - bodyHeight) * grow) * Math.max(0, drop)
+        width: labelWidth + (target.width - labelWidth) * grow
+        height: (bodyHeight + (targetHeight - bodyHeight) * grow) * Math.max(0, drop)
         visible: drop > 0.01
 
         Behavior on drop {
@@ -344,9 +348,9 @@ Island {
 
         property real centerX: root.width / 2
 
-        x: root.placeUnder(centerX, width)
+        x: root.notch > 0.5 ? root.dripX(centerX, width) : root.placeUnder(centerX, width)
         anchors.top: parent.bottom
-        anchors.topMargin: Theme.spacing.sm
+        anchors.topMargin: root.notch > 0.5 ? -1 : Theme.spacing.sm
         width: contextMenu.width
         height: root.contextOpen ? contextMenu.height : 0
 
@@ -355,6 +359,7 @@ Island {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             key: root.contextOpen ? GlobalStates.dockContext : ""
+            attached: root.notch > 0.5
             onRequestClose: GlobalStates.dockContext = ""
         }
     }

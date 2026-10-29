@@ -18,6 +18,15 @@ Singleton {
         }
     }
 
+    readonly property var appModes: {
+        try {
+            return JSON.parse(Settings.windows.appOpacity || "{}");
+        } catch (e) {
+            return {};
+        }
+    }
+    readonly property var modeOpacity: ({ light: 0.95, solid: 1 })
+
     function lua(value) {
         if (typeof value === "string") return JSON.stringify(value);
         return String(value);
@@ -45,6 +54,36 @@ Singleton {
         const w = Settings.windows;
         run(`hl.config({ general = { gaps_in = ${w.gapsIn}, gaps_out = ${w.gapsOut} }, decoration = { rounding = ${w.rounding}, `
             + `active_opacity = ${w.opacity / 100}, inactive_opacity = ${w.opacity / 100} } })`);
+    }
+
+    function appIdFor(entry) {
+        return entry.id;
+    }
+
+    function setAppMode(appId, mode) {
+        const all = Object.assign({}, appModes);
+        all[appId] = mode;
+        Settings.windows.appOpacity = JSON.stringify(all);
+    }
+
+    function removeApp(appId) {
+        const all = Object.assign({}, appModes);
+        delete all[appId];
+        Settings.windows.appOpacity = JSON.stringify(all);
+    }
+
+    function applyApps() {
+        let code = "NEBULA.appRules = NEBULA.appRules or {} for _, rule in pairs(NEBULA.appRules) do rule:set_enabled(false) end ";
+        for (const appId of Object.keys(appModes)) {
+            const opacity = modeOpacity[appModes[appId]];
+            if (opacity === undefined) continue;
+            const entry = DesktopEntries.heuristicLookup(appId);
+            const classes = [...new Set([appId, entry?.id, entry?.startupClass].filter(c => c))];
+            const pattern = "(?i)^(" + classes.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")$";
+            const handle = `NEBULA.appRules[${lua(appId)}]`;
+            code += `${handle} = hl.window_rule({ name = ${lua("nebula-app-" + appId)}, match = { class = ${lua(pattern)} }, opacity = "${opacity} override" }) ${handle}:set_enabled(true) `;
+        }
+        run(code);
     }
 
     function rgba(color, alpha) {
@@ -86,6 +125,7 @@ Singleton {
         applyInput();
         applyBlur();
         applyWindows();
+        applyApps();
         applyBorders();
         applyDisplays();
     }
@@ -143,6 +183,12 @@ Singleton {
     }
 
     Timer {
+        id: appsTimer
+        interval: 150
+        onTriggered: root.applyApps()
+    }
+
+    Timer {
         id: bordersTimer
         interval: 150
         onTriggered: root.applyBorders()
@@ -169,6 +215,12 @@ Singleton {
         function onRoundingChanged() { windowsTimer.restart(); }
         function onGapsInChanged() { windowsTimer.restart(); }
         function onGapsOutChanged() { windowsTimer.restart(); }
+        function onAppOpacityChanged() { appsTimer.restart(); }
+    }
+
+    Connections {
+        target: DesktopEntries.applications
+        function onValuesChanged() { appsTimer.restart(); }
     }
 
     Connections {

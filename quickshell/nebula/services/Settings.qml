@@ -137,6 +137,7 @@ Singleton {
         property int rounding: 15
         property int gapsIn: 5
         property int gapsOut: 10
+        property string appOpacity: "{}"
     }
 
     component QuickSettingsGroup: JsonObject {

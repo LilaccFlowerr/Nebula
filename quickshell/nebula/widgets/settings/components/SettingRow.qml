@@ -1,11 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Widgets
 import qs.theme
 
 Rectangle {
     id: root
 
     property string icon: ""
+    property string image: ""
     property string title: ""
     property string subtitle: ""
     property bool clickable: false
@@ -45,8 +47,14 @@ Rectangle {
         anchors.rightMargin: Theme.spacing.lg + Theme.spacing.xs
         spacing: Theme.spacing.lg
 
+        IconImage {
+            visible: root.image !== ""
+            implicitSize: Theme.settings.iconSize * 1.4
+            source: root.image
+        }
+
         Text {
-            visible: root.icon !== ""
+            visible: root.icon !== "" && root.image === ""
             text: root.icon
             font.family: Theme.font.icons
             font.pixelSize: Theme.settings.iconSize
