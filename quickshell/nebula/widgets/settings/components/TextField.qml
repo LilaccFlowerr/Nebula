@@ -8,6 +8,11 @@ Rectangle {
     property string placeholder: ""
 
     signal edited(string text)
+    signal typed(string text)
+
+    function focusInput() {
+        input.forceActiveFocus();
+    }
 
     implicitWidth: Theme.settings.fieldWidth * 2
     implicitHeight: Theme.button.size - Theme.spacing.xs
@@ -33,6 +38,7 @@ Rectangle {
         selectedTextColor: Colors.textOnPrimary
         onEditingFinished: if (text.trim() !== root.text) root.edited(text.trim())
         onAccepted: focus = false
+        onTextEdited: root.typed(text)
 
         Text {
             anchors.verticalCenter: parent.verticalCenter

@@ -7,18 +7,30 @@ ColumnLayout {
 
     property string title: ""
     default property alias rows: list.data
+    property alias trailing: trailingSlot.data
 
     Layout.fillWidth: true
     spacing: Theme.spacing.sm
 
-    Text {
+    RowLayout {
         visible: root.title !== ""
+        Layout.fillWidth: true
         Layout.leftMargin: Theme.spacing.lg + Theme.spacing.xs
-        text: root.title
-        font.family: Theme.font.family
-        font.pixelSize: Theme.font.normal
-        font.weight: Font.DemiBold
-        color: Colors.primary
+        Layout.rightMargin: Theme.spacing.xs
+
+        Text {
+            Layout.fillWidth: true
+            text: root.title
+            font.family: Theme.font.family
+            font.pixelSize: Theme.font.normal
+            font.weight: Font.DemiBold
+            color: Colors.primary
+        }
+
+        Row {
+            id: trailingSlot
+            spacing: Theme.spacing.sm
+        }
     }
 
     Item {

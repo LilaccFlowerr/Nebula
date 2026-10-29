@@ -1,11 +1,22 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs.components
 import qs.services
 import qs.theme
 import qs.widgets.settings.components
 
 ColumnLayout {
+    id: page
+
+    readonly property var modes: ["glass", "light", "solid"]
+    readonly property var appList: Object.keys(HyprConfig.appModes).map(id => {
+        const entry = DesktopEntries.heuristicLookup(id);
+        return { id: id, name: entry?.name ?? id, icon: Quickshell.iconPath(entry?.icon ?? id, true) };
+    }).sort((a, b) => a.name.localeCompare(b.name))
+
+    signal navigate(string target)
+
     spacing: Theme.spacing.xl
 
     SettingGroup {
@@ -30,8 +41,8 @@ ColumnLayout {
 
         SettingRow {
             icon: "opacity"
-            title: "Opacity"
-            subtitle: "Lower makes windows see-through"
+            title: "Glass"
+            subtitle: "Opacity of every app set to Glass"
 
             Slider {
                 width: Theme.settings.controlWidth - Theme.settings.fieldWidth - Theme.spacing.sm
@@ -75,6 +86,49 @@ ColumnLayout {
                 to: 30
                 suffix: " px"
                 onEdited: value => Settings.windows.rounding = value
+            }
+        }
+    }
+
+    SettingGroup {
+        title: "Per app"
+        trailing: ActionButton {
+            implicitHeight: Theme.button.size * 0.75
+            icon: "add"
+            text: "App"
+            onClicked: page.navigate("glassapps")
+        }
+
+        SettingRow {
+            visible: page.appList.length === 0
+            icon: "blur_on"
+            title: "Every app is glass"
+            subtitle: "Add one to make it lighter or solid"
+        }
+
+        Repeater {
+            model: page.appList
+
+            SettingRow {
+                required property var modelData
+
+                image: modelData.icon
+                icon: "apps"
+                title: modelData.name
+
+                SegmentedButton {
+                    width: Theme.settings.controlWidth
+                    anchors.verticalCenter: parent.verticalCenter
+                    options: ["Glass", "Light", "Solid"]
+                    currentIndex: Math.max(0, page.modes.indexOf(HyprConfig.appModes[modelData.id]))
+                    onSelected: index => HyprConfig.setAppMode(modelData.id, page.modes[index])
+                }
+
+                IconButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    icon: "close"
+                    onClicked: HyprConfig.removeApp(modelData.id)
+                }
             }
         }
     }

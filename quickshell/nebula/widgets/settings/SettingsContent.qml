@@ -28,7 +28,8 @@ Item {
     readonly property var subpages: ({
         wallpapers: { title: "Wallpapers", subtitle: "Click one to use it", source: "pages/appearance/WallpapersPage.qml" },
         images: { title: "Choose an image", subtitle: "Click one to use it", source: "pages/ImagePickerPage.qml" },
-        newwidget: { title: "Add a widget", subtitle: "Pick a type", source: "pages/desktop/NewWidgetPage.qml" }
+        newwidget: { title: "Add a widget", subtitle: "Pick a type", source: "pages/desktop/NewWidgetPage.qml" },
+        glassapps: { title: "Pick an app", subtitle: "It starts out solid", source: "pages/GlassAppPickerPage.qml" }
     })
     readonly property string subKey: shownSub.split(":")[0]
     readonly property string subArg: shownSub.split(":")[1] ?? ""
@@ -174,7 +175,7 @@ Item {
             if (GlobalStates.settingsTab !== "" && pages[index].sections) {
                 sub = "section:" + GlobalStates.settingsTab;
                 shownSub = sub;
-            } else if (GlobalStates.settingsTab === "images" || GlobalStates.settingsTab === "newwidget" || GlobalStates.settingsTab.startsWith("widget:")) {
+            } else if (GlobalStates.settingsTab === "images" || GlobalStates.settingsTab === "newwidget" || GlobalStates.settingsTab === "glassapps" || GlobalStates.settingsTab.startsWith("widget:")) {
                 sub = GlobalStates.settingsTab;
                 shownSub = sub;
             }

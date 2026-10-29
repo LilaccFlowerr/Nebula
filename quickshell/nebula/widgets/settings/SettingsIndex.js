@@ -13,6 +13,7 @@ var entries = [
     { title: "Blur strength", page: "bar", tab: "style", words: "size passes quality gpu" },
     { title: "Window blur", page: "windows", words: "frosted glass transparent" },
     { title: "Window opacity", page: "windows", words: "transparency see-through" },
+    { title: "Glass per app", page: "windows", words: "opacity solid light transparency app override" },
     { title: "Window corner radius", page: "windows", words: "rounding round" },
     { title: "Window gaps", page: "windows", words: "spacing margin between edge" },
     { title: "Bar style", page: "bar", tab: "style", words: "floating attached notch islands hook edge top" },

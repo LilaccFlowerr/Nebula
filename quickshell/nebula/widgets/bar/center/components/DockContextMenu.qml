@@ -10,6 +10,7 @@ Rectangle {
     id: root
 
     property string key: ""
+    property bool attached: false
 
     readonly property bool open: key !== ""
     property string shownKey: ""
@@ -39,15 +40,15 @@ Rectangle {
     implicitWidth: Theme.dock.menuWidth
     implicitHeight: content.implicitHeight + Theme.spacing.sm * 2
     radius: Theme.radius.large
-    color: Qt.alpha(Colors.surface, Theme.bar.opacity)
+    color: attached ? "transparent" : Qt.alpha(Colors.surface, Theme.bar.opacity)
 
     visible: opacity > 0
     opacity: open ? 1 : 0
-    scale: open ? 1 : 0.85
+    scale: open || attached ? 1 : 0.85
     transformOrigin: Item.Top
 
     Behavior on opacity {
-        NumberAnimation { duration: Theme.anim.fast }
+        NumberAnimation { duration: root.attached ? Theme.anim.medium : Theme.anim.fast }
     }
     Behavior on scale {
         NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.OutBack; easing.overshoot: Theme.anim.overshoot }
