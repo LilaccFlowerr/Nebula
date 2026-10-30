@@ -99,7 +99,7 @@ Singleton {
         const m = saved[name];
         if (!m) return null;
         if (m.disabled) return `hl.monitor({ output = ${lua(name)}, disabled = true })`;
-        return `hl.monitor({ output = ${lua(name)}, disabled = false, mode = ${lua(m.mode ?? "preferred")}, position = "auto", scale = ${m.scale ?? 1} })`;
+        return `hl.monitor({ output = ${lua(name)}, disabled = false, mode = ${lua(m.mode ?? "preferred")}, position = "auto", scale = ${m.scale ?? 1}, cm = "srgb" })`;
     }
 
     function applyDisplays() {
