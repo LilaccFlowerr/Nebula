@@ -69,7 +69,7 @@ function clean(raw) {
         .map(l => l.replace(/\t/g, "        "));
 }
 
-const symbols = "●○◆◇■□▪▫█▀▄▌▐⬤";
+const symbols = "●○◆◇■□▪▫█▀▄▌▐⬤";
 
 function plain(line) {
     return line.replace(/\x1b\[[0-9;]*[CGm]/g, "");
@@ -98,7 +98,7 @@ function parse(raw, colors) {
             const n = parseInt(m[1]) || 1;
             if (m[2] === "m") apply(state, m[1] === "" ? [] : m[1].split(";").map(x => parseInt(x) || 0), colors ?? []);
             else if (m[2] === "C") take(" ".repeat(n));
-            else take(" ".repeat(Math.max(0, n - 1 - text.length)));
+            else take(" ".repeat(Math.max(0, n - 1 - [...text].length)));
             last = re.lastIndex;
         }
         take(line.slice(last));
@@ -111,7 +111,7 @@ function parse(raw, colors) {
 }
 
 function columns(lines) {
-    return lines.reduce((w, l) => l.palette ? w : Math.max(w, l.text.replace(/\s+$/, "").length), 0);
+    return lines.reduce((w, l) => l.palette ? w : Math.max(w, [...l.text.replace(/\s+$/, "")].length), 0);
 }
 
 function merge(lines) {

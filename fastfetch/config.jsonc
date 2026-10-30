@@ -2,22 +2,168 @@
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": {
         "type": "data",
-        "source": "$3        .  $2✦$3   ·\n$3    ·  $1.-~~~~-.$3   $2⋆\n$2  ✦  $1.' $2.~~~.$1 '.\n$3    $1(  $2( $4✺$2 )$1  )$3   ·\n$3  ·  $1'. $2'~~~'$1 .'  $2✦\n$3    $2⋆  $1'-~~~~-'\n$3       ·     .  $2✦",
-        "color": { "1": "blue", "2": "magenta", "3": "90", "4": "yellow" },
-        "padding": { "right": 4 }
+        "source": "\n              $3· $2:\n  $3.         $2*$4%$4@$4@$4@$4%$4%$2*$2+$3.  $3·$5✦\n $2:$1+$2:$3.     $2+$4@$4@$4@$4%$2+$2+$2+$2*$2*$4%$2*$2+$2:\n $3.$2+$2+      $4@$4@$4%$2+$2:$2:$3.   $3.$2+$4%$2+$2:\n $3.$2+$2+$2+     $2:$2*$4%$4@$4@$4%$2*$2:   $3.$2:$2*$1*$3.$3·\n  $2:$1*$2*$2:    $2:$2*$4%$4@$4@$4%$2*$2+$3.    $2:$1*$2+$3.\n   $2:$1*$2*$2+$3.   $3.$2:$2:$2:$2*$4@$4@     $3.$2:$2+$3.\n    $3.$1*$2*$4%$2*$2+$2:$2:$2:$2*$4@$4@$4@$3.      $2:$1+$3.\n      $3.$2+$2*$4%$4%$4@$4@$4@$4%$2+$2:       $3.$3.\n           $3.$3.         $3⋆\n    $3⋆                     $3·",
+        "color": {
+            "1": "blue",
+            "2": "magenta",
+            "3": "90",
+            "4": "yellow",
+            "5": "97"
+        },
+        "padding": {
+            "right": 4,
+            "top": 3
+        }
     },
-    "display": { "separator": "  ", "key": { "width": 9 }, "color": { "keys": "blue", "title": "magenta" } },
+    "display": {
+        "separator": " ",
+        "key": {
+            "width": 15
+        },
+        "color": {
+            "keys": "blue",
+            "title": "magenta",
+            "output": "default"
+        },
+        "bar": {
+            "char": {
+                "elapsed": "■",
+                "total": "·"
+            },
+            "border": {
+                "left": "",
+                "right": ""
+            },
+            "width": 10
+        },
+        "percent": {
+            "type": [
+                "num",
+                "bar"
+            ]
+        }
+    },
     "modules": [
-        "title",
+        {
+            "type": "title",
+            "format": "{#1;magenta}{user-name}{#90}@{#1;blue}{host-name}"
+        },
         "break",
-        { "type": "os", "key": "os", "format": "{pretty-name}" },
-        { "type": "kernel", "key": "kernel", "format": "{release}" },
-        { "type": "uptime", "key": "uptime" },
-        { "type": "packages", "key": "pkgs", "format": "{all}" },
-        { "type": "command", "key": "shell", "text": "basename \"$(getent passwd \"$USER\" | cut -d: -f7)\"" },
-        { "type": "wm", "key": "wm", "format": "{pretty-name}" },
-        { "type": "memory", "key": "ram", "format": "{used} / {total}" },
-        "break",
-        { "type": "colors", "paddingLeft": 0, "symbol": "circle" }
+        {
+            "type": "custom",
+            "format": "{#blue}╭─ 󰒓  {#1;blue}system {#0;90}──────────────────────────────────{#blue}╮"
+        },
+        {
+            "type": "os",
+            "key": "│   os",
+            "keyColor": "blue",
+            "format": "{pretty-name<32} {#blue}│"
+        },
+        {
+            "type": "kernel",
+            "key": "│  󰒋 kernel",
+            "keyColor": "blue",
+            "format": "{release<32} {#blue}│"
+        },
+        {
+            "type": "packages",
+            "key": "│  󰏖 pkgs",
+            "keyColor": "blue",
+            "format": "{all<32} {#blue}│"
+        },
+        {
+            "type": "command",
+            "key": "│  󰔟 uptime",
+            "keyColor": "blue",
+            "format": "{result<32} {#blue}│",
+            "text": "uptime -p | sed 's/^up //'"
+        },
+        {
+            "type": "command",
+            "key": "│  󰃭 age",
+            "keyColor": "blue",
+            "format": "{result<32} {#blue}│",
+            "text": "b=$(stat -c %W /); [ \"$b\" -gt 0 ] 2>/dev/null || b=$(date -d \"$(head -1 /var/log/pacman.log | cut -c2-25)\" +%s); echo \"$(( ($(date +%s) - b) / 86400 )) days\""
+        },
+        {
+            "type": "custom",
+            "format": "{#magenta}├─ 󰍹  {#1;magenta}desktop {#0;90}─────────────────────────────────{#magenta}┤"
+        },
+        {
+            "type": "wm",
+            "key": "│  󰕮 wm",
+            "keyColor": "magenta",
+            "format": "{pretty-name<32} {#magenta}│"
+        },
+        {
+            "type": "terminal",
+            "key": "│  󰞷 term",
+            "keyColor": "magenta",
+            "format": "{pretty-name<32} {#magenta}│"
+        },
+        {
+            "type": "media",
+            "key": "│  󰎈 music",
+            "keyColor": "magenta",
+            "format": "{title<32} {#magenta}│"
+        },
+        {
+            "type": "custom",
+            "format": "{#cyan}├─ 󰏘  {#1;cyan}look {#0;90}────────────────────────────────────{#cyan}┤"
+        },
+        {
+            "type": "command",
+            "key": "│  󰸉 wall",
+            "keyColor": "cyan",
+            "format": "{result<32} {#cyan}│",
+            "text": "f=$(grep -o '\"path\": *\"[^\"]*\"' ${XDG_CONFIG_HOME:-$HOME/.config}/nebula/settings.json 2>/dev/null | head -1 | cut -d'\"' -f4); [ -n \"$f\" ] && basename \"${f%.*}\""
+        },
+        {
+            "type": "command",
+            "key": "│  󰹦 scheme",
+            "keyColor": "cyan",
+            "format": "{result<32} {#cyan}│",
+            "text": "grep -o '\"scheme\": *\"[^\"]*\"' ${XDG_CONFIG_HOME:-$HOME/.config}/nebula/settings.json 2>/dev/null | cut -d'\"' -f4 | sed 's/^scheme-//'"
+        },
+        {
+            "type": "terminalfont",
+            "key": "│  󰬴 font",
+            "keyColor": "cyan",
+            "format": "{name<32} {#cyan}│"
+        },
+        {
+            "type": "custom",
+            "format": "{#yellow}├─ 󰌢  {#1;yellow}hardware {#0;90}────────────────────────────────{#yellow}┤"
+        },
+        {
+            "type": "command",
+            "key": "│  󰘚 cpu",
+            "keyColor": "yellow",
+            "format": "{result<32} {#yellow}│",
+            "text": "grep -m1 'model name' /proc/cpuinfo | sed 's/.*: //; s/([RT]*M*)//g; s/[0-9]*th Gen //; s/ CPU//; s/ @.*//; s/ with .*//; s/  */ /g'"
+        },
+        {
+            "type": "gpu",
+            "key": "│  󰢮 gpu",
+            "keyColor": "yellow",
+            "format": "{name<32} {#yellow}│",
+            "hideType": "integrated"
+        },
+        {
+            "type": "memory",
+            "key": "│  󰑭 ram",
+            "keyColor": "yellow",
+            "format": "{percentage-bar} {used<21} {#yellow}│"
+        },
+        {
+            "type": "battery",
+            "key": "│  󰁹 battery",
+            "keyColor": "yellow",
+            "format": "{capacity-bar} {capacity<21} {#yellow}│"
+        },
+        {
+            "type": "custom",
+            "format": "{#90}╰─────────────────────────────── {#91}● {#92}● {#93}● {#94}● {#95}● {#96}● {#90}──╯"
+        }
     ]
 }
