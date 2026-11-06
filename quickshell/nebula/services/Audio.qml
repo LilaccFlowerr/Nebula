@@ -36,8 +36,27 @@ Singleton {
         return node.name.startsWith("bluez_output");
     }
 
+    readonly property string outputName: ready ? shortLabel(sink) : ""
+    readonly property string outputIcon: ready ? iconFor(sink) : "speaker"
+
     function label(node) {
         return node.nickname || node.description || node.name;
+    }
+
+    function shortLabel(node) {
+        if (isBluetooth(node)) return node.description || label(node);
+        const monitor = (node.description ?? "").match(/\[(.+)\]/);
+        if (monitor) return monitor[1];
+        if (/hdmi/i.test(node.name)) return "HDMI";
+        if (/speaker/i.test(node.name)) return "Speakers";
+        if (/headphone/i.test(node.name)) return "Headphones";
+        return label(node);
+    }
+
+    function iconFor(node) {
+        if (isBluetooth(node) || /headphone|headset/i.test(node.name)) return "headphones";
+        if (/hdmi|displayport/i.test(node.name)) return "tv";
+        return "speaker";
     }
 
     function setOutput(node) {

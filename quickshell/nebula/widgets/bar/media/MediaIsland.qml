@@ -135,10 +135,31 @@ Item {
         }
     }
 
+    BlurredArt {
+        id: blurredArt
+        width: root.fullWidth + Theme.media.overshootRoom
+        height: glass.bodyTop + panel.fullHeight + Theme.media.overshootRoom
+        source: media.shownArt
+        visible: false
+        layer.enabled: root.t > 0.001
+    }
+
+    MultiEffect {
+        width: blurredArt.width
+        height: blurredArt.height
+        visible: root.t > 0.001
+        opacity: panel.opacity
+        source: blurredArt
+        maskEnabled: true
+        maskSource: floatingMask
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
+    }
+
     FloatingShapes {
         id: floating
-        width: root.fullWidth
-        height: glass.bodyTop + panel.fullHeight
+        width: root.fullWidth + Theme.media.overshootRoom
+        height: glass.bodyTop + panel.fullHeight + Theme.media.overshootRoom
         running: root.expanded && Media.playing
         visible: false
         layer.enabled: root.t > 0.001

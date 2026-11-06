@@ -6,6 +6,7 @@ import M3Shapes
 import qs.components
 import qs.services
 import qs.theme
+import "../../../components/Curves.js" as Curves
 
 Item {
     id: root
@@ -16,6 +17,34 @@ Item {
     property real fade: 1
 
     readonly property real fullHeight: content.implicitHeight + Theme.media.panelPadding * 2
+
+    property real intro: 0
+
+    readonly property real artIn: Curves.phase(intro, 0, 0.45)
+    readonly property real cavaIn: Curves.decel(Curves.phase(intro, 0.15, 0.4))
+    readonly property real lyricsIn: Curves.decel(Curves.phase(intro, 0.25, 0.4))
+    readonly property real timeIn: Curves.decel(Curves.phase(intro, 0.35, 0.4))
+    readonly property real deviceIn: Curves.decel(Curves.phase(intro, 0.45, 0.4))
+
+    function buttonIn(index) {
+        return Curves.back(Curves.phase(intro, 0.5 + index * 0.08, 0.3), Theme.anim.overshoot);
+    }
+
+    onOpenChanged: {
+        if (open) {
+            intro = 0;
+            introAnim.restart();
+        }
+    }
+
+    NumberAnimation {
+        id: introAnim
+        target: root
+        property: "intro"
+        from: 0
+        to: 1
+        duration: Theme.media.introDuration * Theme.anim.scale
+    }
 
     property real spin: 0
     property real speed: Media.playing && Settings.nowPlaying.spin && !Settings.theme.reduceMotion ? 360 / Settings.nowPlaying.spinSeconds : 0
@@ -55,13 +84,22 @@ Item {
             ShapedArt {
                 Layout.preferredWidth: Theme.media.artSize
                 Layout.preferredHeight: Theme.media.artSize
-                shape: MaterialShape.Cookie7Sided
+                shape: root.artIn > 0.2 ? MaterialShape.Cookie7Sided : MaterialShape.Circle
                 shapeRotation: root.spin
                 color: Colors.surfaceContainerHigh
                 source: root.art
                 sourceSize: Qt.size(Theme.media.artSize * 2, Theme.media.artSize * 2)
                 opacity: root.fade * (Media.playing ? 1 : 0.6)
-                transform: Translate { x: root.slide / 2 }
+                transform: [
+                    Translate { x: root.slide / 2 },
+                    Scale {
+                        readonly property real s: Theme.media.introArtFrom + (1 - Theme.media.introArtFrom) * Curves.back(root.artIn, Theme.anim.overshoot)
+                        origin.x: Theme.media.artSize / 2
+                        origin.y: Theme.media.artSize / 2
+                        xScale: s
+                        yScale: s
+                    }
+                ]
 
                 Behavior on opacity {
                     NumberAnimation { duration: Theme.anim.medium }
@@ -77,22 +115,36 @@ Item {
                 }
             }
 
-            MirroredCava {
+            Item {
                 Layout.preferredWidth: Theme.media.cavaWidth
                 Layout.preferredHeight: Theme.media.artSize
-                rows: Theme.media.cavaRows
-                barHeight: Theme.media.cavaBar
-                values: Cava.values
-                color: Colors.primary
                 visible: Settings.bar.visualizer
+
+                Item {
+                    id: cavaReveal
+                    width: parent.width
+                    height: parent.height * root.cavaIn
+                    anchors.verticalCenter: parent.verticalCenter
+                    clip: true
+
+                    MirroredCava {
+                        width: Theme.media.cavaWidth
+                        height: Theme.media.artSize
+                        y: (cavaReveal.height - height) / 2
+                        rows: Theme.media.cavaRows
+                        barHeight: Theme.media.cavaBar
+                        values: Cava.values
+                        color: Colors.primary
+                    }
+                }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.media.artSize
                 spacing: 2
-                opacity: root.fade
-                transform: Translate { x: root.slide }
+                opacity: root.fade * root.lyricsIn
+                transform: Translate { x: root.slide + (1 - root.lyricsIn) * Theme.media.introSlide }
 
                 LyricsView {
                     Layout.fillWidth: true
@@ -111,6 +163,8 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             spacing: Theme.spacing.md
+            opacity: root.timeIn
+            transform: Translate { y: (1 - root.timeIn) * Theme.media.introRise }
 
             Text {
                 text: Media.formatTime(Media.position)
@@ -153,28 +207,70 @@ Item {
             }
         }
 
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Theme.bar.gap
+        Item {
+            Layout.fillWidth: true
+            implicitHeight: controls.implicitHeight
 
-            IconButton {
-                id: previousButton
-                icon: "skip_previous"
-                onClicked: {
-                    root.nudge(previousButton, -1);
-                    Media.previous();
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Theme.spacing.sm
+                visible: Audio.ready
+                opacity: root.deviceIn
+
+                MaterialShape {
+                    width: Theme.media.deviceShapeSize
+                    height: Theme.media.deviceShapeSize
+                    shape: MaterialShape.Cookie6Sided
+                    color: Colors.secondaryContainer
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: Audio.outputIcon
+                        font.family: Theme.font.icons
+                        font.pixelSize: Theme.media.deviceIconSize
+                        color: Colors.textOnSecondaryContainer
+                    }
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.min(implicitWidth, Theme.media.deviceMaxWidth)
+                    elide: Text.ElideRight
+                    text: Audio.outputName
+                    color: Colors.textOnSurfaceVariant
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.small
                 }
             }
-            PlayButton {
-                playing: Media.playing
-                onClicked: Media.togglePlaying()
-            }
-            IconButton {
-                id: nextButton
-                icon: "skip_next"
-                onClicked: {
-                    root.nudge(nextButton, 1);
-                    Media.next();
+
+            RowLayout {
+                id: controls
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Theme.bar.gap
+
+                IconButton {
+                    id: previousButton
+                    icon: "skip_previous"
+                    transform: Scale { origin.x: previousButton.width / 2; origin.y: previousButton.height / 2; xScale: root.buttonIn(0); yScale: root.buttonIn(0) }
+                    onClicked: {
+                        root.nudge(previousButton, -1);
+                        Media.previous();
+                    }
+                }
+                PlayButton {
+                    id: playButton
+                    playing: Media.playing
+                    transform: Scale { origin.x: playButton.width / 2; origin.y: playButton.height / 2; xScale: root.buttonIn(1); yScale: root.buttonIn(1) }
+                    onClicked: Media.togglePlaying()
+                }
+                IconButton {
+                    id: nextButton
+                    icon: "skip_next"
+                    transform: Scale { origin.x: nextButton.width / 2; origin.y: nextButton.height / 2; xScale: root.buttonIn(2); yScale: root.buttonIn(2) }
+                    onClicked: {
+                        root.nudge(nextButton, 1);
+                        Media.next();
+                    }
                 }
             }
         }

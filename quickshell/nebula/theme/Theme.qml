@@ -67,6 +67,18 @@ Singleton {
         readonly property int openDuration: 450
         readonly property int closeDuration: 300
         readonly property real popFrom: 0.6
+        readonly property int artBlur: 28
+        readonly property real artOpacity: 0.55
+        readonly property int artFade: 800
+        readonly property int artSourceSize: 256
+        readonly property int deviceShapeSize: 32
+        readonly property int deviceIconSize: 18
+        readonly property int deviceMaxWidth: 180
+        readonly property int introDuration: 700
+        readonly property real introArtFrom: 0.6
+        readonly property int introSlide: 24
+        readonly property int introRise: 12
+        readonly property int overshootRoom: 60
     }
     readonly property MediaIslandTokens media: MediaIslandTokens {}
 
