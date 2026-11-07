@@ -98,6 +98,8 @@ Singleton {
         property bool bluetoothFirst: true
         property string eqGains: "0,0,0,0,0,0,0,0,0,0"
         property string eqPreset: "Flat"
+        property bool feedback: true
+        property string eqSaved: "{}"
     }
 
     component BarGroup: JsonObject {

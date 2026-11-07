@@ -92,6 +92,9 @@ Singleton {
         readonly property int eqWaveWidth: 55
         readonly property int eqWaveTail: 220
         readonly property real eqLevelCurve: 0.55
+        readonly property real eqFollow: 16
+        readonly property real tickVolume: 1
+        readonly property int eqTickLead: 150
         readonly property real eqLit: 0.8
         readonly property real eqIdle: 0.16
         readonly property int tabHeight: 36

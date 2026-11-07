@@ -23,6 +23,7 @@ Item {
     property real tabT: eqTab ? 1 : 0
     readonly property real lyricsOut: Curves.phase(tabT, 0, 0.5)
     readonly property real eqIn: Curves.phase(tabT, 0.35, 0.65)
+    readonly property real cavaRoom: Settings.bar.visualizer ? Theme.media.cavaWidth + Theme.spacing.xl : 0
 
     Behavior on tabT {
         NumberAnimation {
@@ -91,9 +92,10 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Theme.spacing.xl
+            spacing: 0
 
             ShapedArt {
+                Layout.rightMargin: Theme.spacing.xl
                 Layout.preferredWidth: Theme.media.artSize
                 Layout.preferredHeight: Theme.media.artSize
                 shape: root.artIn > 0.2 ? MaterialShape.Cookie7Sided : MaterialShape.Circle
@@ -130,7 +132,7 @@ Item {
             Item {
                 Layout.preferredWidth: Theme.media.cavaWidth * (1 - root.tabT)
                 Layout.preferredHeight: Theme.media.artSize
-                Layout.rightMargin: -Theme.spacing.xl * root.tabT
+                Layout.rightMargin: Theme.spacing.xl * (1 - root.tabT)
                 visible: Settings.bar.visualizer && root.tabT < 1
                 opacity: 1 - root.lyricsOut
                 clip: true
@@ -161,7 +163,10 @@ Item {
                 transform: Translate { x: (1 - root.lyricsIn) * Theme.media.introSlide }
 
                 LyricsView {
-                    anchors.fill: parent
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width - root.cavaRoom * root.tabT
                     anchorLine: Theme.media.lyricsAnchor
                     visible: Settings.bar.lyrics && Lyrics.status !== "none" && opacity > 0
                     opacity: root.fade * (1 - root.lyricsOut)
@@ -169,7 +174,10 @@ Item {
                 }
 
                 EqualizerView {
-                    anchors.fill: parent
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width + root.cavaRoom * (1 - root.tabT)
                     visible: opacity > 0
                     opacity: root.eqIn
                     transform: Translate { x: (1 - root.eqIn) * Theme.media.tabSlide }

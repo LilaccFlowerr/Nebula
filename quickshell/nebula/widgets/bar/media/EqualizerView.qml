@@ -1,4 +1,5 @@
 import QtQuick
+import QtMultimedia
 import M3Shapes
 import qs.services
 import qs.theme
@@ -17,7 +18,10 @@ Item {
     readonly property real midY: rowY((rows - 1) / 2)
     readonly property real bottomY: rowY(rows - 1)
 
-    property var fromGains: Equalizer.gains
+    property var fromGains: []
+    property var shown: []
+    property int ticked: 10
+    property int tickCount: 0
     property real wave: 1
     readonly property bool waving: waveAnim.running
     readonly property real front: wave * (width + Theme.media.eqWaveReach * 2) - Theme.media.eqWaveReach
@@ -46,6 +50,28 @@ Item {
         return 0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (3 * p1 - p0 - 3 * p2 + p3) * t * t * t);
     }
 
+    function passedAt(x) {
+        return waving ? Math.max(0, Math.min(1, (front - x) / 90 + 0.5)) : 1;
+    }
+
+    function bandNow(band) {
+        const from = fromGains[band];
+        return from + (Equalizer.gains[band] - from) * back(passedAt(colX(band * perBand)));
+    }
+
+    function tick() {
+        if (Settings.sound.feedback && tickCount++ % 2 === 0) tickSound.play();
+    }
+
+    function click() {
+        tickCount = 0;
+        tick();
+    }
+
+    function drag(band, y) {
+        if (Equalizer.setGain(band, dbFor(y))) tick();
+    }
+
     function back(t) {
         const c1 = 1.70158 * Theme.anim.overshoot, c3 = c1 + 1;
         return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
@@ -55,9 +81,42 @@ Item {
         target: Equalizer
 
         function onPresetChanging() {
-            root.fromGains = Equalizer.gains;
+            root.fromGains = root.waving ? root.fromGains.map((db, band) => root.bandNow(band)) : root.shown;
+            root.ticked = 0;
+            root.tickCount = 0;
             waveAnim.restart();
         }
+    }
+
+    Component.onCompleted: {
+        shown = Equalizer.gains.slice();
+        fromGains = shown;
+    }
+
+    onFrontChanged: {
+        const lead = Theme.media.eqTickLead / Theme.media.eqWaveDuration * (width + Theme.media.eqWaveReach * 2);
+        const changes = fromGains.some((db, band) => Math.round(db) !== Equalizer.gains[band]);
+        while (ticked < 10 && front + lead >= colX(ticked * perBand)) {
+            if (changes) tick();
+            ticked++;
+        }
+    }
+
+    FrameAnimation {
+        running: !root.waving && root.shown.some((db, i) => db !== Equalizer.gains[i])
+        onTriggered: {
+            const k = 1 - Math.exp(-frameTime * Theme.media.eqFollow);
+            root.shown = root.shown.map((db, i) => {
+                const target = Equalizer.gains[i];
+                return Math.abs(target - db) < 0.02 ? target : db + (target - db) * k;
+            });
+        }
+    }
+
+    SoundEffect {
+        id: tickSound
+        source: Qt.resolvedUrl("../../../assets/sounds/thock.wav")
+        volume: Theme.media.tickVolume
     }
 
     NumberAnimation {
@@ -67,7 +126,7 @@ Item {
         from: 0
         to: 1
         duration: Theme.media.eqWaveDuration * Theme.anim.scale
-        easing.type: Easing.InOutSine
+        onFinished: root.shown = Equalizer.gains.slice()
     }
 
     Row {
@@ -75,7 +134,7 @@ Item {
         spacing: Theme.spacing.xs + 2
 
         Repeater {
-            model: Equalizer.presetNames.concat(Equalizer.preset === "Custom" ? ["Custom"] : [])
+            model: Equalizer.presetNames.concat(Equalizer.preset === "Custom" ? ["Custom", "+"] : [])
 
             Rectangle {
                 id: chip
@@ -125,7 +184,18 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     enabled: chip.modelData !== "Custom"
-                    onClicked: Equalizer.usePreset(chip.modelData)
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    onClicked: mouse => {
+                        if (chip.modelData === "+") {
+                            root.click();
+                            Equalizer.save();
+                        } else if (mouse.button === Qt.RightButton) {
+                            root.click();
+                            Equalizer.remove(chip.modelData);
+                        } else {
+                            Equalizer.usePreset(chip.modelData);
+                        }
+                    }
                 }
             }
         }
@@ -151,9 +221,9 @@ Item {
             readonly property real cx: root.colX(index)
             readonly property bool band: index % root.perBand === 0
             readonly property int bandIndex: index / root.perBand
-            readonly property real passed: root.waving ? Math.max(0, Math.min(1, (root.front - cx) / 90 + 0.5)) : 1
+            readonly property real passed: root.passedAt(cx)
             readonly property real from: root.dbAt(root.fromGains, index)
-            readonly property real value: from + (root.dbAt(Equalizer.gains, index) - from) * root.back(passed)
+            readonly property real value: root.waving ? from + (root.dbAt(Equalizer.gains, index) - from) * root.back(passed) : root.dbAt(root.shown, index)
             readonly property real curveY: root.yFor(value)
             readonly property real hit: root.waving ? Math.max(0, 1 - Math.abs(root.front - cx) / Theme.media.eqWaveWidth) : 0
             readonly property real tail: root.waving && root.front > cx ? Math.max(0, 1 - (root.front - cx) / Theme.media.eqWaveTail) : 0
@@ -214,9 +284,9 @@ Item {
                 height: root.gridHeight
                 hoverEnabled: true
                 cursorShape: Qt.SizeVerCursor
-                onPressed: mouse => Equalizer.setGain(column.bandIndex, root.dbFor(mouse.y + y))
+                onPressed: mouse => root.drag(column.bandIndex, mouse.y + y)
                 onPositionChanged: mouse => {
-                    if (pressed) Equalizer.setGain(column.bandIndex, root.dbFor(mouse.y + y));
+                    if (pressed) root.drag(column.bandIndex, mouse.y + y);
                 }
             }
         }

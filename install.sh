@@ -16,7 +16,7 @@ packages=(
     playerctl brightnessctl cava zenity libnotify ffmpeg jq pciutils fastfetch
     gpu-screen-recorder inter-font ttf-material-symbols-variable
     ttf-nerd-fonts-symbols ttf-jetbrains-mono-nerd noto-fonts-emoji papirus-icon-theme
-    git cmake ninja gcc qt6-shadertools
+    git cmake ninja gcc qt6-shadertools qt6-multimedia pipewire wireplumber
 )
 
 say() { printf '  %s\n' "$*"; }
