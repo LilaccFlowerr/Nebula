@@ -19,6 +19,18 @@ Item {
     readonly property real fullHeight: content.implicitHeight + Theme.media.panelPadding * 2
 
     property real intro: 0
+    property bool eqTab: false
+    property real tabT: eqTab ? 1 : 0
+    readonly property real lyricsOut: Curves.phase(tabT, 0, 0.5)
+    readonly property real eqIn: Curves.phase(tabT, 0.35, 0.65)
+
+    Behavior on tabT {
+        NumberAnimation {
+            duration: Theme.media.tabDuration * Theme.anim.scale
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Theme.anim.standard
+        }
+    }
 
     readonly property real artIn: Curves.phase(intro, 0, 0.45)
     readonly property real cavaIn: Curves.decel(Curves.phase(intro, 0.15, 0.4))
@@ -116,9 +128,12 @@ Item {
             }
 
             Item {
-                Layout.preferredWidth: Theme.media.cavaWidth
+                Layout.preferredWidth: Theme.media.cavaWidth * (1 - root.tabT)
                 Layout.preferredHeight: Theme.media.artSize
-                visible: Settings.bar.visualizer
+                Layout.rightMargin: -Theme.spacing.xl * root.tabT
+                visible: Settings.bar.visualizer && root.tabT < 1
+                opacity: 1 - root.lyricsOut
+                clip: true
 
                 Item {
                     id: cavaReveal
@@ -139,23 +154,25 @@ Item {
                 }
             }
 
-            ColumnLayout {
+            Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.media.artSize
-                spacing: 2
-                opacity: root.fade * root.lyricsIn
-                transform: Translate { x: root.slide + (1 - root.lyricsIn) * Theme.media.introSlide }
+                opacity: root.lyricsIn
+                transform: Translate { x: (1 - root.lyricsIn) * Theme.media.introSlide }
 
                 LyricsView {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    anchors.fill: parent
                     anchorLine: Theme.media.lyricsAnchor
-                    visible: Settings.bar.lyrics && Lyrics.status !== "none"
+                    visible: Settings.bar.lyrics && Lyrics.status !== "none" && opacity > 0
+                    opacity: root.fade * (1 - root.lyricsOut)
+                    transform: Translate { x: root.slide - root.lyricsOut * Theme.media.tabSlide }
                 }
 
-                Item {
-                    Layout.fillHeight: true
-                    visible: !Settings.bar.lyrics || Lyrics.status === "none"
+                EqualizerView {
+                    anchors.fill: parent
+                    visible: opacity > 0
+                    opacity: root.eqIn
+                    transform: Translate { x: (1 - root.eqIn) * Theme.media.tabSlide }
                 }
             }
         }
@@ -240,6 +257,67 @@ Item {
                     color: Colors.textOnSurfaceVariant
                     font.family: Theme.font.family
                     font.pixelSize: Theme.font.small
+                }
+            }
+
+            Rectangle {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                width: Theme.media.tabWidth * 2
+                height: Theme.media.tabHeight
+                radius: height / 2
+                color: Qt.alpha(Colors.surfaceContainerHigh, 0.6)
+                opacity: root.deviceIn
+
+                Rectangle {
+                    x: root.tabT * Theme.media.tabWidth
+                    width: Theme.media.tabWidth
+                    height: parent.height
+                    radius: height / 2
+                    color: Colors.secondaryContainer
+                }
+
+                Row {
+                    Repeater {
+                        model: [{ icon: "lyrics", label: "Lyrics", eq: false }, { icon: "equalizer", label: "EQ", eq: true }]
+
+                        Item {
+                            id: tab
+                            required property var modelData
+                            readonly property bool active: root.eqTab === modelData.eq
+
+                            width: Theme.media.tabWidth
+                            height: Theme.media.tabHeight
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: Theme.spacing.xs + 2
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: tab.modelData.icon
+                                    font.family: Theme.font.icons
+                                    font.pixelSize: Theme.media.tabIconSize
+                                    color: tab.active ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
+                                }
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: tab.modelData.label
+                                    font.family: Theme.font.family
+                                    font.pixelSize: Theme.font.small
+                                    font.weight: 600
+                                    color: tab.active ? Colors.textOnSecondaryContainer : Colors.textOnSurfaceVariant
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.eqTab = tab.modelData.eq
+                            }
+                        }
+                    }
                 }
             }
 

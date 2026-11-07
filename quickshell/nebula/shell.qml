@@ -13,6 +13,7 @@ ShellRoot {
     WidgetsWindow {}
     readonly property bool screenshotBusy: Screenshot.busy
     readonly property var hyprMonitors: HyprConfig.monitors
+    readonly property bool equalizer: Equalizer.available
 
     
     Bar {}

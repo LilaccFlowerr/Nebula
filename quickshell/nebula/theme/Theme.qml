@@ -79,6 +79,26 @@ Singleton {
         readonly property int introSlide: 24
         readonly property int introRise: 12
         readonly property int overshootRoom: 60
+        readonly property int eqColumns: 37
+        readonly property int eqRows: 17
+        readonly property int eqPadding: 8
+        readonly property int eqLabelHeight: 20
+        readonly property int eqDot: 6
+        readonly property int eqLineDot: 8
+        readonly property int eqHandle: 14
+        readonly property int eqHandleHit: 6
+        readonly property int eqWaveDuration: 1100
+        readonly property int eqWaveReach: 100
+        readonly property int eqWaveWidth: 55
+        readonly property int eqWaveTail: 220
+        readonly property real eqLevelCurve: 0.55
+        readonly property real eqLit: 0.8
+        readonly property real eqIdle: 0.16
+        readonly property int tabHeight: 36
+        readonly property int tabWidth: 96
+        readonly property int tabIconSize: 18
+        readonly property int tabDuration: 450
+        readonly property int tabSlide: 32
     }
     readonly property MediaIslandTokens media: MediaIslandTokens {}
 
