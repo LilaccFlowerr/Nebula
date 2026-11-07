@@ -1,5 +1,5 @@
 import QtQuick
-import QtMultimedia
+import Quickshell
 import M3Shapes
 import qs.services
 import qs.theme
@@ -60,7 +60,8 @@ Item {
     }
 
     function tick() {
-        if (Settings.sound.feedback && tickCount++ % 2 === 0) tickSound.play();
+        if (Settings.sound.feedback && tickCount++ % 2 === 0)
+            Quickshell.execDetached(["pw-play", "--volume", String(Theme.media.tickVolume), Quickshell.shellPath("assets/sounds/thock.wav")]);
     }
 
     function click() {
@@ -111,12 +112,6 @@ Item {
                 return Math.abs(target - db) < 0.02 ? target : db + (target - db) * k;
             });
         }
-    }
-
-    SoundEffect {
-        id: tickSound
-        source: Qt.resolvedUrl("../../../assets/sounds/thock.wav")
-        volume: Theme.media.tickVolume
     }
 
     NumberAnimation {
