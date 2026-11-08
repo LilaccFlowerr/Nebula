@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Quickshell.Services.Pipewire
 
 Singleton {
@@ -70,16 +69,11 @@ Singleton {
     onGainsChanged: apply()
     onAvailableChanged: apply()
 
-    Process {
-        id: engine
-        running: true
-        command: ["sh", "-c", 'pw-cli ls Node | grep -q \'node.name = "nebula_eq"\' || exec pipewire -c "$1"', "sh", Quickshell.shellPath("assets/nebula-eq.conf")]
-        onExited: restart.start()
-    }
-
     Timer {
-        id: restart
         interval: 3000
-        onTriggered: engine.running = true
+        running: !root.available
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: Quickshell.execDetached(["sh", "-c", 'pw-cli ls Node | grep -q \'node.name = "nebula_eq"\' || exec pipewire -c "$1"', "sh", Quickshell.shellPath("assets/nebula-eq.conf")])
     }
 }
