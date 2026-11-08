@@ -35,7 +35,13 @@ Singleton {
                 app = { name: entry.data.appName, data: entry.data, items: [], count: 0 };
                 apps.push(app);
             }
-            app.items.push(entry);
+            let group = app.items.find(g => g.summary === entry.data.summary);
+            if (!group) {
+                group = { id: app.name + "\n" + entry.data.summary, summary: entry.data.summary, data: entry.data, time: entry.time, entries: [], count: 0 };
+                app.items.push(group);
+            }
+            group.entries.push(entry);
+            group.count += entry.count;
             app.count += entry.count;
         }
         return apps;
@@ -144,8 +150,9 @@ Singleton {
         missed = missed.slice();
     }
 
-    function forget(entry) {
-        missed = missed.filter(m => m.id !== entry.id);
+    function forget(group) {
+        const ids = group.entries.map(e => e.id);
+        missed = missed.filter(m => !ids.includes(m.id));
     }
 
     function forgetApp(name) {
@@ -156,9 +163,9 @@ Singleton {
         missed = [];
     }
 
-    function openMissed(entry) {
-        focusSource(entry.data);
-        forget(entry);
+    function openMissed(group) {
+        focusSource(group.data);
+        forget(group);
     }
 
     function resetTimers() {

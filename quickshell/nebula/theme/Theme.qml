@@ -127,7 +127,9 @@ Singleton {
         readonly property real burstStagger: 0.06
         readonly property real burstLength: 0.5
         readonly property int burstDuration: 850
-        readonly property int expandLines: 6
+        readonly property int expandLines: 3
+        readonly property int expandMessages: 5
+        readonly property int timeSpace: 36
         readonly property int cardHeight: 60
         readonly property int openDuration: 700
         readonly property int closeDuration: 300
