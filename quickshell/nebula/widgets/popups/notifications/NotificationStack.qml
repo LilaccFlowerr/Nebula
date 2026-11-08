@@ -11,25 +11,27 @@ Item {
     readonly property bool hovered: hover.hovered
     readonly property int count: Math.min(Notifications.shown.length, Theme.toast.maxShown)
     readonly property bool expanded: hovered && count > 1
-    readonly property real frontHeight: heights[0] ?? 0
-    property var heights: []
+    readonly property real frontHeight: heightAt(0)
+    property var heights: ({})
 
-    function setHeight(index, h) {
-        const next = heights.slice();
-        next[index] = h;
-        heights = next;
+    function setHeight(key, h) {
+        heights = Object.assign({}, heights, { [key]: h });
+    }
+
+    function heightAt(index) {
+        return heights[Notifications.shown[index]] ?? 0;
     }
 
     function offsetOf(index) {
         if (!expanded) return 0;
         let y = 0;
-        for (let i = 0; i < index; i++) y += (heights[i] ?? 0) + Theme.toast.gap;
+        for (let i = 0; i < index; i++) y += heightAt(i) + Theme.toast.gap;
         return y;
     }
 
     implicitWidth: Theme.toast.width
     implicitHeight: count === 0 ? 0
-        : expanded ? offsetOf(count - 1) + (heights[count - 1] ?? 0)
+        : expanded ? offsetOf(count - 1) + heightAt(count - 1)
         : frontHeight + Math.min(count - 1, Theme.toast.maxPeek) * Theme.toast.peek
 
     visible: opacity > 0
@@ -96,21 +98,31 @@ Item {
             readonly property real away: root.width + Theme.bar.floatMargin * 2
             readonly property bool behind: !root.expanded && index > 0
             property real slide: away
-            property real presence: behind ? 0 : 1
+            property bool tucked: false
+            property real presence: tucked ? 0 : 1
+            property real ink: behind ? 0 : 1
 
             key: modelData
+            canOpen: root.expanded || root.count === 1
             z: -index
             width: root.width
             visible: index < Theme.toast.maxShown
             y: root.offsetOf(index)
             scale: 0.94 + 0.06 * presence
             transformOrigin: Item.Top
-            contentOpacity: presence
+            contentOpacity: ink
             opacity: presence * (1 - slide / away)
             transform: Translate { x: card.slide }
 
-            onImplicitHeightChanged: root.setHeight(index, implicitHeight)
-            onIndexChanged: root.setHeight(index, implicitHeight)
+            onImplicitHeightChanged: root.setHeight(modelData, implicitHeight)
+            onBehindChanged: {
+                if (behind) {
+                    tuckTimer.restart();
+                } else {
+                    tuckTimer.stop();
+                    tucked = false;
+                }
+            }
             onLeavingChanged: {
                 if (leaving) {
                     leaveAnim.restart();
@@ -120,8 +132,15 @@ Item {
                 }
             }
             Component.onCompleted: {
-                root.setHeight(index, implicitHeight);
+                root.setHeight(modelData, implicitHeight);
+                tucked = behind;
                 slide = 0;
+            }
+
+            Timer {
+                id: tuckTimer
+                interval: Theme.anim.island
+                onTriggered: card.tucked = true
             }
 
             Behavior on slide {
@@ -130,6 +149,9 @@ Item {
             }
             Behavior on y {
                 NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+            }
+            Behavior on ink {
+                NumberAnimation { duration: Theme.anim.fast }
             }
             Behavior on presence {
                 NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
