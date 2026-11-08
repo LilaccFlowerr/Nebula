@@ -49,6 +49,7 @@ Singleton {
         readonly property int badgeSize: 20
         readonly property real bumpScale: 1.12
         readonly property int bodyLines: 2
+        readonly property int openDelay: 250
     }
     readonly property Toast toast: Toast {}
 
@@ -104,6 +105,42 @@ Singleton {
         readonly property int tabSlide: 32
     }
     readonly property MediaIslandTokens media: MediaIslandTokens {}
+
+    component GalaxyTokens: QtObject {
+        readonly property int width: 760
+        readonly property int height: 560
+        readonly property int coreSize: 140
+        readonly property int planetSize: 40
+        readonly property int planetGrow: 8
+        readonly property int maxGrowth: 5
+        readonly property int trail: 6
+        readonly property real trailStep: 0.18
+        readonly property int fanRadius: 220
+        readonly property real fanSpread: 0.42
+        readonly property int holdOffset: 170
+        readonly property int cardWidth: 240
+        readonly property int maxCards: 5
+        readonly property int avatarSize: 36
+        readonly property int clearDuration: 450
+        readonly property int flyAway: 1600
+        readonly property real burstStart: 0.1
+        readonly property real burstStagger: 0.06
+        readonly property real burstLength: 0.5
+        readonly property int burstDuration: 850
+        readonly property int expandLines: 6
+        readonly property int cardHeight: 60
+        readonly property int openDuration: 700
+        readonly property int closeDuration: 300
+        readonly property int fanDuration: 550
+        readonly property real backdrop: 0.9
+        readonly property int stars: 160
+        readonly property real starFaint: 0.25
+        readonly property real starBright: 0.6
+        readonly property int peekSize: 88
+        readonly property int peekZone: 6
+        readonly property int peekOut: 34
+    }
+    readonly property GalaxyTokens galaxy: GalaxyTokens {}
 
     component Glass: QtObject {
         readonly property real tint: 0.72

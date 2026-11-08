@@ -11,7 +11,10 @@ Item {
     id: root
 
     required property string key
-    property bool open: hovered
+    property bool canOpen: true
+    property bool open: false
+    readonly property bool wantsOpen: hovered && canOpen
+    property real shownHeight: layout.implicitHeight + Theme.spacing.lg * 2
     property real contentOpacity: 1
     readonly property bool hovered: hover.hovered
 
@@ -28,7 +31,27 @@ Item {
     readonly property var actions: liveN ? liveN.actions.filter(a => a.identifier !== "default") : []
 
     implicitWidth: Theme.toast.width
-    implicitHeight: layout.implicitHeight + Theme.spacing.lg * 2
+    implicitHeight: shownHeight
+    clip: true
+
+    onWantsOpenChanged: {
+        if (wantsOpen) {
+            openTimer.restart();
+        } else {
+            openTimer.stop();
+            open = false;
+        }
+    }
+
+    Behavior on shownHeight {
+        NumberAnimation { duration: Theme.anim.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.anim.emphasizedDecel }
+    }
+
+    Timer {
+        id: openTimer
+        interval: Theme.toast.openDelay
+        onTriggered: root.open = true
+    }
 
     HoverHandler {
         id: hover
