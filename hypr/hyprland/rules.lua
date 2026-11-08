@@ -99,6 +99,13 @@ hl.layer_rule({
     no_anim = true,
 })
 
+-- Quickshell missed-notifications galaxy and its edge peek: animated in QML, no slide-in
+hl.layer_rule({
+    name    = "quickshell-galaxy",
+    match   = { namespace = "^quickshell:galaxy(peek)?$" },
+    no_anim = true,
+})
+
 shell_blur({
     name  = "blur-quickshell-launcher",
     match = { namespace = "^quickshell:launcher$" },

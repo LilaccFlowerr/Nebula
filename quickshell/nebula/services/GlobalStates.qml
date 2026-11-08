@@ -9,6 +9,7 @@ Singleton {
     id: root
 
     property bool launcherOpen: false
+    property bool galaxyOpen: false
     property bool powerMenuOpen: false
     property bool quickSettingsOpen: false
     property bool calendarOpen: false
@@ -41,6 +42,16 @@ Singleton {
             closeAll();
             screen = screenName;
             launcherOpen = true;
+        }
+    }
+
+    function toggleGalaxy(screenName = focusedScreen()) {
+        if (galaxyOpen && screen === screenName) {
+            galaxyOpen = false;
+        } else {
+            closeAll();
+            screen = screenName;
+            galaxyOpen = true;
         }
     }
 
@@ -161,6 +172,7 @@ Singleton {
 
     function closeAll() {
         launcherOpen = false;
+        galaxyOpen = false;
         powerMenuOpen = false;
         quickSettingsOpen = false;
         calendarOpen = false;
@@ -176,6 +188,13 @@ Singleton {
         target: "media"
 
         function toggle(): void { if (Media.active) root.toggleMedia(); }
+    }
+
+    IpcHandler {
+        target: "missed"
+
+        function toggle(): void { root.toggleGalaxy(); }
+        function clear(): void { Notifications.clearMissed(); }
     }
 
     IpcHandler {
