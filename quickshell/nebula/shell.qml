@@ -7,6 +7,7 @@ import qs.widgets.wallpaper
 import qs.widgets.desktop
 import qs.widgets.screenshot
 import qs.widgets.galaxy
+import qs.widgets.lock
 import qs.widgets.popups.notifications
 import qs.services
 
@@ -62,6 +63,8 @@ ShellRoot {
     }
 
     FreezeWindow {}
+
+    LockWindow {}
 
     
 }

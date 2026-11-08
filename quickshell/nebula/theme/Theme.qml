@@ -406,6 +406,53 @@ Singleton {
     }
     readonly property Visualizer visualizer: Visualizer {}
 
+    component LockTokens: QtObject {
+        readonly property color space: "#05050f"
+        readonly property color star: "#e9e4ff"
+        readonly property int twinklers: 18
+        readonly property int ringDots: 90
+        readonly property real ringTilt: 0.32
+        readonly property real backdropDim: 0.62
+        readonly property real surfaceTint: 0.94
+        readonly property real blurSource: 0.5
+        readonly property int blurMax: 40
+        readonly property int openDuration: 3400
+        readonly property int closeDuration: 1500
+        readonly property real centerOvershoot: 1.2
+        readonly property real wingOvershoot: 1.12
+        readonly property real foldOvershoot: 1.3
+        readonly property int holeSize: 160
+        readonly property int clockSize: 230
+        readonly property int musicWidth: 340
+        readonly property int musicHeight: 112
+        readonly property int notificationWidth: 300
+        readonly property int notificationHeight: 72
+        readonly property real orbitX: 0.3
+        readonly property real orbitY: 0.27
+        readonly property int orbitPeriod: 150
+        readonly property real depthScale: 0.14
+        readonly property real depthOpacity: 0.35
+        readonly property int bob: 6
+        readonly property int bobPeriod: 7
+        readonly property int activeClockSize: 340
+        readonly property int activeMusicWidth: 320
+        readonly property int activeMusicHeight: 380
+        readonly property int activeNotificationWidth: 340
+        readonly property int activeNotificationHeight: 84
+        readonly property int notificationGap: 14
+        readonly property int sideGap: 48
+        readonly property int passwordWidth: 340
+        readonly property int passwordHeight: 58
+        readonly property int modeDuration: 1400
+        readonly property int idleTimeout: 15000
+        readonly property int maxNotifications: 3
+        readonly property int maxDots: 24
+        readonly property real spiralTurn: 2.8
+        readonly property real wingStartScale: 0.3
+        readonly property real centerHeight: 0.42
+    }
+    readonly property LockTokens lock: LockTokens {}
+
     component FetchTokens: QtObject {
         readonly property int size: 520
         readonly property real stackLogo: 0.62
