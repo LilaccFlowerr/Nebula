@@ -13,6 +13,7 @@ Singleton {
     readonly property int tick: 250
     readonly property int leaveFallback: 1200
     readonly property int emptyGrace: 600
+    readonly property int maxMissed: 60
 
     property bool paused: false
     property var shown: []
@@ -20,6 +21,23 @@ Singleton {
     property var groups: ({})
     property int revision: 0
     readonly property var current: shown.length > 0 ? shown[0] : null
+    property var missed: []
+    property int nextMissedId: 0
+    property var uncached: []
+    readonly property var missedApps: {
+        const apps = [];
+        for (const entry of missed) {
+            let app = apps.find(a => a.name === entry.data.appName);
+            if (!app) {
+                app = { name: entry.data.appName, data: entry.data, items: [], count: 0 };
+                apps.push(app);
+            }
+            app.items.push(entry);
+            app.count += entry.count;
+        }
+        return apps;
+    }
+    readonly property int missedCount: missed.reduce((sum, entry) => sum + entry.count, 0)
 
     signal bumped(string key)
 
@@ -50,7 +68,7 @@ Singleton {
         return {
             appName: n.appName,
             appIcon: n.appIcon,
-            image: n.image,
+            image: n.image || (n.appIcon.startsWith("/") ? "file://" + n.appIcon : n.appIcon.startsWith("file://") ? n.appIcon : ""),
             summary: n.summary,
             body: n.body,
             urgency: n.urgency,
@@ -62,7 +80,7 @@ Singleton {
         const key = keyOf(n);
         let g = groups[key];
         if (!g) {
-            g = { members: [], count: 0, data: null, remaining: 0, emptySince: 0, closing: null };
+            g = { members: [], count: 0, data: null, entries: [], remaining: 0, emptySince: 0, closing: null };
             groups[key] = g;
         }
         if (!g.members.includes(n)) {
@@ -71,6 +89,7 @@ Singleton {
         }
         g.count++;
         g.data = snapshot(n);
+        g.entries.push(remember(g.data, 1));
         g.remaining = timeoutFor(g);
         g.emptySince = 0;
         g.closing = null;
@@ -88,6 +107,53 @@ Singleton {
         g.members = g.members.filter(x => x !== n);
         if (g.members.length === 0) g.emptySince = Date.now();
         revision++;
+    }
+
+    function iconFor(data) {
+        const entry = DesktopEntries.heuristicLookup(data.desktopEntry || data.appName);
+        return Quickshell.iconPath(data.appIcon || entry?.icon || "", true);
+    }
+
+    function needsCache(image) {
+        return image !== "" && !image.startsWith("image://icon/") && !image.includes(Quickshell.cacheDir);
+    }
+
+    function remember(data, count) {
+        if (needsCache(data.image) && !uncached.includes(data.image)) uncached = [...uncached, data.image];
+        const entry = { id: nextMissedId++, data: data, count: count, time: Date.now() };
+        missed = [entry, ...missed].slice(0, maxMissed);
+        return entry;
+    }
+
+    function seen(key) {
+        const g = groups[key];
+        if (g) missed = missed.filter(m => !g.entries.some(e => e.id === m.id));
+    }
+
+    function cacheImage(original, url) {
+        uncached = uncached.filter(image => image !== original);
+        if (url === "") return;
+        for (const m of missed) {
+            if (m.data.image === original) m.data.image = url;
+        }
+        missed = missed.slice();
+    }
+
+    function forget(entry) {
+        missed = missed.filter(m => m.id !== entry.id);
+    }
+
+    function forgetApp(name) {
+        missed = missed.filter(m => m.data.appName !== name);
+    }
+
+    function clearMissed() {
+        missed = [];
+    }
+
+    function openMissed(entry) {
+        focusSource(entry.data);
+        forget(entry);
     }
 
     function resetTimers() {
@@ -138,10 +204,12 @@ Singleton {
         const n = live(key);
         const action = n ? (n.actions.find(a => a.identifier === "default") ?? n.actions[0]) : null;
         if (action) action.invoke();
+        seen(key);
         close(key);
     }
 
     function dismiss(key = current) {
+        seen(key);
         close(key);
     }
 
@@ -153,7 +221,10 @@ Singleton {
 
         onNotification: n => {
             n.tracked = true;
-            if (Dnd.enabled && n.urgency !== NotificationUrgency.Critical) return;
+            if (Dnd.enabled && n.urgency !== NotificationUrgency.Critical) {
+                root.remember(root.snapshot(n), 1);
+                return;
+            }
             root.add(n);
         }
     }

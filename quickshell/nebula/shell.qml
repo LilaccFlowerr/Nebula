@@ -6,6 +6,8 @@ import qs.widgets.launcher
 import qs.widgets.wallpaper
 import qs.widgets.desktop
 import qs.widgets.screenshot
+import qs.widgets.galaxy
+import qs.widgets.popups.notifications
 import qs.services
 
 ShellRoot {
@@ -45,6 +47,19 @@ ShellRoot {
     ImagePickerWindow {}
 
     LauncherWindow {}
+
+    GalaxyWindow {}
+
+    ImageCache {}
+
+    Variants {
+        model: Quickshell.screens
+
+        GalaxyPeek {
+            required property ShellScreen modelData
+            screen: modelData
+        }
+    }
 
     FreezeWindow {}
 
