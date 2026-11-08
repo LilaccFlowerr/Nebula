@@ -394,7 +394,10 @@ Item {
             }
 
             Repeater {
-                model: planet.active ? planet.modelData.items : []
+                model: ScriptModel {
+                    values: planet.active ? planet.modelData.items : []
+                    objectProp: "id"
+                }
 
                 Item {
                     id: leaf
@@ -560,8 +563,9 @@ Item {
                                 primary: true
                                 Layout.fillWidth: true
                                 onClicked: {
-                                    Notifications.openMissed(leaf.modelData);
+                                    const entry = leaf.modelData;
                                     root.closeRequested();
+                                    Notifications.openMissed(entry);
                                 }
                             }
 

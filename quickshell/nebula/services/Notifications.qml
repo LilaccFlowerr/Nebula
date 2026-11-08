@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Services.Notifications
 
 Singleton {
@@ -24,6 +25,8 @@ Singleton {
     property var missed: []
     property int nextMissedId: 0
     property var uncached: []
+    property bool missedLoaded: false
+    readonly property string directory: Quickshell.env("HOME") + "/.local/state/nebula"
     readonly property var missedApps: {
         const apps = [];
         for (const entry of missed) {
@@ -40,6 +43,8 @@ Singleton {
     readonly property int missedCount: missed.reduce((sum, entry) => sum + entry.count, 0)
 
     signal bumped(string key)
+
+    onMissedChanged: if (missedLoaded) saveTimer.restart()
 
     function keyOf(n) {
         return n.appName + "\u0001" + n.summary;
@@ -211,6 +216,45 @@ Singleton {
     function dismiss(key = current) {
         seen(key);
         close(key);
+    }
+
+    function keepable(image) {
+        return image === "" || image.startsWith("image://icon/") || image.startsWith("file://");
+    }
+
+    Timer {
+        id: saveTimer
+        interval: 1000
+        onTriggered: storage.setText(JSON.stringify(root.missed.map(m => ({
+            count: m.count,
+            time: m.time,
+            data: Object.assign({}, m.data, { image: root.keepable(m.data.image) ? m.data.image : "" })
+        }))))
+    }
+
+    Process {
+        id: createStorage
+        command: ["sh", "-c", "mkdir -p \"$1\" && printf '[]' > \"$1/missed.json\"", "sh", root.directory]
+    }
+
+    FileView {
+        id: storage
+        path: root.directory + "/missed.json"
+        printErrors: false
+        onLoaded: {
+            if (root.missedLoaded) return;
+            let saved = [];
+            try {
+                saved = JSON.parse(text());
+            } catch (e) {}
+            const restored = saved.map(m => ({ id: root.nextMissedId++, count: m.count, time: m.time, data: m.data }));
+            root.missed = [...root.missed, ...restored].slice(0, root.maxMissed);
+            root.missedLoaded = true;
+        }
+        onLoadFailed: error => {
+            root.missedLoaded = true;
+            if (error === FileViewError.FileNotFound) createStorage.running = true;
+        }
     }
 
     NotificationServer {
