@@ -422,13 +422,13 @@ Singleton {
         readonly property real wingOvershoot: 1.12
         readonly property real foldOvershoot: 1.3
         readonly property int holeSize: 160
-        readonly property int clockSize: 230
-        readonly property int musicWidth: 340
-        readonly property int musicHeight: 112
-        readonly property int notificationWidth: 300
-        readonly property int notificationHeight: 72
+        readonly property int clockSize: 250
+        readonly property int musicWidth: 196
+        readonly property int musicHeight: 236
+        readonly property int notificationWidth: 100
+        readonly property int notificationHeight: 122
         readonly property real orbitX: 0.3
-        readonly property real orbitY: 0.27
+        readonly property real orbitY: 0.3
         readonly property int orbitPeriod: 150
         readonly property real depthScale: 0.14
         readonly property real depthOpacity: 0.35
@@ -436,7 +436,7 @@ Singleton {
         readonly property int bobPeriod: 7
         readonly property int activeClockSize: 340
         readonly property int activeMusicWidth: 320
-        readonly property int activeMusicHeight: 380
+        readonly property int activeMusicHeight: 480
         readonly property int activeNotificationWidth: 340
         readonly property int activeNotificationHeight: 84
         readonly property int notificationGap: 14
@@ -445,6 +445,27 @@ Singleton {
         readonly property int passwordHeight: 58
         readonly property int modeDuration: 1400
         readonly property int idleTimeout: 15000
+        readonly property real innerOrbitX: 0.19
+        readonly property real innerOrbitY: 0.14
+        readonly property int innerPeriod: 80
+        readonly property int planetSize: 132
+        readonly property int moonSize: 96
+        readonly property int batterySize: 96
+        readonly property real pulseGain: 0.45
+        readonly property int visualizerBars: 24
+        readonly property int dotSize: 7
+        readonly property int dotMax: 12
+        readonly property real holePulse: 0.12
+        readonly property int statsWidth: 540
+        readonly property int statsHeight: 256
+        readonly property int statsGap: 28
+        readonly property int rowOffset: 70
+        readonly property int bubbleSize: 84
+        readonly property int inputWidth: 360
+        readonly property int inputHeight: 56
+        readonly property int inputGap: 28
+        readonly property int rowSpacing: 130
+        readonly property int eqHeight: 190
         readonly property int maxNotifications: 3
         readonly property int maxDots: 24
         readonly property real spiralTurn: 2.8

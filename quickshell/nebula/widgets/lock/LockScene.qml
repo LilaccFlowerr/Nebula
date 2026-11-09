@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Shapes
 import qs.components
 import qs.services
 import qs.theme
@@ -25,14 +24,56 @@ FocusScope {
     readonly property real phase: seconds * Math.PI * 2 / Theme.lock.orbitPeriod - Math.PI / 2
     readonly property real radiusX: width * Theme.lock.orbitX
     readonly property real radiusY: height * Theme.lock.orbitY
+    readonly property real innerPhase: -seconds * Math.PI * 2 / Theme.lock.innerPeriod + Math.PI / 2
+    readonly property real innerX: width * Theme.lock.innerOrbitX
+    readonly property real innerY: height * Theme.lock.innerOrbitY
     readonly property var missedList: Notifications.missedApps.slice(0, Theme.lock.maxNotifications)
     readonly property int musicSlots: Media.active ? 1 : 0
-    readonly property int total: 1 + musicSlots + missedList.length
+    readonly property int total: 1 + musicSlots + notes.count
+    readonly property bool weatherOn: Weather.enabled && Weather.current !== null
+    readonly property bool batteryOn: Battery.available
+    readonly property int innerTotal: (weatherOn ? 1 : 0) + 1 + (batteryOn ? 1 : 0)
+    readonly property int moonIndex: weatherOn ? 1 : 0
 
     readonly property real activeClock: Theme.lock.activeClockSize * unit
-    readonly property real passwordY: cy + activeClock / 2 + 28 * unit + Theme.lock.passwordHeight * unit / 2
     readonly property real musicX: cx - activeClock / 2 - Theme.lock.sideGap * unit - Theme.lock.activeMusicWidth * unit / 2
     readonly property real notificationX: cx + activeClock / 2 + Theme.lock.sideGap * unit + Theme.lock.activeNotificationWidth * unit / 2
+    readonly property real rowY: cy - activeClock / 2 - Theme.lock.rowOffset * unit
+    readonly property real inputY: cy + activeClock / 2 + (Theme.lock.inputGap + Theme.lock.inputHeight / 2) * unit
+    readonly property real statsY: inputY + (Theme.lock.inputHeight / 2 + Theme.lock.statsGap + Theme.lock.statsHeight / 2) * unit
+
+    readonly property real bass: {
+        const v = Cava.values;
+        if (!v || v.length === 0) return 0;
+        let sum = 0;
+        for (let i = 0; i < 8; i++) sum += v[i] ?? 0;
+        return Math.min(1, sum / 8 * 1.8);
+    }
+    property real pulse: Media.playing && !active ? bass : 0
+
+    readonly property var bandLevels: {
+        if (!Media.playing || active) return [];
+        const v = Cava.values;
+        if (!v || v.length < 10) return [];
+        const per = v.length / 10;
+        const out = [];
+        for (let b = 0; b < 10; b++) {
+            let sum = 0;
+            let n = 0;
+            for (let i = Math.floor(b * per); i < Math.floor((b + 1) * per) && i < v.length; i++) {
+                sum += v[i];
+                n++;
+            }
+            let level = n > 0 ? sum / n : 0;
+            if (Equalizer.available) level *= Math.pow(10, (Equalizer.gains[b] ?? 0) / 40);
+            out.push(Math.min(1, level * 1.3));
+        }
+        return out;
+    }
+
+    Behavior on pulse {
+        NumberAnimation { duration: 70 }
+    }
 
     readonly property real holeBase: (1 + 0.25 * (Curves.outCubic(Curves.phase(m, 0, 260)) - Curves.outCubic(Curves.phase(m, 260, 260)))) * (1 - Curves.inQuad(Curves.phase(m, 180, 320)))
 
@@ -64,7 +105,8 @@ FocusScope {
         ? 1 - Curves.inQuad(Curves.phase(c, 180, 900))
         : Curves.outQuint(Curves.phase(o, 1000, 2400))
 
-    readonly property real pillT: Curves.outBack(Curves.phase(m, 560, 300), Theme.lock.wingOvershoot)
+    readonly property real inputT: Curves.outBack(Curves.phase(m, 560, 300), Theme.lock.wingOvershoot)
+    readonly property real statsT: Curves.outBack(Curves.phase(m, 660, 320), Theme.lock.wingOvershoot)
 
     function wing(openDelay, closeDelay) {
         if (closing) return 1 - Curves.inQuad(Curves.phase(c, closeDelay, 300));
@@ -88,9 +130,37 @@ FocusScope {
         if (!active && !closing && openT > 0.4) active = true;
     }
 
+    function syncNotes() {
+        const want = missedList;
+        for (let i = notes.count - 1; i >= 0; i--) {
+            const name = notes.get(i).name;
+            if (!want.some(a => a.name === name)) notes.remove(i);
+        }
+        want.forEach((a, i) => {
+            const data = { name: a.name, count: a.count, summary: a.items[0] ? a.items[0].summary : "", icon: Notifications.iconFor(a.data) };
+            let at = -1;
+            for (let j = 0; j < notes.count; j++) {
+                if (notes.get(j).name === a.name) at = j;
+            }
+            if (at < 0) {
+                notes.insert(Math.min(i, notes.count), data);
+            } else {
+                notes.set(at, data);
+                if (at !== i) notes.move(at, i, 1);
+            }
+        });
+    }
+
     focus: true
 
+    onMissedListChanged: syncNotes()
+
+    Component.onDestruction: SystemStats.users--
+
     Component.onCompleted: {
+        SystemStats.users++;
+        Weather.refreshIfOld();
+        syncNotes();
         input.forceActiveFocus();
         openAnim.start();
     }
@@ -100,6 +170,10 @@ FocusScope {
         modeAnim.to = active ? 1 : 0;
         modeAnim.duration = Math.round(Theme.lock.modeDuration * Theme.anim.scale * Math.abs(modeAnim.to - modeT));
         modeAnim.start();
+    }
+
+    ListModel {
+        id: notes
     }
 
     FrameAnimation {
@@ -186,35 +260,15 @@ FocusScope {
         spread: root.nebula
     }
 
-    Shape {
-        anchors.fill: parent
-        opacity: Math.min(1, root.nebula * 2) * (1 - Math.min(1, root.modeT * 2))
-
-        ShapePath {
-            strokeColor: Qt.alpha(Colors.textOnSurface, 0.12)
-            strokeWidth: 1
-            strokeStyle: ShapePath.DashLine
-            dashPattern: [3, 6]
-            fillColor: "transparent"
-
-            PathAngleArc {
-                centerX: root.cx
-                centerY: root.cy
-                radiusX: root.radiusX
-                radiusY: root.radiusY
-                startAngle: 0
-                sweepAngle: 360
-            }
-        }
-    }
-
     BlackHole {
         x: root.cx - width / 2
         y: root.cy - height / 2
         width: Theme.lock.holeSize * root.unit
         height: width
-        scale: Math.max(0, root.holeScale)
+        scale: Math.max(0, root.holeScale) * (1 + Theme.lock.holePulse * root.pulse)
         boost: root.holeBoost
+        pulse: root.pulse
+        levels: root.bandLevels
         iconOpacity: root.iconOpacity
         visible: root.holeScale > 0.002
     }
@@ -267,11 +321,16 @@ FocusScope {
     }
 
     Repeater {
-        model: root.missedList
+        model: notes
 
         OrbitSlot {
+            id: note
+
             required property int index
-            required property var modelData
+            required property string name
+            required property int count
+            required property string summary
+            required property string icon
 
             centerX: root.cx
             centerY: root.cy
@@ -288,60 +347,118 @@ FocusScope {
             layoutWidth: Theme.lock.activeNotificationWidth * root.unit
             layoutHeight: Theme.lock.activeNotificationHeight * root.unit
             layoutX: root.notificationX
-            layoutY: root.cy + (index - (root.missedList.length - 1) / 2) * (Theme.lock.activeNotificationHeight + Theme.lock.notificationGap) * root.unit
+            layoutY: root.cy + (index - (notes.count - 1) / 2) * (Theme.lock.activeNotificationHeight + Theme.lock.notificationGap) * root.unit
+
+            Component.onCompleted: if (root.openT > 0.7 && !root.closing) arriveNow()
 
             LockNotification {
                 anchors.fill: parent
-                entry: modelData
+                name: note.name
+                count: note.count
+                summary: note.summary
+                icon: note.icon
+                unit: root.unit
+                morph: root.settle(120 + note.index * 60)
             }
         }
     }
 
+    OrbitSlot {
+        centerX: root.cx
+        centerY: root.cy
+        radiusX: root.innerX
+        radiusY: root.innerY
+        phase: root.innerPhase
+        seconds: root.seconds
+        slotIndex: 0
+        total: root.innerTotal
+        reveal: root.weatherOn ? root.wing(180, 120) : 0
+        settle: root.settle(200)
+        idleWidth: Theme.lock.planetSize * root.unit
+        idleHeight: idleWidth
+        layoutWidth: 92 * root.unit
+        layoutHeight: layoutWidth
+        layoutX: root.cx + (0 - (root.innerTotal - 1) / 2) * Theme.lock.rowSpacing * root.unit
+        layoutY: root.rowY
+
+        LockWeather {
+            anchors.fill: parent
+        }
+    }
+
+    OrbitSlot {
+        centerX: root.cx
+        centerY: root.cy
+        radiusX: root.innerX
+        radiusY: root.innerY
+        phase: root.innerPhase
+        seconds: root.seconds
+        slotIndex: root.moonIndex
+        total: root.innerTotal
+        reveal: root.wing(240, 160)
+        settle: root.settle(240)
+        idleWidth: Theme.lock.moonSize * root.unit
+        idleHeight: idleWidth + 24
+        layoutWidth: 80 * root.unit
+        layoutHeight: layoutWidth + 24
+        layoutX: root.cx + (root.moonIndex - (root.innerTotal - 1) / 2) * Theme.lock.rowSpacing * root.unit
+        layoutY: root.rowY + 12
+
+        LockMoon {
+            anchors.fill: parent
+        }
+    }
+
+    OrbitSlot {
+        centerX: root.cx
+        centerY: root.cy
+        radiusX: root.innerX
+        radiusY: root.innerY
+        phase: root.innerPhase
+        seconds: root.seconds
+        slotIndex: root.moonIndex + 1
+        total: root.innerTotal
+        reveal: root.batteryOn ? root.wing(300, 200) : 0
+        settle: root.settle(280)
+        idleWidth: Theme.lock.batterySize * root.unit
+        idleHeight: idleWidth
+        layoutWidth: 80 * root.unit
+        layoutHeight: layoutWidth
+        layoutX: root.cx + (root.moonIndex + 1 - (root.innerTotal - 1) / 2) * Theme.lock.rowSpacing * root.unit
+        layoutY: root.rowY
+
+        LockBattery {
+            anchors.fill: parent
+        }
+    }
+
+    SpiralSlot {
+        originX: root.cx
+        originY: root.cy
+        targetX: root.cx + root.shakeX
+        targetY: root.inputY
+        reveal: Math.min(root.inputT, root.closing ? 1 - Curves.inQuad(Curves.phase(root.c, 0, 300)) : 1)
+        width: Theme.lock.inputWidth * root.unit
+        height: Theme.lock.inputHeight * root.unit
+
+        LockInput {
+            anchors.fill: parent
+            onSubmit: Lock.submit(input.text)
+        }
+    }
+
     Item {
-        x: root.cx - width / 2 + root.shakeX
-        y: root.passwordY - height / 2
-        width: Theme.lock.passwordWidth * root.unit
-        height: Theme.lock.passwordHeight * root.unit
-        scale: Math.max(0, root.pillT)
-        opacity: Math.min(1, root.pillT * 1.6) * root.contentOpacity
+        readonly property real shownT: Math.min(Curves.outCubic(Curves.phase(root.m, 660, 420)), root.closing ? 1 - Curves.inQuad(Curves.phase(root.c, 60, 300)) : 1)
+
+        x: root.cx - width / 2
+        y: root.statsY - height / 2 + (1 - shownT) * 28 * root.unit
+        width: Theme.lock.statsWidth * root.unit
+        height: Theme.lock.statsHeight * root.unit
+        opacity: shownT
         visible: opacity > 0
 
-        GlassRect {
+        LockStats {
             anchors.fill: parent
-            radius: height / 2
-            fill: Lock.failed ? Colors.errorContainer : Colors.secondaryContainer
-            tint: Theme.lock.surfaceTint
-            light: 0
-
-            Behavior on color {
-                ColorAnimation { duration: Theme.anim.fast }
-            }
-        }
-
-        Row {
-            anchors.centerIn: parent
-            spacing: 8
-            visible: Lock.typed > 0 && !Lock.checking
-
-            Repeater {
-                model: Math.min(Lock.typed, Theme.lock.maxDots)
-
-                Rectangle {
-                    width: 9
-                    height: 9
-                    radius: 4.5
-                    color: Colors.textOnSecondaryContainer
-                }
-            }
-        }
-
-        Text {
-            anchors.centerIn: parent
-            visible: Lock.typed === 0 || Lock.checking
-            text: Lock.checking ? "Checking…" : Lock.failed ? Lock.message : "Enter password"
-            font.family: Theme.font.family
-            font.pixelSize: Theme.font.large
-            color: Lock.failed ? Colors.textOnErrorContainer : Qt.alpha(Colors.textOnSecondaryContainer, 0.7)
         }
     }
 

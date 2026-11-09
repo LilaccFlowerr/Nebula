@@ -8,6 +8,8 @@ Item {
     property real boost: 0
     property real iconOpacity: 1
     property real spinPhase: 0
+    property real pulse: 0
+    property var levels: []
     readonly property real radius: width / 2
 
     implicitWidth: Theme.lock.holeSize
@@ -15,7 +17,7 @@ Item {
 
     FrameAnimation {
         running: root.visible
-        onTriggered: root.spinPhase += frameTime * (0.5 + 9 * root.boost) * 1.6
+        onTriggered: root.spinPhase += frameTime * (0.5 + 9 * root.boost + 4 * root.pulse) * 1.6
     }
 
     function rand(seed) {
@@ -32,6 +34,7 @@ Item {
         width: r * 2
         height: r * 2
         z: -1
+        opacity: Math.min(1, 0.65 + 0.7 * root.pulse)
 
         ShapePath {
             strokeColor: "transparent"
@@ -63,15 +66,19 @@ Item {
 
             readonly property real ring: 1.5 + root.rand(index + 1) * 1.9
             readonly property real angle: root.rand(index + 50) * Math.PI * 2 + root.spinPhase / Math.pow(ring, 1.5)
+            readonly property real unit: (((angle + Math.PI / 2) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2) / (Math.PI * 2) * 10
+            readonly property int low: Math.floor(unit) % 10
+            readonly property real mix: unit - Math.floor(unit)
+            readonly property real level: root.levels.length === 10 ? root.levels[low] * (1 - mix) + root.levels[(low + 1) % 10] * mix : 0
 
-            width: 3
-            height: 3
-            radius: 1.5
-            x: root.width / 2 + Math.cos(angle) * ring * root.radius - 1.5
-            y: root.height / 2 + Math.sin(angle) * ring * root.radius * Theme.lock.ringTilt - 1.5
+            width: 3 + 2.5 * root.pulse + 4 * level
+            height: width
+            radius: width / 2
+            x: root.width / 2 + Math.cos(angle) * ring * root.radius * (1 + Theme.lock.pulseGain * root.pulse + 0.25 * level) - width / 2
+            y: root.height / 2 + Math.sin(angle) * ring * root.radius * (1 + Theme.lock.pulseGain * root.pulse + 0.25 * level) * Theme.lock.ringTilt - width / 2
             z: Math.sin(angle) > 0 ? 2 : 0
             color: index % 3 === 0 ? Colors.tertiary : Colors.primary
-            opacity: 0.85
+            opacity: 0.75 + 0.25 * level
         }
     }
 

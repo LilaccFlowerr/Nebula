@@ -7,10 +7,27 @@ import qs.theme
 Item {
     id: root
 
+    property real flash: 0
+
+    Connections {
+        target: Lock
+
+        function onFailedAttempt() {
+            flashAnim.restart();
+        }
+    }
+
+    SequentialAnimation {
+        id: flashAnim
+
+        NumberAnimation { target: root; property: "flash"; to: 1; duration: 80 }
+        NumberAnimation { target: root; property: "flash"; to: 0; duration: 600; easing.type: Easing.OutCubic }
+    }
+
     MaterialShape {
         anchors.fill: parent
         shape: MaterialShape.Cookie12Sided
-        color: Qt.alpha(Colors.primaryContainer, Theme.lock.surfaceTint)
+        color: Qt.tint(Qt.alpha(Colors.primaryContainer, Theme.lock.surfaceTint), Qt.alpha(Colors.errorContainer, root.flash))
 
         RotationAnimation on rotation {
             from: 0
