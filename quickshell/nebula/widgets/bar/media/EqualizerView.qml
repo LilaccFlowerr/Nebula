@@ -7,8 +7,9 @@ import qs.theme
 Item {
     id: root
 
-    readonly property int columns: Theme.media.eqColumns
-    readonly property int rows: Theme.media.eqRows
+    property int columns: Theme.media.eqColumns
+    property int rows: Theme.media.eqRows
+    property var chipNames: null
     readonly property int perBand: (columns - 1) / 9
     readonly property real pad: Theme.media.eqPadding
     readonly property real gridTop: chips.height + Theme.spacing.md
@@ -129,7 +130,7 @@ Item {
         spacing: Theme.spacing.xs + 2
 
         Repeater {
-            model: Equalizer.presetNames.concat(Equalizer.preset === "Custom" ? ["Custom", "+"] : [])
+            model: root.chipNames ?? Equalizer.presetNames.concat(Equalizer.preset === "Custom" ? ["Custom", "+"] : [])
 
             Rectangle {
                 id: chip
