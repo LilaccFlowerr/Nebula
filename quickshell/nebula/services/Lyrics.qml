@@ -37,6 +37,11 @@ Singleton {
         function onLyricsChanged() { fetchTimer.restart(); }
     }
 
+    Connections {
+        target: Lock
+        function onWantedChanged() { fetchTimer.restart(); }
+    }
+
     Timer {
         id: fetchTimer
         interval: 300
@@ -62,7 +67,7 @@ Singleton {
     function fetch() {
         lines = [];
         plain = "";
-        if (!Media.active || !Settings.bar.lyrics) {
+        if (!Media.active || !(Settings.bar.lyrics || Lock.wanted)) {
             status = "none";
             return;
         }

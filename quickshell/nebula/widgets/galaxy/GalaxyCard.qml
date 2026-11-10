@@ -413,6 +413,7 @@ Item {
                     readonly property real arc: rel * Theme.galaxy.fanSpread + shift
                     readonly property real flight: root.removing?.id === modelData.id ? root.removeT : 0
                     readonly property real pad: Theme.spacing.md + 2
+                    readonly property var messages: modelData.entries.slice(0, Theme.galaxy.expandMessages).reverse()
                     readonly property real fullHeight: Math.max(content.implicitHeight, avatar.height) + actions.height + pad * 2 + Theme.spacing.sm
 
                     Behavior on e {
@@ -500,28 +501,86 @@ Item {
                             id: content
                             x: avatar.visible ? avatar.x + avatar.width + Theme.spacing.md : Theme.spacing.lg + 2
                             y: root.mix((Theme.galaxy.cardHeight - summary.implicitHeight - bodyMetrics.height) / 2, leaf.pad, leaf.e)
-                            width: Theme.galaxy.cardWidth - x - 50
+                            width: Theme.galaxy.cardWidth - x - leaf.pad
 
-                            Text {
-                                id: summary
-                                width: parent.width
-                                elide: Text.ElideRight
-                                text: leaf.modelData.data.summary
-                                color: Colors.textOnSurface
-                                font.family: Theme.font.family
-                                font.pixelSize: Theme.font.normal - 1
-                                font.weight: 700
+                            Row {
+                                width: parent.width - Theme.galaxy.timeSpace
+                                spacing: Theme.spacing.xs + 2
+
+                                Text {
+                                    id: summary
+                                    width: Math.min(implicitWidth, parent.width - (badge.visible ? badge.width + parent.spacing : 0))
+                                    elide: Text.ElideRight
+                                    text: leaf.modelData.summary
+                                    color: Colors.textOnSurface
+                                    font.family: Theme.font.family
+                                    font.pixelSize: Theme.font.normal - 1
+                                    font.weight: 700
+                                }
+
+                                Rectangle {
+                                    id: badge
+                                    anchors.verticalCenter: summary.verticalCenter
+                                    visible: leaf.modelData.count > 1
+                                    width: Math.max(height, badgeText.implicitWidth + 10)
+                                    height: 18
+                                    radius: height / 2
+                                    color: Colors.primary
+
+                                    Text {
+                                        id: badgeText
+                                        anchors.centerIn: parent
+                                        text: leaf.modelData.count
+                                        color: Colors.textOnPrimary
+                                        font.family: Theme.font.family
+                                        font.pixelSize: 11
+                                        font.weight: 700
+                                    }
+                                }
                             }
 
                             Text {
-                                width: parent.width
+                                width: parent.width - Theme.galaxy.timeSpace
+                                visible: !leaf.mine
                                 elide: Text.ElideRight
-                                wrapMode: leaf.mine ? Text.Wrap : Text.NoWrap
-                                maximumLineCount: leaf.mine ? Theme.galaxy.expandLines : 1
                                 text: leaf.modelData.data.body
                                 color: Colors.textOnSurfaceVariant
                                 font.family: Theme.font.family
                                 font.pixelSize: Theme.font.small
+                            }
+
+                            Column {
+                                width: parent.width
+                                visible: leaf.mine
+                                topPadding: Theme.spacing.xs
+                                spacing: Theme.spacing.xs
+
+                                Repeater {
+                                    model: leaf.mine ? leaf.messages : []
+
+                                    Rectangle {
+                                        required property var modelData
+
+                                        width: Math.min(message.implicitWidth, parent.width - Theme.spacing.sm * 2) + Theme.spacing.sm * 2
+                                        height: message.height + Theme.spacing.xs * 2
+                                        radius: 10
+                                        color: Colors.surfaceContainerHighest
+
+                                        Text {
+                                            id: message
+                                            x: Theme.spacing.sm
+                                            y: Theme.spacing.xs
+                                            width: Math.min(implicitWidth, parent.parent.width - Theme.spacing.sm * 2)
+                                            elide: Text.ElideRight
+                                            wrapMode: Text.Wrap
+                                            maximumLineCount: Theme.galaxy.expandLines
+                                            text: parent.modelData.data.body
+                                            color: Colors.textOnSurface
+                                            font.family: Theme.font.family
+                                            font.pixelSize: Theme.font.small
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -574,7 +633,7 @@ Item {
                                 icon: copyTimer.running ? "inventory" : "content_copy"
                                 Layout.preferredWidth: implicitWidth + (pressed ? Theme.spacing.md : 0)
                                 onClicked: {
-                                    Quickshell.clipboardText = leaf.modelData.data.body || leaf.modelData.data.summary;
+                                    Quickshell.clipboardText = leaf.messages.map(m => m.data.body).join("\n") || leaf.modelData.summary;
                                     copyTimer.restart();
                                 }
 

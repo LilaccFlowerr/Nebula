@@ -127,7 +127,9 @@ Singleton {
         readonly property real burstStagger: 0.06
         readonly property real burstLength: 0.5
         readonly property int burstDuration: 850
-        readonly property int expandLines: 6
+        readonly property int expandLines: 3
+        readonly property int expandMessages: 5
+        readonly property int timeSpace: 36
         readonly property int cardHeight: 60
         readonly property int openDuration: 700
         readonly property int closeDuration: 300
@@ -403,6 +405,74 @@ Singleton {
         readonly property int cardHeight: 120
     }
     readonly property Visualizer visualizer: Visualizer {}
+
+    component LockTokens: QtObject {
+        readonly property color space: "#05050f"
+        readonly property color star: "#e9e4ff"
+        readonly property int twinklers: 18
+        readonly property int ringDots: 90
+        readonly property real ringTilt: 0.32
+        readonly property real backdropDim: 0.62
+        readonly property real surfaceTint: 0.94
+        readonly property real blurSource: 0.5
+        readonly property int blurMax: 40
+        readonly property int openDuration: 3400
+        readonly property int closeDuration: 1500
+        readonly property real centerOvershoot: 1.2
+        readonly property real wingOvershoot: 1.12
+        readonly property real foldOvershoot: 1.3
+        readonly property int holeSize: 160
+        readonly property int clockSize: 250
+        readonly property int musicWidth: 196
+        readonly property int musicHeight: 236
+        readonly property int notificationWidth: 100
+        readonly property int notificationHeight: 122
+        readonly property real orbitX: 0.3
+        readonly property real orbitY: 0.3
+        readonly property int orbitPeriod: 150
+        readonly property real depthScale: 0.14
+        readonly property real depthOpacity: 0.35
+        readonly property int bob: 6
+        readonly property int bobPeriod: 7
+        readonly property int activeClockSize: 340
+        readonly property int activeMusicWidth: 320
+        readonly property int activeMusicHeight: 480
+        readonly property int activeNotificationWidth: 340
+        readonly property int activeNotificationHeight: 84
+        readonly property int notificationGap: 14
+        readonly property int sideGap: 48
+        readonly property int passwordWidth: 340
+        readonly property int passwordHeight: 58
+        readonly property int modeDuration: 1400
+        readonly property int idleTimeout: 15000
+        readonly property real innerOrbitX: 0.19
+        readonly property real innerOrbitY: 0.14
+        readonly property int innerPeriod: 80
+        readonly property int planetSize: 132
+        readonly property int moonSize: 96
+        readonly property int batterySize: 96
+        readonly property real pulseGain: 0.45
+        readonly property int visualizerBars: 24
+        readonly property int dotSize: 7
+        readonly property int dotMax: 12
+        readonly property real holePulse: 0.12
+        readonly property int statsWidth: 540
+        readonly property int statsHeight: 256
+        readonly property int statsGap: 28
+        readonly property int rowOffset: 70
+        readonly property int bubbleSize: 84
+        readonly property int inputWidth: 360
+        readonly property int inputHeight: 56
+        readonly property int inputGap: 28
+        readonly property int rowSpacing: 130
+        readonly property int eqHeight: 190
+        readonly property int maxNotifications: 3
+        readonly property int maxDots: 24
+        readonly property real spiralTurn: 2.8
+        readonly property real wingStartScale: 0.3
+        readonly property real centerHeight: 0.42
+    }
+    readonly property LockTokens lock: LockTokens {}
 
     component FetchTokens: QtObject {
         readonly property int size: 520
