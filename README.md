@@ -21,38 +21,26 @@ pick it. No reloads, no config files to touch unless you want to. Everything has
 
 ## Features
 
-**Bar.** Three floating islands. Workspaces and your OS logo on the left, the clock, tray,
-quick settings and power menu on the right. In between sits a glass media island with the
-song that's playing, a wavy progress line and a visualizer. Click it and it grows into a
-full player with synced lyrics.
+**Bar.** Three floating islands, each its own purpose, left shows your workspaces, middle shows the apps youve pinned or are running and right is the powermenu, settings menu and the other system stuff :D
 
-**Launcher.** Tap Super. Your apps sit in a ring around a big clover, each in its own shape.
-Type to search, `>` for commands (lock, sleep, record, theme, wallpaper, ...).
+**Equalizer.** An equalizer built into the shell, which starts its own pipewire service! press super + shift + n to open the media player, and then you can press EQ for the equalizer
 
-**Desktop widgets.** Now playing, clock, weather, calendar, battery, images and notes, all
-living on your wallpaper in a Material shape of your choice. Right click one to change its
-shape, size, color and options. Save your layout as a preset and switch between them.
+**Lockscreen.** A lockscreen with a black hole music player and orbiting planets.
 
-**Wallpapers and themes.** Pick a wallpaper and it grows in through a spinning shape (or a
-glitch, or a fade), then matugen recolors the bar, widgets, Hyprland borders, Ghostty and
-VS Code. Eight color schemes, light and dark.
+**Launcher.** Super opens the launcher, from this launcher you can do quick actions with > for wallpapers, theme etc.
 
-**Notifications.** Glass cards that stack under the right island. Messages from the same
-chat get grouped, hover to fan them out, swipe to dismiss. Do not disturb in quick settings.
+**Desktop widgets.** Theres various widgets and desktop things to choose from, try them out id say!!
 
-**Quick settings and Settings.** Wifi, bluetooth, do not disturb, volume and brightness under
-the gear. The Settings tile grows the panel into a full settings window: appearance, windows,
-desktop, bar, wifi/ethernet/bluetooth, displays, power, input, default apps, notifications and
-the recorder. There's search too (Ctrl+F).
+**Wallpapers and themes.**
 
-**Little things.** Calendar and weather under the clock, volume and brightness OSD, a screen
-recorder hiding in the bottom right corner, screenshots that keep your popups open, battery
-notifications, and an About page.
+**Notifications.** A nebula cloud with all your notifications. press Super + N 
+
+**Quick settings and Settings.** Quick settings for wifi bluetooth and all the sorts, bigger settings for configuring your desktop, this can also be done from `~/.config/nebula/settings.json`
+**Little things.** A media player, a calender and alot of small things youd like !
 
 ## Installation
 
-Nebula is made on Arch (EndeavourOS). Other distros can work, but you're on your own for
-the package names.
+Nebula is made for arch linux. most packages depend on the aur, so it most likely wont work on your fedora or debian install.
 
 ### Guided install
 
@@ -145,7 +133,8 @@ Settings > Appearance or with `>wallpaper` in the launcher.
 - `Super + 1-0` go to workspace, `Super + Shift + 1-0` move window there
 - `Super + Left/Right` previous/next workspace, `Super + Ctrl + arrows` move focus
 - `Super + S` scratchpad, `Super + Alt + S` move window to the scratchpad
-- `Super + N` media player
+- `Super + N` missed notifications 
+- `Super + Shift + N` media player
 - `Super + Shift + S` screenshot a region, `Print` the whole screen
 - `Super + Shift + R` record the screen, `Super + Shift + Alt + R` record a region
 - `Super + Shift + V` clipboard history
@@ -153,7 +142,18 @@ Settings > Appearance or with `>wallpaper` in the launcher.
 
 ### Launcher commands
 
-Type `>` in the launcher to see them. `>wallpaper` and `>theme` open a picker in the ring.
+Type `>` in the launcher to see them, or `>` followed by a few letters to filter.
+
+- `>theme` opens a picker with the eight color schemes in the ring
+- `>wallpaper` opens a picker with your wallpapers in the ring
+- `>settings` opens the settings window
+- `>lock` locks the screen
+- `>sleep` suspends
+- `>restart` reboots
+- `>shutdown` powers off
+- `>log out` ends your session
+- `>record` starts a screen recording
+- `>dark mode` or `>light mode` switches between dark and light (it shows whichever you're not in)
 
 ### IPC
 
@@ -163,8 +163,8 @@ Everything can be opened from a script or your own keybinds:
 qs -c nebula ipc call <target> <function>
 ```
 
-Targets: `launcher`, `settings`, `quicksettings`, `media`, `calendar`, `tray`, `system`,
-`recorder`, `screenshot`, `wallpaper`, `scheme`. Run `qs -c nebula ipc show` for the full list.
+Targets: `launcher`, `settings`, `quicksettings`, `media`, `missed`, `calendar`, `tray`, `system`,
+`recorder`, `screenshot`, `wallpaper`, `scheme`, `lock`. Run `qs -c nebula ipc show` for the full list.
 
 ## Configuring
 
@@ -203,24 +203,31 @@ The shell reloads by itself. After a Qt update the bar may not show up: rebuild 
 cd ~/others/m3shapes && git pull && ninja -C build && sudo ninja -C build install
 ```
 
-## FAQ
+## Roadmap
 
-**The bar doesn't show up.** Check the log with `qs log -c nebula`. Most of the time it's
-m3shapes after a Qt update (see Updating).
-
-**Notifications don't show.** Another notification daemon (like mako) took the spot. Kill it
-and Nebula picks it up again. Flatpak apps may need
-`flatpak override --user --talk-name=org.freedesktop.Notifications <app-id>`.
-
-**Some app icons are black squares.** Install `papirus-icon-theme`.
+- [x] Lock screen
+- [ ] Revamp the widget system
+- [ ] Make the widgets prettier
 
 ## Credits
 
 Inspired by [Caelestia](https://github.com/caelestia-dots/shell),
 [end-4](https://github.com/end-4/dots-hyprland),
 [DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell)
+[Serpantinum](https://github.com/ilyamiro/serpantinum)
 and a lot of scrolling through r/unixporn. Shapes by
 [m3shapes](https://github.com/soramanew/m3shapes). The loading animation is borrowed (with
 permission) from [dynbar](https://github.com/leithXD/dynbar).
 
-MIT licensed, see [LICENSE](LICENSE).
+Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under the AGPL-3.0, see [LICENSE](LICENSE).
+
+
+## Stonks 📈
+
+<a href="https://star-history.com/#LilaccFlowerr/tapes-deck&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=LilaccFlowerr/nebula&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=LilaccFlowerr/nebula&type=Date" />
+    <img alt="Star history chart" src="https://api.star-history.com/svg?repos=LilaccFlowerr/nebula&type=Date" />
+  </picture>
+</a>
