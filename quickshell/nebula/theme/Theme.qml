@@ -303,6 +303,25 @@ Singleton {
     }
     readonly property WidgetEditor widgetEditor: WidgetEditor {}
 
+    component SnapTokens: QtObject {
+        readonly property int distance: 10
+        readonly property int margin: 32
+        readonly property int guideWidth: 2
+        readonly property int guideOverhang: 16
+        readonly property int cell: 20
+        readonly property int gridDistance: 6
+        readonly property int dotSize: 4
+        readonly property int haloSize: 2
+        readonly property real haloOpacity: 0.6
+        readonly property real gridDim: 0.22
+        readonly property int lensSize: 9
+        readonly property int lensReach: 260
+        readonly property int waveBand: 140
+        readonly property int revealDuration: 900
+        readonly property real gridOpacity: 0.8
+    }
+    readonly property SnapTokens snap: SnapTokens {}
+
     component ImagePicker: QtObject {
         readonly property int width: 820
         readonly property int height: 680

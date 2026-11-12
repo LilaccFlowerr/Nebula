@@ -73,8 +73,30 @@ Variants {
             bounds.height = bottom - top;
         }
 
+        function others(id) {
+            const out = [];
+            for (let i = 0; i < repeater.count; i++) {
+                const item = repeater.itemAt(i);
+                if (!item || !item.active || item.leaving || item.ghost || item.modelData === id) continue;
+                out.push({ x: item.x, y: item.y, w: item.width, h: item.height });
+            }
+            return out;
+        }
+
         Item {
             id: bounds
+        }
+
+        SnapGrid {
+            anchors.fill: parent
+            z: -1
+            screenName: window.modelData.name
+        }
+
+        SnapGuides {
+            anchors.fill: parent
+            z: 100000
+            screenName: window.modelData.name
         }
 
         Component {
@@ -204,6 +226,9 @@ Variants {
                 property real shown: 1
                 readonly property bool leaving: Widgets.leaving.includes(modelData)
 
+                property real snapX: 0
+                property real snapY: 0
+
                 property real glide: 0
                 property real fromX: 0
                 property real fromY: 0
@@ -266,8 +291,8 @@ Variants {
                 z: cfg.z ?? 0
                 opacity: (cfg.opacity ?? 1) * Math.min(shown, 1)
                 active: cfg.enabled === true && Widgets.types[cfg.type] !== undefined && (ghost || Widgets.shownOn(cfg, window.modelData.name))
-                x: restX + offX + (drag.active ? drag.translation.x : 0) + glide * (fromX - restX - offX)
-                y: restY + offY + (drag.active ? drag.translation.y : 0) + glide * (fromY - restY - offY)
+                x: restX + offX + (drag.active ? drag.translation.x + snapX : 0) + glide * (fromX - restX - offX)
+                y: restY + offY + (drag.active ? drag.translation.y + snapY : 0) + glide * (fromY - restY - offY)
                 width: item?.implicitWidth ?? 0
                 height: item?.implicitHeight ?? 0
 
@@ -304,8 +329,19 @@ Variants {
                     cursorShape: Qt.ClosedHandCursor
 
                     function publish() {
-                        Widgets.dragX = window.modelData.x + slot.restX + slot.offX + translation.x;
-                        Widgets.dragY = window.modelData.y + slot.restY + slot.offY + translation.y;
+                        const rawX = slot.restX + slot.offX + translation.x;
+                        const rawY = slot.restY + slot.offY + translation.y;
+                        const midX = rawX + slot.width / 2;
+                        const midY = rawY + slot.height / 2;
+                        const free = (centroid.modifiers & Qt.ShiftModifier) || midX < 0 || midY < 0 || midX > window.width || midY > window.height;
+                        if (free) WidgetSnap.release();
+                        const spot = free ? { x: rawX, y: rawY }
+                            : WidgetSnap.snap({ x: rawX, y: rawY, w: slot.width, h: slot.height }, window.others(slot.modelData), { w: window.width, h: window.height }, window.modelData.name);
+                        slot.snapX = spot.x - rawX;
+                        slot.snapY = spot.y - rawY;
+                        WidgetSnap.focus(spot.x + slot.width / 2, spot.y + slot.height / 2);
+                        Widgets.dragX = window.modelData.x + spot.x;
+                        Widgets.dragY = window.modelData.y + spot.y;
                     }
 
                     onTranslationChanged: if (active) publish()
@@ -315,6 +351,7 @@ Variants {
                         if (active) {
                             Widgets.dragSource = window.modelData.name;
                             publish();
+                            WidgetSnap.begin(window.modelData.name);
                             Widgets.dragId = slot.modelData;
                             return;
                         }
@@ -327,6 +364,9 @@ Variants {
                         if (roam) props.screen = target.name;
                         Widgets.update(slot.modelData, props);
                         Widgets.dragId = "";
+                        slot.snapX = 0;
+                        slot.snapY = 0;
+                        WidgetSnap.end();
                     }
                 }
             }
