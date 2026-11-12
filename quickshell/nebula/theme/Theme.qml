@@ -308,6 +308,10 @@ Singleton {
         readonly property int margin: 32
         readonly property int guideWidth: 2
         readonly property int guideOverhang: 16
+        readonly property int capLength: 8
+        readonly property int labelHeight: 20
+        readonly property int labelPadding: 12
+        readonly property int labelGap: 6
         readonly property int cell: 20
         readonly property int gridDistance: 6
         readonly property int dotSize: 4
