@@ -53,6 +53,7 @@ Singleton {
     }
 
     function gridAxis(start, size) {
+        if (!Settings.widgets.grid) return start;
         let shift = 0;
         let reach = Theme.snap.gridDistance;
         for (const point of [start, start + size]) {

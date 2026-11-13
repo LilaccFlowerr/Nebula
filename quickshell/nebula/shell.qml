@@ -39,13 +39,18 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
+        DesktopMenu {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+
         WidgetsCorner {
             required property ShellScreen modelData
             screen: modelData
         }
     }
 
-    ImagePickerWindow {}
 
     LauncherWindow {}
 

@@ -7,7 +7,17 @@ Item {
     id: root
 
     required property string screenName
-    readonly property bool shown: WidgetSnap.dragging && WidgetSnap.screen === screenName
+    readonly property bool lifted: WidgetSnap.dragging && WidgetSnap.screen === screenName
+    readonly property bool shown: Settings.widgets.grid && (lifted || Widgets.editing)
+    property real lens: lifted ? Theme.snap.lensSize : Theme.snap.dotSize
+
+    Behavior on lens {
+        NumberAnimation {
+            duration: Theme.anim.medium
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Theme.anim.standard
+        }
+    }
     readonly property real span: Math.hypot(width, height) + Theme.snap.waveBand * 3
     property real reveal: 0
 
@@ -35,7 +45,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: Colors.scrim
-        opacity: Theme.snap.gridDim
+        opacity: Widgets.editing ? 0 : Theme.snap.gridDim
     }
 
     Loader {
@@ -45,7 +55,7 @@ Item {
         sourceComponent: ShaderEffect {
             readonly property real cell: Theme.snap.cell
             readonly property real base: Theme.snap.dotSize
-            readonly property real grown: Theme.snap.lensSize
+            readonly property real grown: root.lens
             readonly property real reach: Theme.snap.lensReach
             readonly property real reveal: root.reveal
             readonly property real band: Theme.snap.waveBand

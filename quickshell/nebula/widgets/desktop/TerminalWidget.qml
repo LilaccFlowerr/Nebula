@@ -45,6 +45,7 @@ Item {
     property real size: baseSize
 
     Behavior on size {
+        enabled: !Widgets.resizing
         NumberAnimation {
             duration: Theme.anim.island
             easing.type: Easing.OutBack

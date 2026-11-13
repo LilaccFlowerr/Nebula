@@ -23,7 +23,7 @@ Variants {
         }
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
-        mask: dragging ? fullMask : boundsMask
+        mask: fullMask
 
         property bool dragging: false
         property var hovering: []
@@ -38,7 +38,7 @@ Variants {
             return (Widgets.get(id)?.z ?? 0) * 1000 + Widgets.ids.indexOf(id);
         }
 
-        readonly property string topHover: hovering.reduce((best, id) => best === "" || stackOf(id) > stackOf(best) ? id : best, "")
+        readonly property string topHover: toolbar.hovered || chrome.hovered ? "" : hovering.reduce((best, id) => best === "" || stackOf(id) > stackOf(best) ? id : best, "")
         property Region boundsMask: Region { item: bounds }
         property Region fullMask: Region {
             width: window.width
@@ -47,7 +47,8 @@ Variants {
 
         readonly property bool covered: modelData ? Hyprland.monitorFor(modelData)?.activeWorkspace?.hasFullscreen ?? false : false
 
-        WlrLayershell.layer: WlrLayer.Bottom
+        WlrLayershell.layer: Widgets.editing && !Widgets.picking ? WlrLayer.Top : WlrLayer.Bottom
+        WlrLayershell.keyboardFocus: Widgets.editing ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:widgets"
 
         function updateBounds() {
@@ -73,6 +74,17 @@ Variants {
             bounds.height = bottom - top;
         }
 
+        readonly property Item selectedSlot: {
+            const id = Widgets.selected;
+            if (!Widgets.editing || id === "") return null;
+            for (let i = 0; i < repeater.count; i++) {
+                const item = repeater.itemAt(i);
+                if (item && item.modelData === id && item.active && !item.ghost) return item;
+            }
+            return null;
+        }
+        readonly property bool keys: Widgets.editing && Widgets.selected !== ""
+
         function others(id) {
             const out = [];
             for (let i = 0; i < repeater.count; i++) {
@@ -85,6 +97,131 @@ Variants {
 
         Item {
             id: bounds
+        }
+
+        Shortcut {
+            sequence: "Escape"
+            enabled: Widgets.editing
+            onActivated: {
+                if (Widgets.selected !== "") Widgets.selected = "";
+                else Widgets.stopEdit();
+            }
+        }
+
+        Shortcut {
+            sequence: "Ctrl+Z"
+            enabled: Widgets.editing
+            onActivated: Widgets.undo()
+        }
+
+        Shortcut {
+            sequences: ["Ctrl+Shift+Z", "Ctrl+Y"]
+            enabled: Widgets.editing
+            onActivated: Widgets.redo()
+        }
+
+        Shortcut {
+            sequence: "Delete"
+            enabled: window.keys
+            onActivated: Widgets.removeSelected()
+        }
+
+        Shortcut {
+            sequence: "Left"
+            enabled: window.keys
+            onActivated: Widgets.nudge(-1, 0)
+        }
+
+        Shortcut {
+            sequence: "Right"
+            enabled: window.keys
+            onActivated: Widgets.nudge(1, 0)
+        }
+
+        Shortcut {
+            sequence: "Up"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, -1)
+        }
+
+        Shortcut {
+            sequence: "Down"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, 1)
+        }
+
+        Shortcut {
+            sequence: "Shift+Left"
+            enabled: window.keys
+            onActivated: Widgets.nudge(-Theme.snap.cell, 0)
+        }
+
+        Shortcut {
+            sequence: "Shift+Right"
+            enabled: window.keys
+            onActivated: Widgets.nudge(Theme.snap.cell, 0)
+        }
+
+        Shortcut {
+            sequence: "Shift+Up"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, -Theme.snap.cell)
+        }
+
+        Shortcut {
+            sequence: "Shift+Down"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, Theme.snap.cell)
+        }
+
+        SelectionChrome {
+            id: chrome
+            z: 150000
+            target: window.selectedSlot
+            cfg: Widgets.get(Widgets.selected) ?? ({})
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            z: -3
+            color: Colors.scrim
+            opacity: Widgets.editing ? Theme.edit.dim : 0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Theme.anim.medium
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.anim.standard
+                }
+            }
+        }
+
+        EditToolbar {
+            id: toolbar
+            z: 200000
+            screenName: window.modelData.name
+            room: Qt.size(window.width, window.height)
+            origin: Qt.point(window.modelData.x, window.modelData.y)
+        }
+
+        Item {
+            anchors.fill: parent
+            z: -2
+
+            TapHandler {
+                onTapped: {
+                    if (window.topHover !== "" || toolbar.hovered || chrome.hovered) return;
+                    Widgets.selected = "";
+                }
+            }
+
+            TapHandler {
+                acceptedButtons: Qt.RightButton
+                onTapped: point => {
+                    if (window.topHover !== "" || toolbar.hovered || chrome.hovered) return;
+                    Widgets.openDesk(window.modelData.name, window.modelData.x + point.position.x, window.modelData.y + point.position.y);
+                }
+            }
         }
 
         SnapGrid {
@@ -304,6 +441,13 @@ Variants {
 
                 sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : nowPlayingWidget
 
+                Binding {
+                    target: slot.item
+                    property: "enabled"
+                    value: !Widgets.editing
+                    when: slot.item !== null
+                }
+
                 HoverHandler {
                     enabled: !slot.ghost
                     blocking: false
@@ -314,6 +458,7 @@ Variants {
                     enabled: !slot.ghost && slot.isTop
                     gesturePolicy: TapHandler.DragThreshold
                     onPressedChanged: if (pressed) Widgets.raise(slot.modelData)
+                    onTapped: if (Widgets.editing) Widgets.selected = slot.modelData
                 }
 
                 TapHandler {
@@ -349,6 +494,7 @@ Variants {
                     onActiveChanged: {
                         window.dragging = active;
                         if (active) {
+                            if (Widgets.editing) Widgets.selected = slot.modelData;
                             Widgets.dragSource = window.modelData.name;
                             publish();
                             WidgetSnap.begin(window.modelData.name);

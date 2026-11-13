@@ -303,6 +303,32 @@ Singleton {
     }
     readonly property WidgetEditor widgetEditor: WidgetEditor {}
 
+    component DeskMenuTokens: QtObject {
+        readonly property int width: 280
+        readonly property int tileHeight: 92
+        readonly property int tileShape: 44
+    }
+    readonly property DeskMenuTokens deskMenu: DeskMenuTokens {}
+
+    component EditTokens: QtObject {
+        readonly property real dim: 0.35
+        readonly property int button: 44
+        readonly property int padding: 8
+        readonly property int gap: 6
+        readonly property int margin: 24
+        readonly property int labelGap: 6
+        readonly property int labelPadding: 14
+        readonly property int outlineGap: 4
+        readonly property real outlineWidth: 2
+        readonly property real outlineWave: 1.6
+        readonly property int outlineWaveLength: 28
+        readonly property int outlineLoop: 3200
+        readonly property int grab: 14
+        readonly property real outlineHot: 1.8
+        readonly property int tagHeight: 24
+    }
+    readonly property EditTokens edit: EditTokens {}
+
     component SnapTokens: QtObject {
         readonly property int distance: 10
         readonly property int margin: 32
@@ -325,15 +351,6 @@ Singleton {
         readonly property real gridOpacity: 0.8
     }
     readonly property SnapTokens snap: SnapTokens {}
-
-    component ImagePicker: QtObject {
-        readonly property int width: 820
-        readonly property int height: 680
-        readonly property int columns: 4
-        readonly property real backdropDim: 0.35
-        readonly property real openScale: 0.92
-    }
-    readonly property ImagePicker imagePicker: ImagePicker {}
 
     component NowPlaying: QtObject {
         readonly property int margin: 32
