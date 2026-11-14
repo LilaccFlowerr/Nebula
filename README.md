@@ -2,7 +2,7 @@
 
 <p align="center">
   A Hyprland desktop made from scratch, with a shell written in Quickshell.<br>
-  Material 3 Expressive shapes everywhere, and colors that follow your wallpaper.
+  Material 3 Expressive shapes everywhere, and colors that follow your wallpaper.<br>
   
   **If you like it consider leaving a star and joining the [discord](https://discord.gg/jwGwtg68qt)**
 </p>
