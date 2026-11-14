@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.theme
 
 Singleton {
@@ -15,7 +16,8 @@ Singleton {
         battery: { title: "Battery", description: "Fills like water as you charge", icon: "battery_full", shape: "Cookie12Sided", size: 200, minSize: 120, maxSize: 480, color: "secondary" },
         weather: { title: "Weather", description: "Today's weather, in its own shape", icon: "partly_cloudy_day", shape: "Cookie9Sided", size: 220, minSize: 140, maxSize: 480, color: "primary" },
         terminal: { title: "Fetch", description: "Your system at a glance, rice style", icon: "terminal", shape: "Square", size: 520, minSize: 240, maxSize: 1000, color: "surface" },
-        text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
+        text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" },
+        lyrics: { title: "Lyrics", description: "The song's words, sung along", single: true, icon: "lyrics", shape: "Cookie4Sided", size: 520, minSize: 300, maxSize: 1100, color: "primary", aspect: 0.46, bare: true }
     })
 
     readonly property var shapes: ["Circle", "Square", "Slanted", "Arch", "Oval", "Pill", "Diamond", "Pentagon", "Gem", "Sunny", "VerySunny", "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided", "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Boom", "SoftBoom", "Flower", "Puffy", "PuffyDiamond", "PixelCircle", "Bun"]
@@ -49,6 +51,7 @@ Singleton {
     property bool menuExpanded: false
 
     function openMenu(id, screenName, rect, expanded) {
+        closeDesk();
         menuExpanded = expanded === true;
         menuScreen = screenName;
         menuX = rect.x;
@@ -63,6 +66,141 @@ Singleton {
         menuExpanded = false;
     }
 
+    property bool deskOpen: false
+    property string deskScreen: ""
+    property real deskX: 0
+    property real deskY: 0
+
+    property string deskPage: "main"
+    property real deskAlignX: 0
+    property real deskAlignY: 0
+
+    function openDesk(screenName, x, y, page = "main", alignX = 0, alignY = 0) {
+        closeMenu();
+        deskScreen = screenName;
+        deskX = x;
+        deskY = y;
+        deskPage = page;
+        deskAlignX = alignX;
+        deskAlignY = alignY;
+        deskOpen = true;
+    }
+
+    property bool editing: false
+    property string editScreen: ""
+
+    property string selected: ""
+    property bool resizing: false
+    property var history: []
+    property int historyIndex: -1
+    property bool restoring: false
+    readonly property bool canUndo: historyIndex > 0
+    readonly property bool canRedo: historyIndex < history.length - 1
+
+    function frozen() {
+        return JSON.stringify(list.filter(w => !leaving.includes(w.id)).map(w => {
+            const copy = Object.assign({}, w);
+            delete copy.z;
+            return copy;
+        }));
+    }
+
+    function resetHistory() {
+        history = [frozen()];
+        historyIndex = 0;
+    }
+
+    function commit() {
+        const now = frozen();
+        if (history[historyIndex] === now) return;
+        history = history.slice(0, historyIndex + 1).concat([now]).slice(-50);
+        historyIndex = history.length - 1;
+    }
+
+    function stepHistory(delta) {
+        commit();
+        const index = historyIndex + delta;
+        if (index < 0 || index >= history.length) return;
+        const next = parse(history[index]);
+        const fresh = next.filter(w => get(w.id) === null).map(w => w.id);
+        historyIndex = index;
+        restoring = true;
+        gliding();
+        save(next);
+        restoring = false;
+        for (const id of fresh) added(id);
+        if (selected !== "" && get(selected) === null) selected = "";
+    }
+
+    function undo() {
+        stepHistory(-1);
+    }
+
+    function redo() {
+        stepHistory(1);
+    }
+
+    function nudge(dx, dy) {
+        const w = get(selected);
+        if (!w) return;
+        const screen = screenNamed(w.screen ?? "");
+        const rect = rectOf(selected);
+        update(selected, {
+            x: Math.round(Math.max(0, Math.min(rect.x - screen.x + dx, screen.width - rect.width))),
+            y: Math.round(Math.max(0, Math.min(rect.y - screen.y + dy, screen.height - rect.height)))
+        });
+    }
+
+    function removeSelected() {
+        if (selected === "") return;
+        const id = selected;
+        selected = "";
+        remove(id);
+    }
+
+    Timer {
+        id: commitTimer
+        interval: 400
+        onTriggered: root.commit()
+    }
+
+    function startEdit(screenName) {
+        closeMenu();
+        closeDesk();
+        selected = "";
+        resetHistory();
+        editScreen = screenName;
+        editing = true;
+    }
+
+    function stopEdit() {
+        closeMenu();
+        closeDesk();
+        selected = "";
+        editing = false;
+    }
+
+    function toggleEdit(screenName) {
+        if (editing) stopEdit();
+        else startEdit(screenName);
+    }
+
+    IpcHandler {
+        target: "widgets"
+
+        function edit(): void {
+            root.toggleEdit(GlobalStates.focusedScreen());
+        }
+    }
+
+    function closeDesk() {
+        deskOpen = false;
+    }
+
+    function aspectOf(w) {
+        return types[w?.type]?.aspect ?? 1;
+    }
+
     function rectOf(id) {
         const w = get(id);
         if (!w) return Qt.rect(0, 0, 0, 0);
@@ -70,8 +208,9 @@ Singleton {
         const size = w.size ?? types[w.type]?.size ?? 200;
         const p = position(w, s);
         const x = p.x < 0 ? Theme.nowPlaying.margin : p.x;
-        const y = p.y < 0 ? s.height - size - Theme.nowPlaying.margin : p.y;
-        return Qt.rect(s.x + x, s.y + y, size, size);
+        const tall = size * aspectOf(w);
+        const y = p.y < 0 ? s.height - tall - Theme.nowPlaying.margin : p.y;
+        return Qt.rect(s.x + x, s.y + y, size, tall);
     }
 
     function present(name) {
@@ -100,9 +239,10 @@ Singleton {
         const from = !w.screen || present(w.screen) ? null : sizeOf(w.screen);
         if (!from || !target) return { x: x, y: y };
         const half = (w.size ?? types[w.type]?.size ?? 200) / 2;
+        const halfTall = half * aspectOf(w);
         return {
             x: x < 0 ? x : Math.max(0, (x + half) * target.width / from.width - half),
-            y: y < 0 ? y : Math.max(0, (y + half) * target.height / from.height - half)
+            y: y < 0 ? y : Math.max(0, (y + halfTall) * target.height / from.height - halfTall)
         };
     }
 
@@ -112,25 +252,35 @@ Singleton {
         openMenu(id, screenNamed(w.screen ?? "").name, rectOf(id), true);
     }
 
-    property bool pickerOpen: false
+    property bool picking: false
     property string pickerTarget: ""
     property string pickerScreen: ""
+    property string pickerDir: Quickshell.env("HOME") + "/Pictures"
 
     function openPicker(target, screenName) {
+        if (picking) return;
         closeMenu();
+        closeDesk();
         pickerTarget = target ?? "";
         pickerScreen = screenName || (GlobalStates.screen !== "" ? GlobalStates.screen : Quickshell.screens[0].name);
-        pickerOpen = true;
-    }
-
-    function closePicker() {
-        pickerOpen = false;
+        picking = true;
+        fileDialog.running = true;
     }
 
     function pickImage(path) {
+        pickerDir = path.slice(0, path.lastIndexOf("/"));
         if (pickerTarget !== "" && get(pickerTarget)) update(pickerTarget, { source: path, zoom: 1, panX: 0, panY: 0 });
         else add("image", { source: path, screen: pickerScreen });
-        closePicker();
+    }
+
+    Process {
+        id: fileDialog
+        command: ["zenity", "--file-selection", "--title=Choose an image", "--filename=" + root.pickerDir + "/",
+                  "--file-filter=Images | *.png *.jpg *.jpeg *.webp *.gif"]
+        stdout: StdioCollector {
+            onStreamFinished: if (text.trim() !== "") root.pickImage(text.trim())
+        }
+        onExited: root.picking = false
     }
 
     property string dragId: ""
@@ -211,6 +361,7 @@ Singleton {
 
     function save(next) {
         list = next;
+        if (!restoring) commitTimer.restart();
         pending = true;
         saveTimer.restart();
     }
@@ -279,7 +430,7 @@ Singleton {
         delete item.y;
         delete item.z;
         item.fx = (w.x ?? -1) < 0 ? -1 : (w.x + half) / s.width;
-        item.fy = (w.y ?? -1) < 0 ? -1 : (w.y + half) / s.height;
+        item.fy = (w.y ?? -1) < 0 ? -1 : (w.y + half * aspectOf(w)) / s.height;
         return item;
     }
 
@@ -290,7 +441,7 @@ Singleton {
         delete w.fx;
         delete w.fy;
         w.x = item.fx < 0 ? -1 : Math.max(0, Math.round(item.fx * s.width - half));
-        w.y = item.fy < 0 ? -1 : Math.max(0, Math.round(item.fy * s.height - half));
+        w.y = item.fy < 0 ? -1 : Math.max(0, Math.round(item.fy * s.height - half * aspectOf(item)));
         return w;
     }
 
@@ -392,7 +543,7 @@ Singleton {
             if (grows && (w.x ?? -1) >= 0 && (w.y ?? -1) >= 0) {
                 const shift = (props.size - w.size) / 2;
                 next.x = Math.max(0, Math.round(w.x - shift));
-                next.y = Math.max(0, Math.round(w.y - shift));
+                next.y = Math.max(0, Math.round(w.y - shift * aspectOf(w)));
             }
             return next;
         }));
@@ -415,6 +566,7 @@ Singleton {
     }
 
     function finishRemove(id) {
+        if (selected === id) selected = "";
         leaving = leaving.filter(l => l !== id);
         save(list.filter(w => w.id !== id));
     }

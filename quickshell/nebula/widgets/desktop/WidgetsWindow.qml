@@ -23,7 +23,7 @@ Variants {
         }
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
-        mask: dragging ? fullMask : boundsMask
+        mask: fullMask
 
         property bool dragging: false
         property var hovering: []
@@ -38,7 +38,7 @@ Variants {
             return (Widgets.get(id)?.z ?? 0) * 1000 + Widgets.ids.indexOf(id);
         }
 
-        readonly property string topHover: hovering.reduce((best, id) => best === "" || stackOf(id) > stackOf(best) ? id : best, "")
+        readonly property string topHover: toolbar.hovered || chrome.hovered ? "" : hovering.reduce((best, id) => best === "" || stackOf(id) > stackOf(best) ? id : best, "")
         property Region boundsMask: Region { item: bounds }
         property Region fullMask: Region {
             width: window.width
@@ -47,7 +47,8 @@ Variants {
 
         readonly property bool covered: modelData ? Hyprland.monitorFor(modelData)?.activeWorkspace?.hasFullscreen ?? false : false
 
-        WlrLayershell.layer: WlrLayer.Bottom
+        WlrLayershell.layer: Widgets.editing && !Widgets.picking ? WlrLayer.Top : WlrLayer.Bottom
+        WlrLayershell.keyboardFocus: Widgets.editing ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:widgets"
 
         function updateBounds() {
@@ -73,8 +74,166 @@ Variants {
             bounds.height = bottom - top;
         }
 
+        readonly property Item selectedSlot: {
+            const id = Widgets.selected;
+            if (!Widgets.editing || id === "") return null;
+            for (let i = 0; i < repeater.count; i++) {
+                const item = repeater.itemAt(i);
+                if (item && item.modelData === id && item.active && !item.ghost) return item;
+            }
+            return null;
+        }
+        readonly property bool keys: Widgets.editing && Widgets.selected !== ""
+
+        function others(id) {
+            const out = [];
+            for (let i = 0; i < repeater.count; i++) {
+                const item = repeater.itemAt(i);
+                if (!item || !item.active || item.leaving || item.ghost || item.modelData === id) continue;
+                out.push({ x: item.x, y: item.y, w: item.width, h: item.height });
+            }
+            return out;
+        }
+
         Item {
             id: bounds
+        }
+
+        Shortcut {
+            sequence: "Escape"
+            enabled: Widgets.editing
+            onActivated: {
+                if (Widgets.selected !== "") Widgets.selected = "";
+                else Widgets.stopEdit();
+            }
+        }
+
+        Shortcut {
+            sequence: "Ctrl+Z"
+            enabled: Widgets.editing
+            onActivated: Widgets.undo()
+        }
+
+        Shortcut {
+            sequences: ["Ctrl+Shift+Z", "Ctrl+Y"]
+            enabled: Widgets.editing
+            onActivated: Widgets.redo()
+        }
+
+        Shortcut {
+            sequence: "Delete"
+            enabled: window.keys
+            onActivated: Widgets.removeSelected()
+        }
+
+        Shortcut {
+            sequence: "Left"
+            enabled: window.keys
+            onActivated: Widgets.nudge(-1, 0)
+        }
+
+        Shortcut {
+            sequence: "Right"
+            enabled: window.keys
+            onActivated: Widgets.nudge(1, 0)
+        }
+
+        Shortcut {
+            sequence: "Up"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, -1)
+        }
+
+        Shortcut {
+            sequence: "Down"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, 1)
+        }
+
+        Shortcut {
+            sequence: "Shift+Left"
+            enabled: window.keys
+            onActivated: Widgets.nudge(-Theme.snap.cell, 0)
+        }
+
+        Shortcut {
+            sequence: "Shift+Right"
+            enabled: window.keys
+            onActivated: Widgets.nudge(Theme.snap.cell, 0)
+        }
+
+        Shortcut {
+            sequence: "Shift+Up"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, -Theme.snap.cell)
+        }
+
+        Shortcut {
+            sequence: "Shift+Down"
+            enabled: window.keys
+            onActivated: Widgets.nudge(0, Theme.snap.cell)
+        }
+
+        SelectionChrome {
+            id: chrome
+            z: 150000
+            target: window.selectedSlot
+            cfg: Widgets.get(Widgets.selected) ?? ({})
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            z: -3
+            color: Colors.scrim
+            opacity: Widgets.editing ? Theme.edit.dim : 0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Theme.anim.medium
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.anim.standard
+                }
+            }
+        }
+
+        EditToolbar {
+            id: toolbar
+            z: 200000
+            screenName: window.modelData.name
+            room: Qt.size(window.width, window.height)
+            origin: Qt.point(window.modelData.x, window.modelData.y)
+        }
+
+        Item {
+            anchors.fill: parent
+            z: -2
+
+            TapHandler {
+                onTapped: {
+                    if (window.topHover !== "" || toolbar.hovered || chrome.hovered) return;
+                    Widgets.selected = "";
+                }
+            }
+
+            TapHandler {
+                acceptedButtons: Qt.RightButton
+                onTapped: point => {
+                    if (window.topHover !== "" || toolbar.hovered || chrome.hovered) return;
+                    Widgets.openDesk(window.modelData.name, window.modelData.x + point.position.x, window.modelData.y + point.position.y);
+                }
+            }
+        }
+
+        SnapGrid {
+            anchors.fill: parent
+            z: -1
+            screenName: window.modelData.name
+        }
+
+        SnapGuides {
+            anchors.fill: parent
+            z: 100000
+            screenName: window.modelData.name
         }
 
         Component {
@@ -99,6 +258,18 @@ Variants {
                 cropZoom: parent?.cfg?.zoom ?? 1
                 cropX: parent?.cfg?.panX ?? 0
                 cropY: parent?.cfg?.panY ?? 0
+            }
+        }
+
+        Component {
+            id: lyricsWidget
+
+            LyricsWidget {
+                live: !window.covered
+                shapeName: parent?.cfg?.shape ?? "Cookie4Sided"
+                colorRole: parent?.cfg?.color ?? "primary"
+                baseSize: parent?.cfg?.size ?? 520
+                backdrop: parent?.cfg?.backdrop ?? "none"
             }
         }
 
@@ -199,10 +370,13 @@ Variants {
 
                 readonly property bool isTop: window.topHover === modelData
                 readonly property real offX: ghost ? 0 : ((cfg.size ?? width) - width) / 2
-                readonly property real offY: ghost ? 0 : ((cfg.size ?? height) - height) / 2
+                readonly property real offY: ghost || cfg.size === undefined ? 0 : (cfg.size * Widgets.aspectOf(cfg) - height) / 2
 
                 property real shown: 1
                 readonly property bool leaving: Widgets.leaving.includes(modelData)
+
+                property real snapX: 0
+                property real snapY: 0
 
                 property real glide: 0
                 property real fromX: 0
@@ -266,8 +440,8 @@ Variants {
                 z: cfg.z ?? 0
                 opacity: (cfg.opacity ?? 1) * Math.min(shown, 1)
                 active: cfg.enabled === true && Widgets.types[cfg.type] !== undefined && (ghost || Widgets.shownOn(cfg, window.modelData.name))
-                x: restX + offX + (drag.active ? drag.translation.x : 0) + glide * (fromX - restX - offX)
-                y: restY + offY + (drag.active ? drag.translation.y : 0) + glide * (fromY - restY - offY)
+                x: restX + offX + (drag.active ? drag.translation.x + snapX : 0) + glide * (fromX - restX - offX)
+                y: restY + offY + (drag.active ? drag.translation.y + snapY : 0) + glide * (fromY - restY - offY)
                 width: item?.implicitWidth ?? 0
                 height: item?.implicitHeight ?? 0
 
@@ -277,7 +451,14 @@ Variants {
                 onWidthChanged: window.updateBounds()
                 onHeightChanged: window.updateBounds()
 
-                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : nowPlayingWidget
+                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : cfg.type === "lyrics" ? lyricsWidget : nowPlayingWidget
+
+                Binding {
+                    target: slot.item
+                    property: "enabled"
+                    value: !Widgets.editing
+                    when: slot.item !== null
+                }
 
                 HoverHandler {
                     enabled: !slot.ghost
@@ -289,6 +470,7 @@ Variants {
                     enabled: !slot.ghost && slot.isTop
                     gesturePolicy: TapHandler.DragThreshold
                     onPressedChanged: if (pressed) Widgets.raise(slot.modelData)
+                    onTapped: if (Widgets.editing) Widgets.selected = slot.modelData
                 }
 
                 TapHandler {
@@ -304,8 +486,19 @@ Variants {
                     cursorShape: Qt.ClosedHandCursor
 
                     function publish() {
-                        Widgets.dragX = window.modelData.x + slot.restX + slot.offX + translation.x;
-                        Widgets.dragY = window.modelData.y + slot.restY + slot.offY + translation.y;
+                        const rawX = slot.restX + slot.offX + translation.x;
+                        const rawY = slot.restY + slot.offY + translation.y;
+                        const midX = rawX + slot.width / 2;
+                        const midY = rawY + slot.height / 2;
+                        const free = (centroid.modifiers & Qt.ShiftModifier) || midX < 0 || midY < 0 || midX > window.width || midY > window.height;
+                        if (free) WidgetSnap.release();
+                        const spot = free ? { x: rawX, y: rawY }
+                            : WidgetSnap.snap({ x: rawX, y: rawY, w: slot.width, h: slot.height }, window.others(slot.modelData), { w: window.width, h: window.height }, window.modelData.name);
+                        slot.snapX = spot.x - rawX;
+                        slot.snapY = spot.y - rawY;
+                        WidgetSnap.focus(spot.x + slot.width / 2, spot.y + slot.height / 2);
+                        Widgets.dragX = window.modelData.x + spot.x;
+                        Widgets.dragY = window.modelData.y + spot.y;
                     }
 
                     onTranslationChanged: if (active) publish()
@@ -313,8 +506,10 @@ Variants {
                     onActiveChanged: {
                         window.dragging = active;
                         if (active) {
+                            if (Widgets.editing) Widgets.selected = slot.modelData;
                             Widgets.dragSource = window.modelData.name;
                             publish();
+                            WidgetSnap.begin(window.modelData.name);
                             Widgets.dragId = slot.modelData;
                             return;
                         }
@@ -327,6 +522,9 @@ Variants {
                         if (roam) props.screen = target.name;
                         Widgets.update(slot.modelData, props);
                         Widgets.dragId = "";
+                        slot.snapX = 0;
+                        slot.snapY = 0;
+                        WidgetSnap.end();
                     }
                 }
             }
