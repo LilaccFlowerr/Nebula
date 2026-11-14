@@ -52,8 +52,6 @@ var entries = [
     { title: "Resolution", page: "system", tab: "displays", words: "refresh rate hz monitor" },
     { title: "Scale", page: "system", tab: "displays", words: "zoom size monitor" },
     { title: "Screen brightness", page: "system", tab: "displays", words: "backlight" },
-    { title: "Sound output", page: "system", tab: "sound", words: "speaker headphones audio device hdmi" },
-    { title: "Bluetooth audio first", page: "system", tab: "sound", words: "headphones default output" },
     { title: "Power mode", page: "system", tab: "power", words: "profile saver balanced performance" },
     { title: "Low battery warning", page: "system", tab: "power", words: "battery percentage" },
     { title: "Keyboard layout", page: "system", tab: "input", words: "keyboard us qwerty language" },

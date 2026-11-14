@@ -1,5 +1,3 @@
--- See https://wiki.hypr.land/Configuring/Basics/Variables/#input
-
 local vars = require("variables")
 
 hl.config({
@@ -12,7 +10,7 @@ hl.config({
 
         follow_mouse = 1,
 
-        sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
+        sensitivity = 0,
 
         touchpad = {
             natural_scroll = vars.naturalScroll,
@@ -20,8 +18,3 @@ hl.config({
     },
 })
 
--- Per-device config, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/
--- hl.device({
---     name        = "epic-mouse-v1",
---     sensitivity = -0.5,
--- })
