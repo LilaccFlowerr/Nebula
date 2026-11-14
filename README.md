@@ -3,6 +3,8 @@
 <p align="center">
   A Hyprland desktop made from scratch, with a shell written in Quickshell.<br>
   Material 3 Expressive shapes everywhere, and colors that follow your wallpaper.
+
+  **If you like it consider leaving a star and joining the [discord](https://discord.gg/jwGwtg68qt)**
 </p>
 
 <p align="center">
@@ -11,13 +13,8 @@
   <img src="https://img.shields.io/github/license/LilaccFlowerr/Nebula?style=for-the-badge&color=89b4fa&labelColor=1e1e2e" alt="license">
 </p>
 
-<!-- Drag the showcase video into a GitHub comment box, copy the user-attachments link it gives you and put it here: -->
 https://github.com/user-attachments/assets/b3be7c33-a358-43e6-9ec0-5404f7068d17
 
-Nebula is my own desktop. Not a fork of someone else's dots, I built it piece by piece
-because I wanted something that feels alive: shapes that morph into each other, a bar that
-reacts to what you're doing, and a wallpaper that recolors the whole thing the moment you
-pick it. No reloads, no config files to touch unless you want to. Everything has a setting.
 
 ## Features
 
@@ -31,97 +28,91 @@ pick it. No reloads, no config files to touch unless you want to. Everything has
 
 **Desktop widgets.** Theres various widgets and desktop things to choose from, try them out id say!!
 
-**Wallpapers and themes.**
+**Wallpapers and themes.** A wallpaper picker AND theme picker!
 
 **Notifications.** A nebula cloud with all your notifications. press Super + N 
 
 **Quick settings and Settings.** Quick settings for wifi bluetooth and all the sorts, bigger settings for configuring your desktop, this can also be done from `~/.config/nebula/settings.json`
-**Little things.** A media player, a calender and alot of small things youd like !
 
 ## Installation
 
-Nebula is made for arch linux. most packages depend on the aur, so it most likely wont work on your fedora or debian install.
+Nebula is an OS made for arch, and depends on pacman this shell does not have official support on other distros.
 
-### Guided install
+### Install
 
 ```bash
 sudo pacman -Syu --needed git
-git clone https://github.com/LilaccFlowerr/Nebula.git ~/setup/dotfiles
-cd ~/setup/dotfiles
+git clone https://github.com/LilaccFlowerr/Nebula.git
+cd Nebula
 ./install.sh
 ```
 
-The installer walks you through packages, building m3shapes, linking configs and generating
-colors. Run it as your normal user; it asks for sudo when needed. Before installing,
-it lists any configs it will replace and asks whether to back them up and continue.
-Press Enter or choose No to cancel without changes. Existing `hypr`,
-`quickshell`, `matugen` and `ghostty` configs are moved to a unique
-`~/.config/nebula-backup-*` folder before linking. Keep the checkout where it is.
+It copies the configs into `~/.config`. Whatever was there gets renamed to `.bak-<date>`, so
+nothing is lost. Your own tweaks go in `~/.config/nebula/` (`hypr-vars.lua`, `hypr-user.lua`,
+`settings.json`): the installer never touches that folder.
 
-Use `./install.sh --dry-run` to preview the steps. You can run the installer again after
-a failure; correct links and existing colors are kept. It does a full system package
-upgrade and rebuilds m3shapes each time. It doesn't configure your login manager,
-networking or audio services; start with a working Arch desktop.
+### Tips
 
-When it's done, log out and choose Hyprland on the login screen.
-
-### Manual install
-
-If you'd rather do each step yourself, follow the instructions below.
-
-### Dependencies
-
-Everything is in the official repos except m3shapes, which you build yourself.
-
-```bash
-sudo pacman -S hyprland hypridle hyprlock quickshell matugen xdg-desktop-portal-hyprland \
-    ghostty firefox nautilus fuzzel cliphist wl-clipboard grim slurp mate-polkit playerctl \
-    brightnessctl cava zenity libnotify ffmpeg jq pciutils gpu-screen-recorder inter-font \
-    ttf-material-symbols-variable ttf-nerd-fonts-symbols noto-fonts-emoji papirus-icon-theme \
-    git cmake ninja gcc qt6-shadertools
-```
+1. Tap **Super** for the launcher, **Super + T** opens a terminal. You can set these in settings
+2. Click the gear in the top right, then **Settings**: set your wallpaper, monitors and
+   keyboard layout there.
+3. Put your own wallpapers in `~/Pictures/Wallpapers`.
 
 <details>
-<summary>What each package is for</summary>
+<summary>Manual install (if you'd rather do every step yourself)</summary>
+
+#### Packages
+
+```bash
+sudo pacman -S --needed hyprland hypridle hyprlock quickshell matugen xdg-desktop-portal-hyprland \
+    ghostty firefox nautilus fuzzel cliphist wl-clipboard grim slurp mate-polkit playerctl \
+    brightnessctl cava zenity libnotify ffmpeg jq pciutils fastfetch gpu-screen-recorder \
+    inter-font ttf-material-symbols-variable ttf-nerd-fonts-symbols ttf-jetbrains-mono-nerd \
+    noto-fonts-emoji papirus-icon-theme pipewire wireplumber git cmake ninja gcc qt6-shadertools
+```
 
 - Desktop: `hyprland` `hypridle` `hyprlock` `quickshell` `matugen` `xdg-desktop-portal-hyprland`
 - Apps: `ghostty` `firefox` `nautilus` (just the defaults, change them in Settings > Apps)
 - Tools: `fuzzel` (only for the clipboard picker) `cliphist` `wl-clipboard` `grim` `slurp`
   `mate-polkit` `playerctl` `brightnessctl` `cava` `zenity` `libnotify` `ffmpeg` `jq` `pciutils`
+  `fastfetch`
+- Sound and the equalizer: `pipewire` `wireplumber`
 - Screen recorder: `gpu-screen-recorder`
-- Fonts: `inter-font` `ttf-material-symbols-variable` `ttf-nerd-fonts-symbols` `noto-fonts-emoji`
+- Fonts: `inter-font` `ttf-material-symbols-variable` `ttf-nerd-fonts-symbols`
+  `ttf-jetbrains-mono-nerd` `noto-fonts-emoji`
 - Icons: `papirus-icon-theme`. Quickshell uses it on its own (some GNOME icons render as black
-  squares otherwise). Pick it for your GTK apps too so everything matches.
+  squares otherwise).
 - To build m3shapes: `git` `cmake` `ninja` `gcc` `qt6-shadertools`
 
-</details>
-
-### m3shapes
+#### m3shapes
 
 All the shapes and the morphing between them come from
 [m3shapes](https://github.com/soramanew/m3shapes), a QML port of Google's Material 3 shapes.
 
 ```bash
 git clone https://github.com/soramanew/m3shapes ~/others/m3shapes
-cmake -S ~/others/m3shapes -B ~/others/m3shapes/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+cmake -S ~/others/m3shapes -B ~/others/m3shapes/build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib
 ninja -C ~/others/m3shapes/build
 sudo ninja -C ~/others/m3shapes/build install
 ```
 
-### Nebula
+#### Nebula
 
-Clone the repo and link the folders into `~/.config`. If something is already there
+Clone the repo and copy the folders into `~/.config`. If something is already there
 (Hyprland makes its own config on first start), move it out of the way first.
 
 ```bash
-git clone https://github.com/LilaccFlowerr/Nebula.git ~/setup/dotfiles
-cd ~/setup/dotfiles
-for dir in hypr quickshell matugen ghostty; do ln -s "$PWD/$dir" ~/.config/$dir; done
-matugen image quickshell/nebula/assets/default.jpg
+git clone https://github.com/LilaccFlowerr/Nebula.git
+cd Nebula
+mkdir -p ~/.config/quickshell
+cp -rL hypr matugen ghostty ~/.config/
+cp -rL quickshell/nebula ~/.config/quickshell/
+mkdir -p ~/.local/state/nebula ~/.cache/wal ~/.config/ghostty/themes
+matugen image ~/.config/quickshell/nebula/assets/default.jpg
 ```
 
-Log out and pick Hyprland on the login screen. The shell starts on its own. Put your own wallpapers in `~/Pictures/Wallpapers` and pick one in
-Settings > Appearance or with `>wallpaper` in the launcher.
+</details>
 
 ## Usage
 
@@ -138,6 +129,7 @@ Settings > Appearance or with `>wallpaper` in the launcher.
 - `Super + Shift + S` screenshot a region, `Print` the whole screen
 - `Super + Shift + R` record the screen, `Super + Shift + Alt + R` record a region
 - `Super + Shift + V` clipboard history
+- `Super + Shift + E` edit your desktop widgets
 - `Super + L` lock, `Super + M` log out
 
 ### Launcher commands
@@ -164,7 +156,7 @@ qs -c nebula ipc call <target> <function>
 ```
 
 Targets: `launcher`, `settings`, `quicksettings`, `media`, `missed`, `calendar`, `tray`, `system`,
-`recorder`, `screenshot`, `wallpaper`, `scheme`, `lock`. Run `qs -c nebula ipc show` for the full list.
+`recorder`, `screenshot`, `wallpaper`, `scheme`, `lock`, `widgets`. Run `qs -c nebula ipc show` for the full list.
 
 ## Configuring
 
@@ -194,10 +186,14 @@ Settings > System > Displays.
 ## Updating
 
 ```bash
-cd ~/setup/dotfiles && git pull
+cd Nebula && git pull && ./install.sh
 ```
 
-The shell reloads by itself. After a Qt update the bar may not show up: rebuild m3shapes.
+It copies the new configs over the old ones (no backups this time) and keeps your colors and
+everything in `~/.config/nebula/`. It also rebuilds m3shapes when Qt was updated, otherwise
+the bar may not show up.
+
+Installed by hand? Rebuild it in the folder you cloned it to:
 
 ```bash
 cd ~/others/m3shapes && git pull && ninja -C build && sudo ninja -C build install
@@ -206,8 +202,10 @@ cd ~/others/m3shapes && git pull && ninja -C build && sudo ninja -C build instal
 ## Roadmap
 
 - [x] Lock screen
-- [ ] Revamp the widget system
-- [ ] Make the widgets prettier
+- [x] Widget edit mode: snapping, resizing, undo, layouts
+- [x] Lyrics widget
+- [ ] Visualizer widget
+- [ ] Make the other widgets prettier
 
 ## Credits
 
@@ -224,7 +222,7 @@ Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under the AGPL-3.
 
 ## Stonks 📈
 
-<a href="https://star-history.com/#LilaccFlowerr/tapes-deck&Date">
+<a href="https://star-history.com/#LilaccFlowerr/Nebula&Date">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=LilaccFlowerr/nebula&type=Date&theme=dark" />
     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=LilaccFlowerr/nebula&type=Date" />
