@@ -3,6 +3,8 @@
 <p align="center">
   A Hyprland desktop made from scratch, with a shell written in Quickshell.<br>
   Material 3 Expressive shapes everywhere, and colors that follow your wallpaper.
+
+  **If you like it consider leaving a star and joining the [discord](https://discord.gg/jwGwtg68qt)**
 </p>
 
 <p align="center">
@@ -11,13 +13,8 @@
   <img src="https://img.shields.io/github/license/LilaccFlowerr/Nebula?style=for-the-badge&color=89b4fa&labelColor=1e1e2e" alt="license">
 </p>
 
-<!-- Drag the showcase video into a GitHub comment box, copy the user-attachments link it gives you and put it here: -->
 https://github.com/user-attachments/assets/b3be7c33-a358-43e6-9ec0-5404f7068d17
 
-Nebula is my own desktop. Not a fork of someone else's dots, I built it piece by piece
-because I wanted something that feels alive: shapes that morph into each other, a bar that
-reacts to what you're doing, and a wallpaper that recolors the whole thing the moment you
-pick it. No reloads, no config files to touch unless you want to. Everything has a setting.
 
 ## Features
 
