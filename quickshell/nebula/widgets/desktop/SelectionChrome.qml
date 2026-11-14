@@ -24,6 +24,13 @@ Item {
 
     function edge(x, y) {
         if (width <= 0) return 0;
+        if (Math.abs(width - height) > 2) {
+            const dx = Math.abs(x - width / 2);
+            const dy = Math.abs(y - height / 2);
+            const far = Math.hypot(dx, dy);
+            if (far < 1) return Math.min(width, height) / 2;
+            return far * Math.min(dx > 0 ? width / 2 / dx : Infinity, dy > 0 ? height / 2 / dy : Infinity);
+        }
         const angle = Math.atan2(x - width / 2, height / 2 - y) * 180 / Math.PI;
         return outlineOf.distanceAtAngle((angle + 360) % 360);
     }
@@ -59,6 +66,16 @@ Item {
         animationDuration: 0
     }
 
+    Rectangle {
+        id: frame
+
+        width: root.width
+        height: root.height
+        radius: Theme.radius.large
+        color: "black"
+        visible: false
+    }
+
     ShaderEffectSource {
         id: capture
 
@@ -66,7 +83,7 @@ Item {
         y: -root.pad
         width: root.width + root.pad * 2
         height: root.height + root.pad * 2
-        sourceItem: root.shown ? root.target : null
+        sourceItem: !root.shown ? null : root.kind.bare ? frame : root.target
         sourceRect: Qt.rect(-root.pad, -root.pad, width, height)
         live: true
         visible: false

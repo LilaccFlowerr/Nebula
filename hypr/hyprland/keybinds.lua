@@ -38,6 +38,9 @@ bind(vars.kbMedia, hl.dsp.exec_cmd("qs -c nebula ipc call media toggle"))
 -- Missed notifications: the galaxy card
 bind(vars.kbMissed, hl.dsp.exec_cmd("qs -c nebula ipc call missed toggle"))
 
+-- Desktop widgets: toggle the edit mode
+bind(vars.kbEditWidgets, hl.dsp.exec_cmd("qs -c nebula ipc call widgets edit"))
+
 -- Screenshots (Quickshell screenshot service): saved to ~/Pictures/Screenshots and copied to the
 -- clipboard. Open popups stay open while selecting, so they end up in the shot.
 bind(vars.kbScreenshotRegion, hl.dsp.exec_cmd("qs -c nebula ipc call screenshot region"))

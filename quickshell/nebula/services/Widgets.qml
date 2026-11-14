@@ -16,7 +16,8 @@ Singleton {
         battery: { title: "Battery", description: "Fills like water as you charge", icon: "battery_full", shape: "Cookie12Sided", size: 200, minSize: 120, maxSize: 480, color: "secondary" },
         weather: { title: "Weather", description: "Today's weather, in its own shape", icon: "partly_cloudy_day", shape: "Cookie9Sided", size: 220, minSize: 140, maxSize: 480, color: "primary" },
         terminal: { title: "Fetch", description: "Your system at a glance, rice style", icon: "terminal", shape: "Square", size: 520, minSize: 240, maxSize: 1000, color: "surface" },
-        text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" }
+        text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" },
+        lyrics: { title: "Lyrics", description: "The song's words, sung along", single: true, icon: "lyrics", shape: "Cookie4Sided", size: 520, minSize: 300, maxSize: 1100, color: "primary", aspect: 0.46, bare: true }
     })
 
     readonly property var shapes: ["Circle", "Square", "Slanted", "Arch", "Oval", "Pill", "Diamond", "Pentagon", "Gem", "Sunny", "VerySunny", "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided", "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Boom", "SoftBoom", "Flower", "Puffy", "PuffyDiamond", "PixelCircle", "Bun"]
@@ -196,6 +197,10 @@ Singleton {
         deskOpen = false;
     }
 
+    function aspectOf(w) {
+        return types[w?.type]?.aspect ?? 1;
+    }
+
     function rectOf(id) {
         const w = get(id);
         if (!w) return Qt.rect(0, 0, 0, 0);
@@ -203,8 +208,9 @@ Singleton {
         const size = w.size ?? types[w.type]?.size ?? 200;
         const p = position(w, s);
         const x = p.x < 0 ? Theme.nowPlaying.margin : p.x;
-        const y = p.y < 0 ? s.height - size - Theme.nowPlaying.margin : p.y;
-        return Qt.rect(s.x + x, s.y + y, size, size);
+        const tall = size * aspectOf(w);
+        const y = p.y < 0 ? s.height - tall - Theme.nowPlaying.margin : p.y;
+        return Qt.rect(s.x + x, s.y + y, size, tall);
     }
 
     function present(name) {
@@ -233,9 +239,10 @@ Singleton {
         const from = !w.screen || present(w.screen) ? null : sizeOf(w.screen);
         if (!from || !target) return { x: x, y: y };
         const half = (w.size ?? types[w.type]?.size ?? 200) / 2;
+        const halfTall = half * aspectOf(w);
         return {
             x: x < 0 ? x : Math.max(0, (x + half) * target.width / from.width - half),
-            y: y < 0 ? y : Math.max(0, (y + half) * target.height / from.height - half)
+            y: y < 0 ? y : Math.max(0, (y + halfTall) * target.height / from.height - halfTall)
         };
     }
 
@@ -423,7 +430,7 @@ Singleton {
         delete item.y;
         delete item.z;
         item.fx = (w.x ?? -1) < 0 ? -1 : (w.x + half) / s.width;
-        item.fy = (w.y ?? -1) < 0 ? -1 : (w.y + half) / s.height;
+        item.fy = (w.y ?? -1) < 0 ? -1 : (w.y + half * aspectOf(w)) / s.height;
         return item;
     }
 
@@ -434,7 +441,7 @@ Singleton {
         delete w.fx;
         delete w.fy;
         w.x = item.fx < 0 ? -1 : Math.max(0, Math.round(item.fx * s.width - half));
-        w.y = item.fy < 0 ? -1 : Math.max(0, Math.round(item.fy * s.height - half));
+        w.y = item.fy < 0 ? -1 : Math.max(0, Math.round(item.fy * s.height - half * aspectOf(item)));
         return w;
     }
 
@@ -536,7 +543,7 @@ Singleton {
             if (grows && (w.x ?? -1) >= 0 && (w.y ?? -1) >= 0) {
                 const shift = (props.size - w.size) / 2;
                 next.x = Math.max(0, Math.round(w.x - shift));
-                next.y = Math.max(0, Math.round(w.y - shift));
+                next.y = Math.max(0, Math.round(w.y - shift * aspectOf(w)));
             }
             return next;
         }));

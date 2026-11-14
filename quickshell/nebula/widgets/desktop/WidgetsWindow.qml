@@ -262,6 +262,18 @@ Variants {
         }
 
         Component {
+            id: lyricsWidget
+
+            LyricsWidget {
+                live: !window.covered
+                shapeName: parent?.cfg?.shape ?? "Cookie4Sided"
+                colorRole: parent?.cfg?.color ?? "primary"
+                baseSize: parent?.cfg?.size ?? 520
+                backdrop: parent?.cfg?.backdrop ?? "none"
+            }
+        }
+
+        Component {
             id: textWidget
 
             TextWidget {
@@ -358,7 +370,7 @@ Variants {
 
                 readonly property bool isTop: window.topHover === modelData
                 readonly property real offX: ghost ? 0 : ((cfg.size ?? width) - width) / 2
-                readonly property real offY: ghost ? 0 : ((cfg.size ?? height) - height) / 2
+                readonly property real offY: ghost || cfg.size === undefined ? 0 : (cfg.size * Widgets.aspectOf(cfg) - height) / 2
 
                 property real shown: 1
                 readonly property bool leaving: Widgets.leaving.includes(modelData)
@@ -439,7 +451,7 @@ Variants {
                 onWidthChanged: window.updateBounds()
                 onHeightChanged: window.updateBounds()
 
-                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : nowPlayingWidget
+                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : cfg.type === "lyrics" ? lyricsWidget : nowPlayingWidget
 
                 Binding {
                     target: slot.item

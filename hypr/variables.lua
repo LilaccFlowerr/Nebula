@@ -46,6 +46,7 @@ local vars = {
     kbRecordRegion       = mainMod .. " + SHIFT + ALT + R",
     kbMedia              = mainMod .. " + SHIFT + N",
     kbMissed             = mainMod .. " + N",
+    kbEditWidgets        = mainMod .. " + SHIFT + E",
     kbScreenshotRegion   = mainMod .. " + SHIFT + S",
     kbScreenshotScreen   = "Print",
     kbClipboard          = mainMod .. " + SHIFT + V",

@@ -11,6 +11,28 @@ Singleton {
     property string status: "none"
 
     readonly property bool synced: status === "synced"
+    readonly property bool wanted: Settings.bar.lyrics || Lock.wanted || Widgets.list.some(w => w.type === "lyrics" && w.enabled === true)
+    function clock() {
+        return Media.playing && syncedAt > 0 ? basePosition + (Date.now() - syncedAt) / 1000 : position;
+    }
+
+    function timing(all, index) {
+        const line = all[index];
+        if (!line || line.text === "") return [];
+        const parts = line.text.split(/\s+/).filter(part => part !== "");
+        if (parts.length === 0) return [];
+        const until = all[index + 1]?.time ?? line.time + 5;
+        const gap = Math.max(0.4, until - line.time);
+        const weights = parts.map(part => part.replace(/[^\p{L}\p{N}]/gu, "").length + 1.5);
+        const total = weights.reduce((sum, weight) => sum + weight, 0);
+        const span = Math.min(gap * 0.97, Math.max(total * 0.09, Math.min(gap * 0.9, total * 0.2)));
+        let passed = 0;
+        return parts.map((part, i) => {
+            const start = line.time + span * passed / total;
+            passed += weights[i];
+            return { text: part, start: start, end: line.time + span * passed / total };
+        });
+    }
     readonly property string key: Media.artist + "|" + Media.title
 
     property real position: 0
@@ -32,15 +54,7 @@ Singleton {
 
     onKeyChanged: fetchTimer.restart()
 
-    Connections {
-        target: Settings.bar
-        function onLyricsChanged() { fetchTimer.restart(); }
-    }
-
-    Connections {
-        target: Lock
-        function onWantedChanged() { fetchTimer.restart(); }
-    }
+    onWantedChanged: fetchTimer.restart()
 
     Timer {
         id: fetchTimer
@@ -67,7 +81,7 @@ Singleton {
     function fetch() {
         lines = [];
         plain = "";
-        if (!Media.active || !(Settings.bar.lyrics || Lock.wanted)) {
+        if (!Media.active || !wanted) {
             status = "none";
             return;
         }

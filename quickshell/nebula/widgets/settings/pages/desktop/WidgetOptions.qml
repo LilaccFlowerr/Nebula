@@ -18,7 +18,7 @@ ColumnLayout {
         Widgets.update(arg, props);
     }
 
-    readonly property bool hasOptions: ["text", "image", "clock", "calendar", "nowplaying", "weather", "terminal"].includes(cfg.type)
+    readonly property bool hasOptions: ["text", "image", "clock", "calendar", "nowplaying", "weather", "terminal", "lyrics"].includes(cfg.type)
 
     visible: hasOptions
     spacing: Theme.spacing.xl
@@ -165,6 +165,24 @@ ColumnLayout {
                 icon: "restart_alt"
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: page.set({ zoom: 1, panX: 0, panY: 0 })
+            }
+        }
+    }
+
+    SettingGroup {
+        title: "Lyrics"
+        visible: page.cfg.type === "lyrics"
+
+        SettingRow {
+            icon: "pill"
+            title: "Glass pill"
+            subtitle: "Behind the line being sung"
+            clickable: true
+            onClicked: page.set({ backdrop: page.cfg.backdrop === "pill" ? "none" : "pill" })
+
+            Switch {
+                checked: page.cfg.backdrop === "pill"
+                onToggled: page.set({ backdrop: page.cfg.backdrop === "pill" ? "none" : "pill" })
             }
         }
     }
