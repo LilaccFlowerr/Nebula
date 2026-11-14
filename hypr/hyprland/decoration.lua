@@ -1,5 +1,3 @@
--- See https://wiki.hypr.land/Configuring/Basics/Variables/#decoration
-
 local vars = require("variables")
 
 hl.config({
@@ -7,7 +5,6 @@ hl.config({
         rounding       = 15,
         rounding_power = vars.roundingPower,
 
-        -- Change transparency of focused and unfocused windows
         active_opacity   = 0.95,
         inactive_opacity = 0.95,
 
@@ -15,7 +12,7 @@ hl.config({
             enabled        = true,
             size           = 4,
             passes         = 1,
-            ignore_opacity = true, -- needed to blur through transparent windows
+            ignore_opacity = true,
             popups         = true,
         },
 

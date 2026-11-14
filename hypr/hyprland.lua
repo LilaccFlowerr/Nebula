@@ -1,11 +1,7 @@
--- Entry point: Hyprland loads this file, which loads everything else.
--- require("hyprland.env") loads hyprland/env.lua
-
 local home = os.getenv("HOME")
 local user = home .. "/.config/nebula"
 package.path = package.path .. ";" .. user .. "/?.lua"
 
--- Your own files live in ~/.config/nebula (outside git). Created empty when missing.
 local function maybe_create(file, content)
     local f = io.open(file)
     if f then
@@ -39,11 +35,6 @@ maybe_create(user .. "/hypr-user.lua", [[
 -- hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"))
 ]])
 
--- Monitors, see https://wiki.hypr.land/Configuring/Basics/Monitors/
--- Every monitor: preferred mode, placed automatically, scale 1 (a reload keeps it;
--- "auto" made the screen jump big on every reload).
--- Set your own with hl.monitor({ output = "...", mode = "1920x1080@144", position = "0x0", scale = 1 }),
--- or in Settings > System > Displays.
 hl.monitor({
     output   = "",
     mode     = "preferred",
@@ -51,7 +42,6 @@ hl.monitor({
     scale    = 1,
 })
 
--- Configs
 require("hyprland.env")
 require("hyprland.general")
 require("hyprland.input")
@@ -63,5 +53,4 @@ require("hyprland.rules")
 require("hyprland.gestures")
 require("hyprland.keybinds")
 
--- Your own config, last so it can override anything above
 require("hypr-user")

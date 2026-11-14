@@ -1,11 +1,5 @@
-# matugen: generates Material You colors from the wallpaper and fills in the templates
-# Run: matugen image <path-to-wallpaper>
-# Template syntax: {{colors.<role>.default.hex}} or .hex_stripped (without #)
-
 [config]
 
-# Fixed terminal colors, harmonized towards the wallpaper so they still read as red/green/…
-# Available in templates as colors.red, colors.green, …
 [config.custom_colors]
 red     = "#e06c75"
 green   = "#98c379"
@@ -17,10 +11,8 @@ cyan    = "#56b6c2"
 [templates.ghostty]
 input_path  = "~/.config/matugen/templates/ghostty-colors"
 output_path = "~/.config/ghostty/themes/matugen"
-post_hook   = "pkill -USR2 -x ghostty || true" # Ghostty reloads its config on SIGUSR2
+post_hook   = "pkill -USR2 -x ghostty || true"
 
-# pywal-compatible colors, read by the VS Code "Wal Theme" extension and Pywalfox (Firefox)
-# Wal Theme reads the 16 colors from "colors" and only background/foreground from "colors.json"
 [templates.pywal-plain]
 input_path  = "~/.config/matugen/templates/pywal-colors"
 output_path = "~/.cache/wal/colors"
@@ -29,8 +21,6 @@ output_path = "~/.cache/wal/colors"
 input_path  = "~/.config/matugen/templates/pywal-colors.json"
 output_path = "~/.cache/wal/colors.json"
 
-# Quickshell colors: written as JSON outside the config dir, theme/Colors.qml reads it live
-# (no Quickshell reload, so the shell keeps its state when the wallpaper changes)
 [templates.quickshell]
 input_path  = "~/.config/matugen/templates/quickshell-colors.json"
 output_path = "~/.local/state/nebula/colors.json"

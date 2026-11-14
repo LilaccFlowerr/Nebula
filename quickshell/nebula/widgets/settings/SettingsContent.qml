@@ -54,9 +54,8 @@ Item {
             { key: "ethernet", title: "Ethernet", subtitle: "Cable, IP and MAC address", icon: "lan", source: "pages/connections/EthernetTab.qml" },
             { key: "bluetooth", title: "Bluetooth", subtitle: "Devices and pairing", icon: "bluetooth", source: "pages/connections/BluetoothTab.qml" }
         ] },
-        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "pages/SectionsPage.qml", reset: ["input", "power", "sound"], sections: [
+        { key: "system", title: "System", subtitle: "Screens, battery and input", icon: "tune", shape: MaterialShape.Gem, source: "pages/SectionsPage.qml", reset: ["input", "power"], sections: [
             { key: "displays", title: "Displays", subtitle: "Resolution, scale and brightness", icon: "monitor", source: "pages/system/DisplaysTab.qml" },
-            { key: "sound", title: "Sound", subtitle: "Output device and Bluetooth", icon: "volume_up", source: "pages/system/SoundTab.qml" },
             { key: "power", title: "Power", subtitle: "Power mode and battery", icon: "battery_horiz_075", source: "pages/system/PowerTab.qml" },
             { key: "input", title: "Input", subtitle: "Keyboard, mouse and touchpad", icon: "keyboard", source: "pages/system/InputTab.qml" }
         ] },

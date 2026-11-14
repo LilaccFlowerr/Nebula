@@ -1,36 +1,24 @@
--- Shared variables, used by the files in hyprland/
--- Use them with: local vars = require("variables")
---
--- Override order: the defaults below, then apps.lua (written by Settings > Apps),
--- then ~/.config/nebula/hypr-vars.lua (yours, never touched by git).
-
 local mainMod = "SUPER"
 
 local vars = {
-    -- Apps
     terminal             = "ghostty",
     browser              = "firefox",
     files                = "nautilus",
     editor               = "code",
     launcher             = "qs -c nebula ipc call launcher toggle",
 
-    -- Keybinds
     mainMod              = mainMod,
 
-    -- Windows (gaps, rounding and opacity are in the shell: Settings > Windows)
     borderSize           = 1,
     roundingPower        = 2,
     resizeOnBorder       = false,
 
-    -- Shadow (blur is in the shell: Settings > Bar > Layout)
     shadowEnabled        = true,
     shadowRange          = 15,
 
-    -- Input
     kbLayout             = "us",
     naturalScroll        = false,
 
-    -- Binds: a string, or a list of strings to bind several keys to one action
     kbTerminal           = mainMod .. " + T",
     kbBrowser            = mainMod .. " + W",
     kbEditor             = mainMod .. " + C",
