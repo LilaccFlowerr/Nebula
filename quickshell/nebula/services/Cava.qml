@@ -9,7 +9,8 @@ Singleton {
 
     property int bars: 64
     property var values: []
-    readonly property bool running: Media.playing && (Settings.bar.visualizer || Lock.wanted)
+    readonly property bool wanted: Widgets.list.some(w => w.type === "visualizer" && w.enabled === true)
+    readonly property bool running: Media.playing && (Settings.bar.visualizer || Lock.wanted || wanted)
 
     readonly property string config: [
         "[general]", "bars = " + bars, "framerate = 60",

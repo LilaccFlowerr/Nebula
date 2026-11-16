@@ -18,7 +18,7 @@ ColumnLayout {
         Widgets.update(arg, props);
     }
 
-    readonly property bool hasOptions: ["text", "image", "clock", "calendar", "nowplaying", "weather", "terminal", "lyrics"].includes(cfg.type)
+    readonly property bool hasOptions: ["text", "image", "clock", "calendar", "nowplaying", "weather", "terminal", "lyrics", "visualizer"].includes(cfg.type)
 
     visible: hasOptions
     spacing: Theme.spacing.xl
@@ -183,6 +183,89 @@ ColumnLayout {
             Switch {
                 checked: page.cfg.backdrop === "pill"
                 onToggled: page.set({ backdrop: page.cfg.backdrop === "pill" ? "none" : "pill" })
+            }
+        }
+    }
+
+    SettingGroup {
+        title: "Visualizer"
+        visible: page.cfg.type === "visualizer"
+
+        SettingRow {
+            icon: "graphic_eq"
+            title: "Style"
+            subtitle: "Separate bars or one smooth wave"
+
+            SegmentedButton {
+                readonly property var styles: ["bars", "wave"]
+
+                width: Theme.settings.controlWidth
+                anchors.verticalCenter: parent.verticalCenter
+                options: ["Bars", "Wave"]
+                currentIndex: Math.max(0, styles.indexOf(page.cfg.style ?? "bars"))
+                onSelected: index => page.set({ style: styles[index] })
+            }
+        }
+
+        SettingRow {
+            icon: "north"
+            title: "Direction"
+            subtitle: "Where the bars grow to"
+
+            SegmentedButton {
+                readonly property var directions: ["up", "down", "left", "right"]
+
+                width: Theme.settings.controlWidth
+                anchors.verticalCenter: parent.verticalCenter
+                options: ["Up", "Down", "Left", "Right"]
+                currentIndex: Math.max(0, directions.indexOf(page.cfg.direction ?? "up"))
+                onSelected: index => Widgets.turn(page.arg, directions[index])
+            }
+        }
+
+        SettingRow {
+            icon: "unfold_more"
+            title: "Both ways"
+            subtitle: "Grow out from the middle line"
+            clickable: true
+            onClicked: page.set({ mirror: !(page.cfg.mirror ?? false) })
+
+            Switch {
+                checked: page.cfg.mirror ?? false
+                onToggled: page.set({ mirror: !(page.cfg.mirror ?? false) })
+            }
+        }
+
+        SettingRow {
+            icon: "line_weight"
+            title: "Thickness"
+            subtitle: "How far the bars can reach"
+
+            Slider {
+                readonly property bool upright: page.cfg.direction === "left" || page.cfg.direction === "right"
+                readonly property real ratio: upright ? 1 / Widgets.aspectOf(page.cfg) : Widgets.aspectOf(page.cfg)
+
+                width: Theme.settings.controlWidth
+                anchors.verticalCenter: parent.verticalCenter
+                from: Theme.visWidget.minThickness * 100
+                to: Theme.visWidget.maxThickness * 100
+                stepSize: 1
+                value: ratio * 100
+                onMoved: Widgets.thicken(page.arg, value / 100)
+            }
+        }
+
+        SettingRow {
+            icon: "fit_screen"
+            title: "Whole screen"
+            subtitle: "Stretch along the edge it grows from"
+
+            ActionButton {
+                icon: "open_in_full"
+                text: "Stretch"
+                filled: true
+                anchors.verticalCenter: parent.verticalCenter
+                onClicked: Widgets.stretch(page.arg)
             }
         }
     }

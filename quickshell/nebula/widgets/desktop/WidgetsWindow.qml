@@ -274,6 +274,20 @@ Variants {
         }
 
         Component {
+            id: visualizerWidget
+
+            VisualizerWidget {
+                live: !window.covered
+                colorRole: parent?.cfg?.color ?? "primary"
+                baseSize: parent?.cfg?.size ?? 640
+                aspect: Widgets.aspectOf(parent?.cfg)
+                style: parent?.cfg?.style ?? "bars"
+                direction: parent?.cfg?.direction ?? "up"
+                mirror: parent?.cfg?.mirror ?? false
+            }
+        }
+
+        Component {
             id: textWidget
 
             TextWidget {
@@ -451,7 +465,7 @@ Variants {
                 onWidthChanged: window.updateBounds()
                 onHeightChanged: window.updateBounds()
 
-                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : cfg.type === "lyrics" ? lyricsWidget : nowPlayingWidget
+                sourceComponent: cfg.type === "image" ? imageWidget : cfg.type === "text" ? textWidget : cfg.type === "clock" ? clockWidget : cfg.type === "calendar" ? calendarWidget : cfg.type === "battery" ? batteryWidget : cfg.type === "weather" ? weatherWidget : cfg.type === "terminal" ? terminalWidget : cfg.type === "lyrics" ? lyricsWidget : cfg.type === "visualizer" ? visualizerWidget : nowPlayingWidget
 
                 Binding {
                     target: slot.item

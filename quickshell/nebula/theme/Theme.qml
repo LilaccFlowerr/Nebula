@@ -448,6 +448,24 @@ Singleton {
     }
     readonly property Visualizer visualizer: Visualizer {}
 
+    component VisWidgetTokens: QtObject {
+        readonly property int maxBars: 128
+        readonly property int wavePoints: 64
+        readonly property int barWidth: 6
+        readonly property int gap: 4
+        readonly property int minLength: 3
+        readonly property real radius: 0.35
+        readonly property real opacityBase: 0.3
+        readonly property real opacityRange: 0.7
+        readonly property real barReach: 0.96
+        readonly property real waveReach: 0.92
+        readonly property real waveRise: 0.25
+        readonly property real waveFall: 0.12
+        readonly property real minThickness: 0.05
+        readonly property real maxThickness: 0.6
+    }
+    readonly property VisWidgetTokens visWidget: VisWidgetTokens {}
+
     component LockTokens: QtObject {
         readonly property color space: "#05050f"
         readonly property color star: "#e9e4ff"

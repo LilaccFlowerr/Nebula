@@ -17,7 +17,8 @@ Singleton {
         weather: { title: "Weather", description: "Today's weather, in its own shape", icon: "partly_cloudy_day", shape: "Cookie9Sided", size: 220, minSize: 140, maxSize: 480, color: "primary" },
         terminal: { title: "Fetch", description: "Your system at a glance, rice style", icon: "terminal", shape: "Square", size: 520, minSize: 240, maxSize: 1000, color: "surface" },
         text: { title: "Text", description: "A note on your desktop", icon: "sticky_note_2", shape: "Sunny", size: 180, minSize: 80, maxSize: 600, color: "tertiary" },
-        lyrics: { title: "Lyrics", description: "The song's words, sung along", single: true, icon: "lyrics", shape: "Cookie4Sided", size: 520, minSize: 300, maxSize: 1100, color: "primary", aspect: 0.46, bare: true }
+        lyrics: { title: "Lyrics", description: "The song's words, sung along", single: true, icon: "lyrics", shape: "Cookie4Sided", size: 520, minSize: 300, maxSize: 1100, color: "primary", aspect: 0.46, bare: true },
+        visualizer: { title: "Visualizer", description: "Bars or a wave that move with the music", icon: "graphic_eq", shape: "Circle", size: 640, minSize: 24, maxSize: 4000, color: "primary", aspect: 0.28, bare: true }
     })
 
     readonly property var shapes: ["Circle", "Square", "Slanted", "Arch", "Oval", "Pill", "Diamond", "Pentagon", "Gem", "Sunny", "VerySunny", "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided", "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Boom", "SoftBoom", "Flower", "Puffy", "PuffyDiamond", "PixelCircle", "Bun"]
@@ -198,7 +199,59 @@ Singleton {
     }
 
     function aspectOf(w) {
-        return types[w?.type]?.aspect ?? 1;
+        return w?.aspect ?? types[w?.type]?.aspect ?? 1;
+    }
+
+    function reshape(id, width, height, at) {
+        const w = get(id);
+        if (!w) return;
+        const s = screenNamed(w.screen ?? "");
+        const r = rectOf(id);
+        const x = at?.x ?? Math.round(r.x - s.x + r.width / 2 - width / 2);
+        const y = at?.y ?? Math.round(r.y - s.y + r.height / 2 - height / 2);
+        update(id, {
+            size: Math.round(width),
+            aspect: height / width,
+            x: Math.max(0, Math.min(x, s.width - Math.round(width))),
+            y: Math.max(0, Math.min(y, s.height - Math.round(height)))
+        });
+    }
+
+    function turn(id, direction) {
+        const w = get(id);
+        if (!w) return;
+        const r = rectOf(id);
+        const upright = d => d === "left" || d === "right";
+        if (upright(w.direction ?? "up") === upright(direction)) update(id, { direction: direction });
+        else {
+            update(id, { direction: direction });
+            reshape(id, r.height, r.width);
+        }
+    }
+
+    function thicken(id, ratio) {
+        const w = get(id);
+        if (!w) return;
+        const r = rectOf(id);
+        const upright = w.direction === "left" || w.direction === "right";
+        if (upright) reshape(id, r.height * ratio, r.height);
+        else reshape(id, r.width, r.width * ratio);
+    }
+
+    function stretch(id) {
+        const w = get(id);
+        if (!w) return;
+        const s = screenNamed(w.screen ?? "");
+        const r = rectOf(id);
+        const direction = w.direction ?? "up";
+        const mirror = w.mirror === true;
+        if (direction === "left" || direction === "right") {
+            const x = mirror ? r.x - s.x : direction === "right" ? 0 : s.width - r.width;
+            reshape(id, r.width, s.height, { x: x, y: 0 });
+        } else {
+            const y = mirror ? r.y - s.y : direction === "down" ? 0 : s.height - r.height;
+            reshape(id, s.width, r.height, { x: 0, y: y });
+        }
     }
 
     function rectOf(id) {

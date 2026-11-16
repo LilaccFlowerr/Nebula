@@ -217,7 +217,8 @@ Inspired by [Caelestia](https://github.com/caelestia-dots/shell),
 [Serpantinum](https://github.com/ilyamiro/serpantinum)
 and a lot of scrolling through r/unixporn. Shapes by
 [m3shapes](https://github.com/soramanew/m3shapes). The loading animation is borrowed (with
-permission) from [dynbar](https://github.com/leithXD/dynbar).
+permission) from [dynbar](https://github.com/leithXD/dynbar). The music visualizer widget (its shaders and
+level smoothing) is taken from [Serpantinum](https://github.com/ilyamiro/serpantinum) (AGPL-3.0) and adapted to Nebula.
 
 Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under the AGPL-3.0, see [LICENSE](LICENSE).
 
