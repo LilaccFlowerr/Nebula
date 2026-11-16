@@ -19,12 +19,18 @@ ColumnLayout {
                 id: option
 
                 required property var modelData
+                readonly property bool taken: modelData.taken !== ""
 
+                opacity: taken ? Theme.deskMenu.takenOpacity : 1
                 icon: modelData.icon
                 title: modelData.title
-                subtitle: modelData.description
+                subtitle: taken ? "Already added, open its settings" : modelData.description
                 clickable: true
                 onClicked: {
+                    if (taken) {
+                        page.navigate("widget:" + modelData.taken);
+                        return;
+                    }
                     if (modelData.picker) {
                         Widgets.replacing = "";
                         page.navigate("images");

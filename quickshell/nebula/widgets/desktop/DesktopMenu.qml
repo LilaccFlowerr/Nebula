@@ -45,6 +45,10 @@ PanelWindow {
 
     function addType(entry) {
         Widgets.closeDesk();
+        if (entry.taken !== "") {
+            Widgets.reveal(entry.taken);
+            return;
+        }
         if (entry.picker) {
             Widgets.openPicker("", modelData.name);
             return;
@@ -221,6 +225,7 @@ PanelWindow {
                         id: tile
 
                         required property var modelData
+                        readonly property bool taken: modelData.taken !== ""
 
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
@@ -228,30 +233,58 @@ PanelWindow {
                         radius: Theme.radius.medium
                         color: tileMouse.containsMouse ? Colors.surfaceContainerHighest : Colors.surfaceContainerHigh
 
-                        MaterialShape {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            y: Theme.spacing.md
-                            implicitSize: Theme.deskMenu.tileShape
-                            shape: MaterialShape[tile.modelData.shape] ?? MaterialShape.Circle
-                            color: Colors.primaryContainer
+                        Item {
+                            anchors.fill: parent
+                            opacity: tile.taken && !tileMouse.containsMouse ? Theme.deskMenu.takenOpacity : 1
+
+                            Behavior on opacity {
+                                NumberAnimation { duration: Theme.anim.fast }
+                            }
+
+                            MaterialShape {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                y: Theme.spacing.md
+                                implicitSize: Theme.deskMenu.tileShape
+                                shape: MaterialShape[tile.modelData.shape] ?? MaterialShape.Circle
+                                color: tile.taken ? Colors.surfaceContainerHighest : Colors.primaryContainer
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: tile.modelData.icon
+                                    font.family: Theme.font.icons
+                                    font.pixelSize: Theme.settings.iconSize
+                                    color: tile.taken ? Colors.textOnSurfaceVariant : Colors.textOnPrimaryContainer
+                                }
+
+                                Rectangle {
+                                    visible: tile.taken
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    anchors.margins: -Theme.spacing.xs
+                                    width: Theme.deskMenu.badge
+                                    height: width
+                                    radius: width / 2
+                                    color: Colors.primary
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "check"
+                                        font.family: Theme.font.icons
+                                        font.pixelSize: Theme.deskMenu.badge * 0.7
+                                        color: Colors.textOnPrimary
+                                    }
+                                }
+                            }
 
                             Text {
-                                anchors.centerIn: parent
-                                text: tile.modelData.icon
-                                font.family: Theme.font.icons
-                                font.pixelSize: Theme.settings.iconSize
-                                color: Colors.textOnPrimaryContainer
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: Theme.spacing.sm
+                                text: tile.taken && tileMouse.containsMouse ? "Show it" : tile.modelData.title
+                                font.family: Theme.font.family
+                                font.pixelSize: Theme.font.small
+                                color: Colors.textOnSurface
                             }
-                        }
-
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: Theme.spacing.sm
-                            text: tile.modelData.title
-                            font.family: Theme.font.family
-                            font.pixelSize: Theme.font.small
-                            color: Colors.textOnSurface
                         }
 
                         MouseArea {

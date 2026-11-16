@@ -307,6 +307,8 @@ Singleton {
         readonly property int width: 280
         readonly property int tileHeight: 92
         readonly property int tileShape: 44
+        readonly property real takenOpacity: 0.45
+        readonly property int badge: 20
     }
     readonly property DeskMenuTokens deskMenu: DeskMenuTokens {}
 

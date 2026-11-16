@@ -503,7 +503,7 @@ PanelWindow {
                 columnSpacing: Theme.spacing.sm
 
                 Repeater {
-                    model: window.adding ? Widgets.available() : []
+                    model: window.adding ? Widgets.available().filter(entry => entry.taken === "") : []
 
                     Rectangle {
                         id: option

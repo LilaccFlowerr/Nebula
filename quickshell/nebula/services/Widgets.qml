@@ -309,8 +309,16 @@ Singleton {
 
     function available() {
         return Object.keys(types)
-            .filter(key => !types[key].single || first(key) === null)
-            .map(key => Object.assign({ key: key }, types[key]));
+            .map(key => Object.assign({ key: key, taken: types[key].single ? (first(key)?.id ?? "") : "" }, types[key]));
+    }
+
+    function reveal(id) {
+        const w = get(id);
+        if (!w) return;
+        if (w.enabled !== true) update(id, { enabled: true });
+        raise(id);
+        if (editing) selected = id;
+        else edit(id);
     }
 
     function spawn(size, screenName) {
